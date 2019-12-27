@@ -32,6 +32,7 @@ import com.jd.blockchain.ledger.TransactionTemplate;
 import com.jd.blockchain.ledger.core.LedgerQuery;
 import com.jd.blockchain.sdk.BlockchainService;
 import com.jd.blockchain.sdk.client.GatewayServiceFactory;
+import com.jd.blockchain.test.PeerTestRunner;
 import com.jd.blockchain.tools.initializer.DBConnectionConfig;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.tools.initializer.Prompter;

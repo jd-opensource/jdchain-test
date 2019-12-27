@@ -21,6 +21,7 @@
 
 	<modules>
 		<module>../core</module>
+		<module>test-common</module>
 		<module>test-consensus-client</module>
 		<module>test-consensus-node</module>
 		<module>test-ledger</module>
@@ -41,7 +42,7 @@
 				<artifactId>consensus-mq</artifactId>
 				<version>${core.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>com.jd.blockchain</groupId>
 				<artifactId>contract-jvm</artifactId>
@@ -52,7 +53,7 @@
 				<artifactId>contract-maven-plugin</artifactId>
 				<version>${core.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>com.jd.blockchain</groupId>
 				<artifactId>crypto-adv</artifactId>
@@ -63,25 +64,25 @@
 				<artifactId>crypto-pki</artifactId>
 				<version>${core.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>com.jd.blockchain</groupId>
 				<artifactId>gateway</artifactId>
 				<version>${core.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>com.jd.blockchain</groupId>
 				<artifactId>peer</artifactId>
 				<version>${core.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>com.jd.blockchain</groupId>
 				<artifactId>ledger-database</artifactId>
 				<version>${core.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>com.jd.blockchain</groupId>
 				<artifactId>runtime-context</artifactId>
@@ -97,7 +98,24 @@
 				<artifactId>runtime-modular-booter</artifactId>
 				<version>${core.version}</version>
 			</dependency>
-			
+
+			<dependency>
+				<groupId>com.jd.blockchain</groupId>
+				<artifactId>tools-initializer</artifactId>
+				<version>${core.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.jd.blockchain</groupId>
+				<artifactId>sdk-client</artifactId>
+				<version>${framework.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.jd.blockchain</groupId>
+				<artifactId>crypto-classic</artifactId>
+				<version>${framework.version}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>com.jd.blockchain</groupId>
 				<artifactId>storage-redis</artifactId>
@@ -108,8 +126,8 @@
 				<artifactId>storage-rocksdb</artifactId>
 				<version>${core.version}</version>
 			</dependency>
-			
-			
+
+
 		</dependencies>
 
 	</dependencyManagement>

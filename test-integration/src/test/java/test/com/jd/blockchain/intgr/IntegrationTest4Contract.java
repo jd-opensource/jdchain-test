@@ -1,30 +1,31 @@
 package test.com.jd.blockchain.intgr;
 
+import static test.com.jd.blockchain.intgr.IntegrationBase.buildLedgers;
+import static test.com.jd.blockchain.intgr.IntegrationBase.peerNodeStart;
+
+import java.io.File;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import org.junit.Test;
+import org.springframework.core.io.ClassPathResource;
+
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.crypto.KeyGenUtils;
 import com.jd.blockchain.crypto.PrivKey;
 import com.jd.blockchain.crypto.PubKey;
 import com.jd.blockchain.gateway.GatewayConfigProperties;
-import com.jd.blockchain.ledger.BlockchainKeypair;
 import com.jd.blockchain.ledger.core.LedgerQuery;
 import com.jd.blockchain.sdk.BlockchainService;
 import com.jd.blockchain.sdk.client.GatewayServiceFactory;
 import com.jd.blockchain.storage.service.DbConnectionFactory;
+import com.jd.blockchain.test.PeerTestRunner;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker;
 
-import org.junit.Test;
-import org.springframework.core.io.ClassPathResource;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeTest;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeWeb4Nodes;
-
-import java.io.File;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import static test.com.jd.blockchain.intgr.IntegrationBase.*;
 
 public class IntegrationTest4Contract {
     private static final boolean isContractDeployAndExe = true;

@@ -8,7 +8,6 @@ import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 
-import com.jd.blockchain.storage.service.impl.composite.CompositeConnectionFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ClassPathResource;
@@ -36,6 +35,8 @@ import com.jd.blockchain.ledger.core.LedgerQuery;
 import com.jd.blockchain.sdk.BlockchainService;
 import com.jd.blockchain.sdk.client.GatewayServiceFactory;
 import com.jd.blockchain.storage.service.DbConnection;
+import com.jd.blockchain.storage.service.impl.composite.CompositeConnectionFactory;
+import com.jd.blockchain.test.PeerTestRunner;
 import com.jd.blockchain.tools.initializer.DBConnectionConfig;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.tools.initializer.LedgerInitCommand;
@@ -50,7 +51,6 @@ import com.jd.blockchain.utils.net.NetworkAddress;
 import test.com.jd.blockchain.intgr.GatewayTestRunner;
 import test.com.jd.blockchain.intgr.IntegratedContext;
 import test.com.jd.blockchain.intgr.IntegratedContext.Node;
-import test.com.jd.blockchain.intgr.PeerTestRunner;
 import test.com.jd.blockchain.intgr.PresetAnswerPrompter;
 
 public class GlobalPerformanceTest {

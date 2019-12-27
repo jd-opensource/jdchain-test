@@ -1,5 +1,15 @@
 package test.com.jd.blockchain.intgr;
 
+import static test.com.jd.blockchain.intgr.IntegrationBase.buildLedgers;
+import static test.com.jd.blockchain.intgr.IntegrationBase.peerNodeStart;
+import static test.com.jd.blockchain.intgr.IntegrationBase.validKeyPair;
+import static test.com.jd.blockchain.intgr.IntegrationBase.validKvWrite;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.Test;
+
 import com.jd.blockchain.consensus.ConsensusProviders;
 import com.jd.blockchain.consensus.bftsmart.BftsmartConsensusSettings;
 import com.jd.blockchain.consensus.mq.settings.MsgQueueConsensusSettings;
@@ -9,23 +19,18 @@ import com.jd.blockchain.crypto.KeyGenUtils;
 import com.jd.blockchain.crypto.PrivKey;
 import com.jd.blockchain.crypto.PubKey;
 import com.jd.blockchain.gateway.GatewayConfigProperties.KeyPairConfig;
-import com.jd.blockchain.ledger.*;
-import com.jd.blockchain.ledger.core.*;
+import com.jd.blockchain.ledger.BlockchainKeypair;
+import com.jd.blockchain.ledger.core.LedgerQuery;
 import com.jd.blockchain.sdk.BlockchainService;
 import com.jd.blockchain.sdk.client.GatewayServiceFactory;
 import com.jd.blockchain.storage.service.DbConnectionFactory;
+import com.jd.blockchain.test.PeerTestRunner;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker.AsyncCallback;
 import com.jd.blockchain.utils.io.FileUtils;
 
-import org.junit.Test;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeTest;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeWeb4Nodes;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static test.com.jd.blockchain.intgr.IntegrationBase.*;
 
 public class IntegrationTest4MQ {
 

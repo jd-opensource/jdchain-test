@@ -10,48 +10,42 @@
 	<artifactId>test-integration</artifactId>
 
 	<dependencies>
+
 		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<scope>compile</scope>
+			<groupId>com.jd.blockchain</groupId>
+			<artifactId>test-common</artifactId>
+			<version>${project.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>com.jd.blockchain</groupId>
 			<artifactId>peer</artifactId>
-			<version>${core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jd.blockchain</groupId>
 			<artifactId>storage-rocksdb</artifactId>
-			<version>${core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jd.blockchain</groupId>
 			<artifactId>storage-redis</artifactId>
-			<version>${core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jd.blockchain</groupId>
 			<artifactId>gateway</artifactId>
-			<version>${core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jd.blockchain</groupId>
 			<artifactId>tools-initializer</artifactId>
-			<version>${core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jd.blockchain</groupId>
 			<artifactId>sdk-client</artifactId>
-			<version>${framework.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.jd.blockchain</groupId>
 			<artifactId>crypto-classic</artifactId>
-			<version>${framework.version}</version>
 		</dependency>
-
 
 		<dependency>
 			<groupId>io.nats</groupId>
@@ -61,10 +55,11 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
+			<scope>compile</scope>
 		</dependency>
 
 	</dependencies>
-	
+
 	<build>
 		<plugins>
 			<plugin>
