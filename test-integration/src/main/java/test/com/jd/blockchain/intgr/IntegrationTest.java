@@ -1,5 +1,11 @@
 package test.com.jd.blockchain.intgr;
 
+import static com.jd.blockchain.transaction.TxBuilder.computeTxContentHash;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -9,28 +15,21 @@ import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.jd.blockchain.binaryproto.BinaryProtocol;
-import com.jd.blockchain.consensus.bftsmart.BftsmartConsensusProvider;
-import com.jd.blockchain.consensus.bftsmart.service.BftsmartNodeServer;
-import com.jd.blockchain.consensus.bftsmart.service.BftsmartServerSettings;
-import com.jd.blockchain.consensus.service.*;
-import com.jd.blockchain.ledger.*;
-import com.jd.blockchain.ledger.core.*;
-import com.jd.blockchain.peer.consensus.ConsensusMessageDispatcher;
-import com.jd.blockchain.peer.consensus.LedgerStateManager;
-import com.jd.blockchain.storage.service.impl.composite.CompositeConnectionFactory;
-import com.jd.blockchain.test.PeerTestRunner;
-import com.jd.blockchain.transaction.*;
-import com.jd.blockchain.utils.concurrent.AsyncFuture;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.core.io.ClassPathResource;
 
+import com.jd.blockchain.binaryproto.BinaryProtocol;
 import com.jd.blockchain.consensus.ConsensusProvider;
 import com.jd.blockchain.consensus.ConsensusProviders;
 import com.jd.blockchain.consensus.ConsensusSettings;
+import com.jd.blockchain.consensus.bftsmart.BftsmartConsensusProvider;
+import com.jd.blockchain.consensus.bftsmart.service.BftsmartNodeServer;
+import com.jd.blockchain.consensus.bftsmart.service.BftsmartServerSettings;
+import com.jd.blockchain.consensus.service.MessageHandle;
+import com.jd.blockchain.consensus.service.NodeServerFactory;
+import com.jd.blockchain.consensus.service.StateMachineReplicate;
 import com.jd.blockchain.crypto.AddressEncoding;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.Crypto;
@@ -39,24 +38,50 @@ import com.jd.blockchain.crypto.KeyGenUtils;
 import com.jd.blockchain.crypto.PrivKey;
 import com.jd.blockchain.crypto.PubKey;
 import com.jd.blockchain.gateway.GatewayConfigProperties.KeyPairConfig;
+import com.jd.blockchain.ledger.BlockchainIdentity;
+import com.jd.blockchain.ledger.BlockchainKeyGenerator;
+import com.jd.blockchain.ledger.BlockchainKeypair;
+import com.jd.blockchain.ledger.BytesValue;
+import com.jd.blockchain.ledger.DataAccountKVSetOperation;
+import com.jd.blockchain.ledger.LedgerBlock;
+import com.jd.blockchain.ledger.LedgerInfo;
+import com.jd.blockchain.ledger.LedgerInitProperties;
+import com.jd.blockchain.ledger.ParticipantNode;
+import com.jd.blockchain.ledger.PreparedTransaction;
+import com.jd.blockchain.ledger.TransactionRequest;
+import com.jd.blockchain.ledger.TransactionResponse;
+import com.jd.blockchain.ledger.TransactionTemplate;
+import com.jd.blockchain.ledger.TypedKVEntry;
+import com.jd.blockchain.ledger.UserInfo;
+import com.jd.blockchain.ledger.core.DataAccountQuery;
+import com.jd.blockchain.ledger.core.DefaultOperationHandleRegisteration;
+import com.jd.blockchain.ledger.core.LedgerManage;
+import com.jd.blockchain.ledger.core.LedgerManager;
+import com.jd.blockchain.ledger.core.LedgerQuery;
+import com.jd.blockchain.ledger.core.LedgerRepository;
+import com.jd.blockchain.ledger.core.TransactionEngineImpl;
+import com.jd.blockchain.peer.consensus.ConsensusMessageDispatcher;
+import com.jd.blockchain.peer.consensus.LedgerStateManager;
 import com.jd.blockchain.sdk.BlockchainService;
 import com.jd.blockchain.sdk.client.GatewayServiceFactory;
 import com.jd.blockchain.storage.service.KVStorageService;
+import com.jd.blockchain.storage.service.impl.composite.CompositeConnectionFactory;
+import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.DBConnectionConfig;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.tools.initializer.Prompter;
+import com.jd.blockchain.transaction.TxContentBlob;
+import com.jd.blockchain.transaction.TxRequestBuilder;
+import com.jd.blockchain.transaction.UserRegisterOpTemplate;
 import com.jd.blockchain.utils.Bytes;
 import com.jd.blockchain.utils.codec.HexUtils;
+import com.jd.blockchain.utils.concurrent.AsyncFuture;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker.AsyncCallback;
 import com.jd.blockchain.utils.net.NetworkAddress;
 
 import test.com.jd.blockchain.intgr.IntegratedContext.Node;
 import test.com.jd.blockchain.intgr.perf.LedgerInitializeWebTest;
 import test.com.jd.blockchain.intgr.perf.Utils;
-
-import static com.jd.blockchain.transaction.TxBuilder.computeTxContentHash;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.doAnswer;
 
 public class IntegrationTest {
 	// 合约测试使用的初始化数据;
@@ -115,16 +140,16 @@ public class IntegrationTest {
 		mockNodeServer(context);
 
 		NetworkAddress peerSrvAddr0 = new NetworkAddress("127.0.0.1", 10200);
-		PeerTestRunner peer0 = new PeerTestRunner(peerSrvAddr0, node0.getBindingConfig(), node0.getStorageDB(), node0.getLedgerManager());
+		PeerServer peer0 = new PeerServer(peerSrvAddr0, node0.getBindingConfig(), node0.getStorageDB(), node0.getLedgerManager());
 
 		NetworkAddress peerSrvAddr1 = new NetworkAddress("127.0.0.1", 10210);
-		PeerTestRunner peer1 = new PeerTestRunner(peerSrvAddr1, node1.getBindingConfig(), node1.getStorageDB(), node1.getLedgerManager());
+		PeerServer peer1 = new PeerServer(peerSrvAddr1, node1.getBindingConfig(), node1.getStorageDB(), node1.getLedgerManager());
 
 		NetworkAddress peerSrvAddr2 = new NetworkAddress("127.0.0.1", 10220);
-		PeerTestRunner peer2 = new PeerTestRunner(peerSrvAddr2, node2.getBindingConfig(), node2.getStorageDB(), node2.getLedgerManager());
+		PeerServer peer2 = new PeerServer(peerSrvAddr2, node2.getBindingConfig(), node2.getStorageDB(), node2.getLedgerManager());
 
 		NetworkAddress peerSrvAddr3 = new NetworkAddress("127.0.0.1", 10230);
-		PeerTestRunner peer3 = new PeerTestRunner(peerSrvAddr3, node3.getBindingConfig(), node3.getStorageDB(), node3.getLedgerManager());
+		PeerServer peer3 = new PeerServer(peerSrvAddr3, node3.getBindingConfig(), node3.getStorageDB(), node3.getLedgerManager());
 
 		AsyncCallback<Object> peerStarting0 = peer0.start();
 		AsyncCallback<Object> peerStarting1 = peer1.start();

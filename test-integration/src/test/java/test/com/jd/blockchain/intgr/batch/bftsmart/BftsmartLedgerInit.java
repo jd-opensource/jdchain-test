@@ -32,7 +32,7 @@ import com.jd.blockchain.ledger.core.LedgerQuery;
 import com.jd.blockchain.sdk.BlockchainService;
 import com.jd.blockchain.sdk.client.GatewayServiceFactory;
 import com.jd.blockchain.storage.service.DbConnectionFactory;
-import com.jd.blockchain.test.PeerTestRunner;
+import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.tools.initializer.LedgerInitCommand;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker;
@@ -89,7 +89,7 @@ public class BftsmartLedgerInit {
     @Test
     public void start4Nodes() {
         localConf4NodesLoad();
-        PeerTestRunner[] peerNodes = startNodes(4);
+        PeerServer[] peerNodes = startNodes(4);
         // 检查账本一致性
         LedgerQuery[] ledgers = checkNodes(peerNodes);
 
@@ -106,7 +106,7 @@ public class BftsmartLedgerInit {
     @Test
     public void start8Nodes() {
         localConf8NodesLoad();
-        PeerTestRunner[] peerNodes = startNodes(8);
+        PeerServer[] peerNodes = startNodes(8);
         // 检查账本一致性
         LedgerQuery[] ledgers = checkNodes(peerNodes);
 
@@ -123,7 +123,7 @@ public class BftsmartLedgerInit {
     @Test
     public void start16Nodes() {
         localConf16NodesLoad();
-        PeerTestRunner[] peerNodes = startNodes(16);
+        PeerServer[] peerNodes = startNodes(16);
         // 检查账本一致性
         LedgerQuery[] ledgers = checkNodes(peerNodes);
 
@@ -141,7 +141,7 @@ public class BftsmartLedgerInit {
     public void start32Nodes() {
         localConf32NodesLoad();
 //        ledgerInitPools.shutdown();
-        PeerTestRunner[] peerNodes = startNodes(32);
+        PeerServer[] peerNodes = startNodes(32);
         // 检查账本一致性
         LedgerQuery[] ledgers = checkNodes(peerNodes);
 
@@ -158,14 +158,14 @@ public class BftsmartLedgerInit {
     @Test
     public void start64Nodes() {
         localConf64NodesLoad();
-        PeerTestRunner[] peerNodes = startNodes(64);
+        PeerServer[] peerNodes = startNodes(64);
         // 检查账本一致性
         LedgerQuery[] ledgers = checkNodes(peerNodes);
 
         txRequestTest(peerNodes, ledgers);
     }
 
-    public void txRequestTest(PeerTestRunner[] peerNodes, LedgerQuery[] ledgers) {
+    public void txRequestTest(PeerServer[] peerNodes, LedgerQuery[] ledgers) {
         // 测试K-V
         GatewayTestRunner gateway = initGateWay(peerNodes[0]);
 
@@ -230,7 +230,7 @@ public class BftsmartLedgerInit {
         }
     }
 
-    public GatewayTestRunner initGateWay(PeerTestRunner peerNode) {
+    public GatewayTestRunner initGateWay(PeerServer peerNode) {
         String encodedBase58Pwd = KeyGenUtils.encodePasswordAsBase58(LedgerInitializeTest.PASSWORD);
 
         GatewayConfigProperties.KeyPairConfig gwkey0 = new GatewayConfigProperties.KeyPairConfig();
@@ -247,7 +247,7 @@ public class BftsmartLedgerInit {
         return gateway;
     }
 
-    public LedgerQuery[] checkNodes(PeerTestRunner[] peerNodes) {
+    public LedgerQuery[] checkNodes(PeerServer[] peerNodes) {
         int size = peerNodes.length;
         LedgerBindingConfig[] ledgerBindingConfigs = new LedgerBindingConfig[size];
         DbConnectionFactory[] connectionFactories = new DbConnectionFactory[size];
@@ -262,8 +262,8 @@ public class BftsmartLedgerInit {
         return ledgers;
     }
 
-    public PeerTestRunner[] startNodes(int size) {
-        PeerTestRunner[] peerNodes = new PeerTestRunner[size];
+    public PeerServer[] startNodes(int size) {
+        PeerServer[] peerNodes = new PeerServer[size];
         CountDownLatch countDownLatch = new CountDownLatch(size);
         try {
             for (int i = 0; i < size; i++) {
@@ -274,7 +274,7 @@ public class BftsmartLedgerInit {
                         String ledgerBindingConf = BftsmartConfig.BFTSMART_DIR + "conf" + File.separator + index + File.separator + "ledger-binding.conf";
                         ClassPathResource ledgerBindingConfRes = new ClassPathResource(ledgerBindingConf);
                         LedgerBindingConfig bindingConfig = LedgerBindingConfig.resolve(ledgerBindingConfRes.getInputStream());
-                        PeerTestRunner peer = new PeerTestRunner(peerSrvAddr, bindingConfig);
+                        PeerServer peer = new PeerServer(peerSrvAddr, bindingConfig);
                         ThreadInvoker.AsyncCallback<Object> peerStarting = peer.start();
                         peerStarting.waitReturn();
                         peerNodes[index] = peer;
