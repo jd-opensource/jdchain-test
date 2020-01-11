@@ -24,7 +24,7 @@ import com.jd.blockchain.ledger.core.LedgerQuery;
 import com.jd.blockchain.sdk.BlockchainService;
 import com.jd.blockchain.sdk.client.GatewayServiceFactory;
 import com.jd.blockchain.storage.service.DbConnectionFactory;
-import com.jd.blockchain.test.PeerTestRunner;
+import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker.AsyncCallback;
 import com.jd.blockchain.utils.io.FileUtils;
@@ -79,7 +79,7 @@ public class IntegrationTest4MQ {
 		HashDigest ledgerHash = initLedger(dbType, dbConnections);
 
 		// 启动Peer节点
-		PeerTestRunner[] peerNodes = peerNodeStart(ledgerHash, dbType);
+		PeerServer[] peerNodes = peerNodeStart(ledgerHash, dbType);
 
 		DbConnectionFactory dbConnectionFactory0 = peerNodes[0].getDBConnectionFactory();
 		DbConnectionFactory dbConnectionFactory1 = peerNodes[1].getDBConnectionFactory();

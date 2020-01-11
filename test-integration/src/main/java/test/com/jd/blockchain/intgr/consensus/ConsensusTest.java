@@ -34,7 +34,7 @@ import com.jd.blockchain.sdk.BlockchainService;
 import com.jd.blockchain.sdk.client.GatewayServiceFactory;
 import com.jd.blockchain.storage.service.DbConnection;
 import com.jd.blockchain.storage.service.impl.composite.CompositeConnectionFactory;
-import com.jd.blockchain.test.PeerTestRunner;
+import com.jd.blockchain.test.PeerServer;
 //import com.jd.blockchain.storage.service.utils.MemoryBasedDb;
 import com.jd.blockchain.tools.initializer.DBConnectionConfig;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
@@ -69,16 +69,16 @@ public class ConsensusTest {
 		Node node3 = context.getNode(3);
 
 		NetworkAddress peerSrvAddr0 = new NetworkAddress("127.0.0.1", 10200);
-		PeerTestRunner peer0 = new PeerTestRunner(peerSrvAddr0, node0.getBindingConfig(), node0.getStorageDB(), null);
+		PeerServer peer0 = new PeerServer(peerSrvAddr0, node0.getBindingConfig(), node0.getStorageDB(), null);
 
 		NetworkAddress peerSrvAddr1 = new NetworkAddress("127.0.0.1", 10210);
-		PeerTestRunner peer1 = new PeerTestRunner(peerSrvAddr1, node1.getBindingConfig(), node1.getStorageDB(), null);
+		PeerServer peer1 = new PeerServer(peerSrvAddr1, node1.getBindingConfig(), node1.getStorageDB(), null);
 
 		NetworkAddress peerSrvAddr2 = new NetworkAddress("127.0.0.1", 10220);
-		PeerTestRunner peer2 = new PeerTestRunner(peerSrvAddr2, node2.getBindingConfig(), node2.getStorageDB(), null);
+		PeerServer peer2 = new PeerServer(peerSrvAddr2, node2.getBindingConfig(), node2.getStorageDB(), null);
 
 		NetworkAddress peerSrvAddr3 = new NetworkAddress("127.0.0.1", 10230);
-		PeerTestRunner peer3 = new PeerTestRunner(peerSrvAddr3, node3.getBindingConfig(), node3.getStorageDB(), null);
+		PeerServer peer3 = new PeerServer(peerSrvAddr3, node3.getBindingConfig(), node3.getStorageDB(), null);
 
 		AsyncCallback<Object> peerStarting0 = peer0.start();
 		AsyncCallback<Object> peerStarting1 = peer1.start();

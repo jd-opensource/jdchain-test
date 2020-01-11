@@ -43,7 +43,7 @@ import com.jd.blockchain.sdk.BlockchainService;
 import com.jd.blockchain.sdk.client.GatewayServiceFactory;
 import com.jd.blockchain.storage.service.DbConnection;
 import com.jd.blockchain.storage.service.DbConnectionFactory;
-import com.jd.blockchain.test.PeerTestRunner;
+import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.utils.Bytes;
 import com.jd.blockchain.utils.codec.HexUtils;
@@ -90,19 +90,19 @@ public class IntegrationTestAll4Redis {
 
 		NetworkAddress peerSrvAddr0 = new NetworkAddress("127.0.0.1", 10200);
 		LedgerBindingConfig bindingConfig0 = loadBindingConfig(0);
-		PeerTestRunner peer0 = new PeerTestRunner(peerSrvAddr0, bindingConfig0);
+		PeerServer peer0 = new PeerServer(peerSrvAddr0, bindingConfig0);
 
 		NetworkAddress peerSrvAddr1 = new NetworkAddress("127.0.0.1", 10210);
 		LedgerBindingConfig bindingConfig1 = loadBindingConfig(1);
-		PeerTestRunner peer1 = new PeerTestRunner(peerSrvAddr1, bindingConfig1);
+		PeerServer peer1 = new PeerServer(peerSrvAddr1, bindingConfig1);
 
 		NetworkAddress peerSrvAddr2 = new NetworkAddress("127.0.0.1", 10220);
 		LedgerBindingConfig bindingConfig2 = loadBindingConfig(2);
-		PeerTestRunner peer2 = new PeerTestRunner(peerSrvAddr2, bindingConfig2);
+		PeerServer peer2 = new PeerServer(peerSrvAddr2, bindingConfig2);
 
 		NetworkAddress peerSrvAddr3 = new NetworkAddress("127.0.0.1", 10230);
 		LedgerBindingConfig bindingConfig3 = loadBindingConfig(3);
-		PeerTestRunner peer3 = new PeerTestRunner(peerSrvAddr3, bindingConfig3);
+		PeerServer peer3 = new PeerServer(peerSrvAddr3, bindingConfig3);
 
 		AsyncCallback<Object> peerStarting0 = peer0.start();
 		AsyncCallback<Object> peerStarting1 = peer1.start();

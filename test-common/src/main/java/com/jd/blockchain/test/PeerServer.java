@@ -14,7 +14,7 @@ import com.jd.blockchain.utils.net.NetworkAddress;
  * @author huanghaiquan
  *
  */
-public class PeerTestRunner {
+public class PeerServer {
 
 	private NetworkAddress serviceAddress;
 
@@ -34,15 +34,15 @@ public class PeerTestRunner {
 		return ledgerBindingConfig;
 	}
 
-	public PeerTestRunner(NetworkAddress serviceAddress, LedgerBindingConfig ledgerBindingConfig) {
+	public PeerServer(NetworkAddress serviceAddress, LedgerBindingConfig ledgerBindingConfig) {
 		this(serviceAddress, ledgerBindingConfig, null, null);
 	}
 	
-	public PeerTestRunner(NetworkAddress serviceAddress, LedgerBindingConfig ledgerBindingConfig, DbConnectionFactory dbConnectionFactory) {
+	public PeerServer(NetworkAddress serviceAddress, LedgerBindingConfig ledgerBindingConfig, DbConnectionFactory dbConnectionFactory) {
 		this(serviceAddress, ledgerBindingConfig, dbConnectionFactory, null);
 	}
 
-	public PeerTestRunner(NetworkAddress serviceAddress, LedgerBindingConfig ledgerBindingConfig,
+	public PeerServer(NetworkAddress serviceAddress, LedgerBindingConfig ledgerBindingConfig,
 			DbConnectionFactory dbConnectionFactory, LedgerManager ledgerManager) {
 		this.serviceAddress = serviceAddress;
 		this.ledgerBindingConfig = ledgerBindingConfig;
