@@ -116,7 +116,7 @@ public class IntegrationTest {
 	public static final String PRIV_KEYS = "177gjtSgSdUF3LwRFGhzbpZZxmXXChsnwbuuLCG1V9KYfVuuxLwXGmZCp5FGUvsenhwBQLV";
 
 
-	public static void main(String[] args) {
+	public static void main_(String[] args) {
 		// init ledgers of all nodes ;
 		IntegratedContext context = initLedgers();
 
