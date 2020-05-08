@@ -31,6 +31,8 @@ public class LedgerInitConsensusConfig {
 
     public static String[] redisConnectionStrings = new String[4];
 
+    public static String[] kvdbConnectionStrings = new String[4];
+
     public static String[] memConnectionStrings = new String[4];
 
     public static String[] rocksdbConnectionStrings = new String[4];
@@ -74,6 +76,11 @@ public class LedgerInitConsensusConfig {
             rocksdbDirStrings[i] = dbDir;
             rocksdbConnectionStrings[i] = "rocksdb://" + dbDir;
         }
+
+        kvdbConnectionStrings[0] = "kvdb://localhost:7078/peer0";
+        kvdbConnectionStrings[1] = "kvdb://localhost:7078/peer1";
+        kvdbConnectionStrings[2] = "kvdb://localhost:7078/peer2";
+        kvdbConnectionStrings[3] = "kvdb://localhost:7078/peer3";
     }
 
     public static ConsensusProvider getConsensusProvider(String providerName) {
