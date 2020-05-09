@@ -1,0 +1,4 @@
+db.peer0.enable=true
+db.peer1.enable=true
+db.peer2.enable=true
+db.peer3.enable=true
