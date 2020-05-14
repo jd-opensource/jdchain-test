@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static test.com.jd.blockchain.intgr.IntegrationBase.*;
+import static test.com.jd.blockchain.intgr.IntegrationTest4Bftsmart.DB_TYPE_ROCKSDB;
 
 public class IntegrationTest4Operations {
 
@@ -45,6 +46,11 @@ public class IntegrationTest4Operations {
     @Test
     public void test() {
         test(LedgerInitConsensusConfig.bftsmartProvider, DB_TYPE_MEM, LedgerInitConsensusConfig.memConnectionStrings);
+    }
+
+    @Test
+    public void test4Rocksdb() {
+        test(LedgerInitConsensusConfig.bftsmartProvider, DB_TYPE_ROCKSDB, LedgerInitConsensusConfig.rocksdbConnectionStrings);
     }
 
     @Test

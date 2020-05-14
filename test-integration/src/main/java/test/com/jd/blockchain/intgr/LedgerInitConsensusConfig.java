@@ -70,9 +70,11 @@ public class LedgerInitConsensusConfig {
         mqAndbftsmartProvider[0] = mqConfig.provider;
         mqAndbftsmartProvider[1] = bftsmartConfig.provider;
 
+        String path = LedgerInitConsensusConfig.class.getResource("/").getPath();
+
+        String currDir = path + "rocks.db";
         for (int i = 0; i < rocksdbConnectionStrings.length; i++) {
-            String currDir = FileUtils.getCurrentDir() + File.separator + "rocks.db";
-            String dbDir = new File(currDir, "rocksdb" + i + ".db").getAbsolutePath();
+            String dbDir = currDir + File.separator + "rocksdb" + i + ".db";
             rocksdbDirStrings[i] = dbDir;
             rocksdbConnectionStrings[i] = "rocksdb://" + dbDir;
         }

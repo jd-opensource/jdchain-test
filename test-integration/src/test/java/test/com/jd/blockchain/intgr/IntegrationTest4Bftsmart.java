@@ -47,7 +47,7 @@ public class IntegrationTest4Bftsmart {
 
     private static final String DB_TYPE_REDIS = "redis";
 
-    private static final String DB_TYPE_ROCKSDB = "rocksdb";
+    public static final String DB_TYPE_ROCKSDB = "rocksdb";
 
     public static final  String  BFTSMART_PROVIDER = "com.jd.blockchain.consensus.bftsmart.BftsmartConsensusProvider";
 
