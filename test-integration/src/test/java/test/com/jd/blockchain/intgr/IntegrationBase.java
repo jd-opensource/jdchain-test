@@ -25,8 +25,6 @@ import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.jd.blockchain.crypto.PubKey;
-import com.jd.blockchain.ledger.*;
 import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.ClassPathResource;
 
@@ -35,11 +33,27 @@ import com.jd.blockchain.binaryproto.DataContractRegistry;
 import com.jd.blockchain.crypto.AddressEncoding;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.HashDigest;
+import com.jd.blockchain.ledger.BlockchainIdentityData;
+import com.jd.blockchain.ledger.BlockchainKeyGenerator;
+import com.jd.blockchain.ledger.BlockchainKeypair;
+import com.jd.blockchain.ledger.BytesValueEncoding;
+import com.jd.blockchain.ledger.LedgerBlock;
+import com.jd.blockchain.ledger.LedgerInitOperation;
+import com.jd.blockchain.ledger.OperationResult;
+import com.jd.blockchain.ledger.ParticipantInfoData;
+import com.jd.blockchain.ledger.ParticipantNodeState;
+import com.jd.blockchain.ledger.PreparedTransaction;
+import com.jd.blockchain.ledger.TransactionResponse;
+import com.jd.blockchain.ledger.TransactionState;
+import com.jd.blockchain.ledger.TransactionTemplate;
+import com.jd.blockchain.ledger.TypedKVEntry;
+import com.jd.blockchain.ledger.UserRegisterOperation;
 import com.jd.blockchain.ledger.core.LedgerManager;
 import com.jd.blockchain.ledger.core.LedgerQuery;
 import com.jd.blockchain.sdk.BlockchainService;
 import com.jd.blockchain.storage.service.DbConnection;
 import com.jd.blockchain.storage.service.DbConnectionFactory;
+import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.transaction.GenericValueHolder;
 import com.jd.blockchain.utils.Bytes;
@@ -360,22 +374,22 @@ public class IntegrationBase {
 		}
 	}
 
-	public static PeerTestRunner[] peerNodeStart(HashDigest ledgerHash, String dbType) {
+	public static PeerServer[] peerNodeStart(HashDigest ledgerHash, String dbType) {
 		NetworkAddress peerSrvAddr0 = new NetworkAddress("127.0.0.1", 12000);
 		LedgerBindingConfig bindingConfig0 = loadBindingConfig(0, ledgerHash, dbType);
-		PeerTestRunner peer0 = new PeerTestRunner(peerSrvAddr0, bindingConfig0);
+		PeerServer peer0 = new PeerServer(peerSrvAddr0, bindingConfig0);
 
 		NetworkAddress peerSrvAddr1 = new NetworkAddress("127.0.0.1", 12010);
 		LedgerBindingConfig bindingConfig1 = loadBindingConfig(1, ledgerHash, dbType);
-		PeerTestRunner peer1 = new PeerTestRunner(peerSrvAddr1, bindingConfig1);
+		PeerServer peer1 = new PeerServer(peerSrvAddr1, bindingConfig1);
 
 		NetworkAddress peerSrvAddr2 = new NetworkAddress("127.0.0.1", 12020);
 		LedgerBindingConfig bindingConfig2 = loadBindingConfig(2, ledgerHash, dbType);
-		PeerTestRunner peer2 = new PeerTestRunner(peerSrvAddr2, bindingConfig2);
+		PeerServer peer2 = new PeerServer(peerSrvAddr2, bindingConfig2);
 
 		NetworkAddress peerSrvAddr3 = new NetworkAddress("127.0.0.1", 12030);
 		LedgerBindingConfig bindingConfig3 = loadBindingConfig(3, ledgerHash, dbType);
-		PeerTestRunner peer3 = new PeerTestRunner(peerSrvAddr3, bindingConfig3);
+		PeerServer peer3 = new PeerServer(peerSrvAddr3, bindingConfig3);
 
 		ThreadInvoker.AsyncCallback<Object> peerStarting0 = peer0.start();
 		ThreadInvoker.AsyncCallback<Object> peerStarting1 = peer1.start();
@@ -387,7 +401,7 @@ public class IntegrationBase {
 		peerStarting2.waitReturn();
 		peerStarting3.waitReturn();
 
-		return new PeerTestRunner[] { peer0, peer1, peer2, peer3 };
+		return new PeerServer[] { peer0, peer1, peer2, peer3 };
 	}
 
 	public static LedgerBindingConfig loadBindingConfig(int id, HashDigest ledgerHash, String dbType) {

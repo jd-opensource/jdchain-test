@@ -1,30 +1,31 @@
 package test.com.jd.blockchain.intgr;
 
+import static test.com.jd.blockchain.intgr.IntegrationBase.buildLedgers;
+import static test.com.jd.blockchain.intgr.IntegrationBase.peerNodeStart;
+
+import java.io.File;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import org.junit.Test;
+import org.springframework.core.io.ClassPathResource;
+
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.crypto.KeyGenUtils;
 import com.jd.blockchain.crypto.PrivKey;
 import com.jd.blockchain.crypto.PubKey;
 import com.jd.blockchain.gateway.GatewayConfigProperties;
-import com.jd.blockchain.ledger.BlockchainKeypair;
 import com.jd.blockchain.ledger.core.LedgerQuery;
 import com.jd.blockchain.sdk.BlockchainService;
 import com.jd.blockchain.sdk.client.GatewayServiceFactory;
 import com.jd.blockchain.storage.service.DbConnectionFactory;
+import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker;
 
-import org.junit.Test;
-import org.springframework.core.io.ClassPathResource;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeTest;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeWeb4Nodes;
-
-import java.io.File;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import static test.com.jd.blockchain.intgr.IntegrationBase.*;
 
 public class IntegrationTest4Contract {
     private static final boolean isContractDeployAndExe = true;
@@ -40,7 +41,7 @@ public class IntegrationTest4Contract {
         // 内存账本初始化
         HashDigest ledgerHash = initLedger(dbConnections);
         // 启动Peer节点
-        PeerTestRunner[] peerNodes = peerNodeStart(ledgerHash, dbType);
+        PeerServer[] peerNodes = peerNodeStart(ledgerHash, dbType);
         DbConnectionFactory dbConnectionFactory0 = peerNodes[0].getDBConnectionFactory();
         DbConnectionFactory dbConnectionFactory1 = peerNodes[1].getDBConnectionFactory();
         DbConnectionFactory dbConnectionFactory2 = peerNodes[2].getDBConnectionFactory();

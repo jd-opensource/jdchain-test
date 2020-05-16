@@ -5,22 +5,24 @@
 	<parent>
 		<groupId>com.jd.blockchain</groupId>
 		<artifactId>jdchain-core</artifactId>
-		<version>1.2.0-SNAPSHOT</version>
+		<version>1.2.0.RELEASE</version>
 		<relativePath>../core</relativePath>
 	</parent>
 
 
 	<groupId>com.jd.blockchain</groupId>
 	<artifactId>test</artifactId>
-	<version>1.2.0-SNAPSHOT</version>
+	<version>1.2.0.RELEASE</version>
 	<packaging>pom</packaging>
 
 	<properties>
-		<core.version>1.2.0-SNAPSHOT</core.version>
+		<core.version>1.2.0.RELEASE</core.version>
+		<kvdb.version>1.0.0.RELEASE</kvdb.version>
 	</properties>
 
 	<modules>
 		<module>../core</module>
+		<module>test-common</module>
 		<module>test-consensus-client</module>
 		<module>test-consensus-node</module>
 		<module>test-ledger</module>
@@ -41,7 +43,7 @@
 				<artifactId>consensus-mq</artifactId>
 				<version>${core.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>com.jd.blockchain</groupId>
 				<artifactId>contract-jvm</artifactId>
@@ -52,7 +54,7 @@
 				<artifactId>contract-maven-plugin</artifactId>
 				<version>${core.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>com.jd.blockchain</groupId>
 				<artifactId>crypto-adv</artifactId>
@@ -63,25 +65,25 @@
 				<artifactId>crypto-pki</artifactId>
 				<version>${core.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>com.jd.blockchain</groupId>
 				<artifactId>gateway</artifactId>
 				<version>${core.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>com.jd.blockchain</groupId>
 				<artifactId>peer</artifactId>
 				<version>${core.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>com.jd.blockchain</groupId>
 				<artifactId>ledger-database</artifactId>
 				<version>${core.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>com.jd.blockchain</groupId>
 				<artifactId>runtime-context</artifactId>
@@ -97,7 +99,24 @@
 				<artifactId>runtime-modular-booter</artifactId>
 				<version>${core.version}</version>
 			</dependency>
-			
+
+			<dependency>
+				<groupId>com.jd.blockchain</groupId>
+				<artifactId>tools-initializer</artifactId>
+				<version>${core.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.jd.blockchain</groupId>
+				<artifactId>sdk-client</artifactId>
+				<version>${framework.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.jd.blockchain</groupId>
+				<artifactId>crypto-classic</artifactId>
+				<version>${framework.version}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>com.jd.blockchain</groupId>
 				<artifactId>storage-redis</artifactId>
@@ -108,8 +127,17 @@
 				<artifactId>storage-rocksdb</artifactId>
 				<version>${core.version}</version>
 			</dependency>
-			
-			
+			<dependency>
+				<groupId>com.jd.blockchain</groupId>
+				<artifactId>storage-kvdb</artifactId>
+				<version>${core.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.jd.blockchain</groupId>
+				<artifactId>kvdb-server</artifactId>
+				<version>${kvdb.version}</version>
+			</dependency>
+
 		</dependencies>
 
 	</dependencyManagement>

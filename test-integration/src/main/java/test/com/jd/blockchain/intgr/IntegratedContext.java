@@ -9,7 +9,6 @@ import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.ledger.core.LedgerManager;
 import com.jd.blockchain.storage.service.DbConnectionFactory;
-import com.jd.blockchain.storage.service.impl.composite.CompositeConnectionFactory;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 
 public class IntegratedContext {

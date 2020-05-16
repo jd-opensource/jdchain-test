@@ -1,5 +1,11 @@
 package test.com.jd.blockchain.intgr.perf;
 
+import java.io.IOException;
+import java.util.Random;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.RecursiveAction;
+
 import com.jd.blockchain.storage.service.DbConnection;
 import com.jd.blockchain.storage.service.KVStorageService;
 import com.jd.blockchain.storage.service.VersioningKVStorage;
@@ -11,20 +17,14 @@ import com.jd.blockchain.utils.codec.Base58Utils;
 import com.jd.blockchain.utils.io.BytesUtils;
 import com.jd.blockchain.utils.security.ShaUtils;
 
-import java.io.IOException;
-import java.util.Random;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
-import java.util.concurrent.RecursiveAction;
-
 public class PerformanceTest {
 
 	public static void main(String[] args) {
 		try {
 			boolean testLedger = !ArgumentSet.hasOption(args, "-test=storage");
 			if (testLedger) {
-//				LedgerPerformanceTest.test(new String[]{"-silent", "-usertest", "-o"});
-				LedgerPerformanceTest.test(new String[]{"-silent", "-o", "-rocksdb"});
+//				LedgerPerformanceTest.test(new String[]{"-silent", "-o", "-rocksdb"});
+				LedgerPerformanceTest.test(new String[] {  "-o" });
 				return;
 			}
 
@@ -33,7 +33,7 @@ public class PerformanceTest {
 //			testRedisWriting(args);
 		} catch (Exception e) {
 			e.printStackTrace();
-		}finally {
+		} finally {
 			ForkJoinPool.commonPool().shutdown();
 		}
 	}

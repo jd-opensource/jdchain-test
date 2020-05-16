@@ -20,6 +20,7 @@ import com.jd.blockchain.gateway.GatewayConfigProperties.KeyPairConfig;
 import com.jd.blockchain.ledger.LedgerBlock;
 import com.jd.blockchain.ledger.LedgerInitProperties;
 import com.jd.blockchain.ledger.core.LedgerQuery;
+import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.DBConnectionConfig;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.tools.initializer.Prompter;
@@ -47,16 +48,16 @@ public class IntegrationBaseTest {
 		Node node3 = context.getNode(3);
 
 		NetworkAddress peerSrvAddr0 = new NetworkAddress("127.0.0.1", 13200);
-		PeerTestRunner peer0 = new PeerTestRunner(peerSrvAddr0, node0.getBindingConfig(), node0.getStorageDB(), null);
+		PeerServer peer0 = new PeerServer(peerSrvAddr0, node0.getBindingConfig(), node0.getStorageDB(), null);
 
 		NetworkAddress peerSrvAddr1 = new NetworkAddress("127.0.0.1", 13210);
-		PeerTestRunner peer1 = new PeerTestRunner(peerSrvAddr1, node1.getBindingConfig(), node1.getStorageDB(), null);
+		PeerServer peer1 = new PeerServer(peerSrvAddr1, node1.getBindingConfig(), node1.getStorageDB(), null);
 
 		NetworkAddress peerSrvAddr2 = new NetworkAddress("127.0.0.1", 13220);
-		PeerTestRunner peer2 = new PeerTestRunner(peerSrvAddr2, node2.getBindingConfig(), node2.getStorageDB(), null);
+		PeerServer peer2 = new PeerServer(peerSrvAddr2, node2.getBindingConfig(), node2.getStorageDB(), null);
 
 		NetworkAddress peerSrvAddr3 = new NetworkAddress("127.0.0.1", 13230);
-		PeerTestRunner peer3 = new PeerTestRunner(peerSrvAddr3, node3.getBindingConfig(), node3.getStorageDB(), null);
+		PeerServer peer3 = new PeerServer(peerSrvAddr3, node3.getBindingConfig(), node3.getStorageDB(), null);
 
 		AsyncCallback<Object> peerStarting0 = peer0.start();
 		AsyncCallback<Object> peerStarting1 = peer1.start();

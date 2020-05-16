@@ -44,6 +44,7 @@ import com.jd.blockchain.storage.service.impl.redis.RedisConnectionFactory;
 import com.jd.blockchain.storage.service.impl.redis.RedisStorageService;
 import com.jd.blockchain.storage.service.impl.rocksdb.RocksDBConnectionFactory;
 import com.jd.blockchain.storage.service.utils.MemoryDBConnFactory;
+import com.jd.blockchain.tools.initializer.ConsolePrompter;
 import com.jd.blockchain.tools.initializer.DBConnectionConfig;
 import com.jd.blockchain.tools.initializer.Prompter;
 import com.jd.blockchain.tools.initializer.web.LedgerInitConsensusService;
@@ -249,7 +250,7 @@ public class LedgerPerformanceTest {
 		List<TransactionRequest> txList = prepareDataWriteRequests(ledgerHash, dataAccounts, totalCount, adminKey,
 				false);
 
-		Prompter consolePrompter = new PresetAnswerPrompter("N");
+		Prompter consolePrompter = new ConsolePrompter();
 
 		if (!silent) {
 //			ConsoleUtils.confirm("\r\nTest is ready! Any key to continue...");

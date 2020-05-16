@@ -8,31 +8,8 @@
  */
 package test.com.jd.blockchain.intgr.batch.bftsmart;
 
-import com.jd.blockchain.crypto.AsymmetricKeypair;
-import com.jd.blockchain.crypto.HashDigest;
-import com.jd.blockchain.crypto.KeyGenUtils;
-import com.jd.blockchain.crypto.PrivKey;
-import com.jd.blockchain.crypto.PubKey;
-import com.jd.blockchain.gateway.GatewayConfigProperties;
-import com.jd.blockchain.ledger.BlockchainKeypair;
-import com.jd.blockchain.ledger.core.LedgerQuery;
-import com.jd.blockchain.peer.PeerServerBooter;
-import com.jd.blockchain.sdk.BlockchainService;
-import com.jd.blockchain.sdk.client.GatewayServiceFactory;
-import com.jd.blockchain.storage.service.DbConnectionFactory;
-import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
-import com.jd.blockchain.tools.initializer.LedgerInitCommand;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker;
-import com.jd.blockchain.utils.io.FileUtils;
-import com.jd.blockchain.utils.net.NetworkAddress;
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.core.io.ClassPathResource;
-import test.com.jd.blockchain.intgr.GatewayTestRunner;
-import test.com.jd.blockchain.intgr.IntegrationBase;
-import test.com.jd.blockchain.intgr.LedgerInitConsensusConfig;
-import test.com.jd.blockchain.intgr.PeerTestRunner;
-import test.com.jd.blockchain.intgr.initializer.LedgerInitializeTest;
+import static test.com.jd.blockchain.intgr.IntegrationBase.buildLedgers;
+import static test.com.jd.blockchain.intgr.IntegrationBase.validKeyPair;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -40,11 +17,32 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicLong;
 
-import static test.com.jd.blockchain.intgr.IntegrationBase.buildLedgers;
-import static test.com.jd.blockchain.intgr.IntegrationBase.validKeyPair;
-import static test.com.jd.blockchain.intgr.IntegrationBase.validKvWrite;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.core.io.ClassPathResource;
+
+import com.jd.blockchain.crypto.AsymmetricKeypair;
+import com.jd.blockchain.crypto.HashDigest;
+import com.jd.blockchain.crypto.KeyGenUtils;
+import com.jd.blockchain.crypto.PrivKey;
+import com.jd.blockchain.crypto.PubKey;
+import com.jd.blockchain.gateway.GatewayConfigProperties;
+import com.jd.blockchain.ledger.core.LedgerQuery;
+import com.jd.blockchain.sdk.BlockchainService;
+import com.jd.blockchain.sdk.client.GatewayServiceFactory;
+import com.jd.blockchain.storage.service.DbConnectionFactory;
+import com.jd.blockchain.test.PeerServer;
+import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
+import com.jd.blockchain.tools.initializer.LedgerInitCommand;
+import com.jd.blockchain.utils.concurrent.ThreadInvoker;
+import com.jd.blockchain.utils.io.FileUtils;
+import com.jd.blockchain.utils.net.NetworkAddress;
+
+import test.com.jd.blockchain.intgr.GatewayTestRunner;
+import test.com.jd.blockchain.intgr.IntegrationBase;
+import test.com.jd.blockchain.intgr.LedgerInitConsensusConfig;
+import test.com.jd.blockchain.intgr.initializer.LedgerInitializeTest;
 
 /**
  *
@@ -91,7 +89,7 @@ public class BftsmartLedgerInit {
     @Test
     public void start4Nodes() {
         localConf4NodesLoad();
-        PeerTestRunner[] peerNodes = startNodes(4);
+        PeerServer[] peerNodes = startNodes(4);
         // 检查账本一致性
         LedgerQuery[] ledgers = checkNodes(peerNodes);
 
@@ -108,7 +106,7 @@ public class BftsmartLedgerInit {
     @Test
     public void start8Nodes() {
         localConf8NodesLoad();
-        PeerTestRunner[] peerNodes = startNodes(8);
+        PeerServer[] peerNodes = startNodes(8);
         // 检查账本一致性
         LedgerQuery[] ledgers = checkNodes(peerNodes);
 
@@ -125,7 +123,7 @@ public class BftsmartLedgerInit {
     @Test
     public void start16Nodes() {
         localConf16NodesLoad();
-        PeerTestRunner[] peerNodes = startNodes(16);
+        PeerServer[] peerNodes = startNodes(16);
         // 检查账本一致性
         LedgerQuery[] ledgers = checkNodes(peerNodes);
 
@@ -143,7 +141,7 @@ public class BftsmartLedgerInit {
     public void start32Nodes() {
         localConf32NodesLoad();
 //        ledgerInitPools.shutdown();
-        PeerTestRunner[] peerNodes = startNodes(32);
+        PeerServer[] peerNodes = startNodes(32);
         // 检查账本一致性
         LedgerQuery[] ledgers = checkNodes(peerNodes);
 
@@ -160,14 +158,14 @@ public class BftsmartLedgerInit {
     @Test
     public void start64Nodes() {
         localConf64NodesLoad();
-        PeerTestRunner[] peerNodes = startNodes(64);
+        PeerServer[] peerNodes = startNodes(64);
         // 检查账本一致性
         LedgerQuery[] ledgers = checkNodes(peerNodes);
 
         txRequestTest(peerNodes, ledgers);
     }
 
-    public void txRequestTest(PeerTestRunner[] peerNodes, LedgerQuery[] ledgers) {
+    public void txRequestTest(PeerServer[] peerNodes, LedgerQuery[] ledgers) {
         // 测试K-V
         GatewayTestRunner gateway = initGateWay(peerNodes[0]);
 
@@ -232,7 +230,7 @@ public class BftsmartLedgerInit {
         }
     }
 
-    public GatewayTestRunner initGateWay(PeerTestRunner peerNode) {
+    public GatewayTestRunner initGateWay(PeerServer peerNode) {
         String encodedBase58Pwd = KeyGenUtils.encodePasswordAsBase58(LedgerInitializeTest.PASSWORD);
 
         GatewayConfigProperties.KeyPairConfig gwkey0 = new GatewayConfigProperties.KeyPairConfig();
@@ -249,7 +247,7 @@ public class BftsmartLedgerInit {
         return gateway;
     }
 
-    public LedgerQuery[] checkNodes(PeerTestRunner[] peerNodes) {
+    public LedgerQuery[] checkNodes(PeerServer[] peerNodes) {
         int size = peerNodes.length;
         LedgerBindingConfig[] ledgerBindingConfigs = new LedgerBindingConfig[size];
         DbConnectionFactory[] connectionFactories = new DbConnectionFactory[size];
@@ -264,8 +262,8 @@ public class BftsmartLedgerInit {
         return ledgers;
     }
 
-    public PeerTestRunner[] startNodes(int size) {
-        PeerTestRunner[] peerNodes = new PeerTestRunner[size];
+    public PeerServer[] startNodes(int size) {
+        PeerServer[] peerNodes = new PeerServer[size];
         CountDownLatch countDownLatch = new CountDownLatch(size);
         try {
             for (int i = 0; i < size; i++) {
@@ -276,7 +274,7 @@ public class BftsmartLedgerInit {
                         String ledgerBindingConf = BftsmartConfig.BFTSMART_DIR + "conf" + File.separator + index + File.separator + "ledger-binding.conf";
                         ClassPathResource ledgerBindingConfRes = new ClassPathResource(ledgerBindingConf);
                         LedgerBindingConfig bindingConfig = LedgerBindingConfig.resolve(ledgerBindingConfRes.getInputStream());
-                        PeerTestRunner peer = new PeerTestRunner(peerSrvAddr, bindingConfig);
+                        PeerServer peer = new PeerServer(peerSrvAddr, bindingConfig);
                         ThreadInvoker.AsyncCallback<Object> peerStarting = peer.start();
                         peerStarting.waitReturn();
                         peerNodes[index] = peer;

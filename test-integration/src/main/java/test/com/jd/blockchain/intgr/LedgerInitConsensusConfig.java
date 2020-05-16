@@ -31,6 +31,8 @@ public class LedgerInitConsensusConfig {
 
     public static String[] redisConnectionStrings = new String[4];
 
+    public static String[] kvdbConnectionStrings = new String[4];
+
     public static String[] memConnectionStrings = new String[4];
 
     public static String[] rocksdbConnectionStrings = new String[4];
@@ -68,12 +70,19 @@ public class LedgerInitConsensusConfig {
         mqAndbftsmartProvider[0] = mqConfig.provider;
         mqAndbftsmartProvider[1] = bftsmartConfig.provider;
 
+        String path = LedgerInitConsensusConfig.class.getResource("/").getPath();
+
+        String currDir = path + "rocks.db";
         for (int i = 0; i < rocksdbConnectionStrings.length; i++) {
-            String currDir = FileUtils.getCurrentDir() + File.separator + "rocks.db";
-            String dbDir = new File(currDir, "rocksdb" + i + ".db").getAbsolutePath();
+            String dbDir = currDir + File.separator + "rocksdb" + i + ".db";
             rocksdbDirStrings[i] = dbDir;
             rocksdbConnectionStrings[i] = "rocksdb://" + dbDir;
         }
+
+        kvdbConnectionStrings[0] = "kvdb://localhost:7078/peer0";
+        kvdbConnectionStrings[1] = "kvdb://localhost:7078/peer1";
+        kvdbConnectionStrings[2] = "kvdb://localhost:7078/peer2";
+        kvdbConnectionStrings[3] = "kvdb://localhost:7078/peer3";
     }
 
     public static ConsensusProvider getConsensusProvider(String providerName) {
