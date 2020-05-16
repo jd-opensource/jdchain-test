@@ -85,6 +85,17 @@ public class IntegrationTest4Operations {
         test(LedgerInitConsensusConfig.bftsmartProvider, DB_TYPE_MEM, LedgerInitConsensusConfig.memConnectionStrings);
     }
 
+    @Test
+    public void testAll() {
+        isRegisterUser = true;
+        isRegisterDataAccount = true;
+        isRegisterParticipant = true;
+        isParticipantStateUpdate = true;
+        isWriteKv = true;
+
+        test(LedgerInitConsensusConfig.bftsmartProvider, DB_TYPE_MEM, LedgerInitConsensusConfig.memConnectionStrings);
+    }
+
     public void test(String[] providers, String dbType, String[] dbConnections) {
 
         final ExecutorService sendReqExecutors = Executors.newFixedThreadPool(20);
