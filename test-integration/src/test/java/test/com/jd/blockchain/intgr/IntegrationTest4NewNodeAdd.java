@@ -140,7 +140,7 @@ public class IntegrationTest4NewNodeAdd {
 
         NetworkAddress newParticipant = new NetworkAddress(NEW_NODE_HOST, NEW_NODE_CONSENSUS_PORT);
 
-        participantManager.activePeer(new NetworkAddress(NEW_NODE_HOST, NEW_NODE_HTTP_PORT, false), newParticipant, ledgerHash, user);
+        participantManager.activePeer(new NetworkAddress(NEW_NODE_HOST, NEW_NODE_HTTP_PORT, false), newParticipant, ledgerHash, user, null);
 
     }
 
