@@ -8,7 +8,9 @@
 		<version>1.2.1.RELEASE</version>
 	</parent>
 	<artifactId>test-ledger</artifactId>
-
+	<properties>
+		<v1>1</v1>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>com.jd.blockchain</groupId>
