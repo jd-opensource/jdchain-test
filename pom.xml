@@ -4,11 +4,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.jd.blockchain</groupId>
-		<artifactId>jdchain-core</artifactId>
-		<version>1.3.0.RELEASE</version>
-		<relativePath>../core</relativePath>
+		<artifactId>jdchain-parent</artifactId>
+		<version>1.1.4.RELEASE</version>
+		<relativePath>../project/parent</relativePath>
 	</parent>
-
 
 	<groupId>com.jd.blockchain</groupId>
 	<artifactId>test</artifactId>
@@ -16,7 +15,8 @@
 	<packaging>pom</packaging>
 
 	<properties>
-		<core.version>1.3.0.RELEASE</core.version>
+		<framework.version>1.3.1-SNAPSHOT</framework.version>
+		<core.version>1.3.1-SNAPSHOT</core.version>
 		<kvdb.version>1.0.1.RELEASE</kvdb.version>
 	</properties>
 
