@@ -25,6 +25,10 @@ import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.jd.blockchain.ledger.BytesValue;
+import com.jd.blockchain.ledger.DataType;
+import com.jd.blockchain.ledger.Event;
+import com.jd.blockchain.utils.io.BytesUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ClassPathResource;
@@ -263,6 +267,71 @@ public class IntegrationBase {
 		return keyPairResponse;
 	}
 
+	public static KeyPairResponse testSDK_RegisterEventAccount(AsymmetricKeypair adminKey, HashDigest ledgerHash,
+															  BlockchainService blockchainService) {
+		// 注册事件账户，并验证最终写入；
+		BlockchainKeypair eventAccount = BlockchainKeyGenerator.getInstance().generate();
+
+		// 定义交易；
+		TransactionTemplate txTpl = blockchainService.newTransaction(ledgerHash);
+		txTpl.eventAccounts().register(eventAccount.getIdentity());
+		// 签名；
+		PreparedTransaction ptx = txTpl.prepare();
+
+		HashDigest transactionHash = ptx.getHash();
+
+		ptx.sign(adminKey);
+
+		// 提交并等待共识返回；
+		TransactionResponse txResp = ptx.commit();
+
+		KeyPairResponse keyPairResponse = new KeyPairResponse();
+		keyPairResponse.keyPair = eventAccount;
+		keyPairResponse.txResp = txResp;
+		keyPairResponse.txHash = transactionHash;
+		return keyPairResponse;
+	}
+
+	public static EventResponse testSDK_PublishEvent(AsymmetricKeypair adminKey, HashDigest ledgerHash,
+												BlockchainService blockchainService, Bytes eventAccount,
+												String name, long sequence) {
+
+		TransactionTemplate txTemp = blockchainService.newTransaction(ledgerHash);
+		long now = System.currentTimeMillis();
+		Object content;
+		if(now %3 == 0) {
+			content = "string" + now + new Random().nextInt(100000);
+			txTemp.eventAccount(eventAccount).publish(name, (String) content, sequence);
+		} else if(now %3 == 1) {
+			content = BytesUtils.toBytes("bytes" + now + new Random().nextInt(100000));
+			txTemp.eventAccount(eventAccount).publish(name, (byte[])content, sequence);
+		} else {
+			content = now;
+			txTemp.eventAccount(eventAccount).publish(name, (long)content, sequence);
+		}
+
+		// TX 准备就绪；
+		PreparedTransaction prepTx = txTemp.prepare();
+
+		HashDigest transactionHash = prepTx.getHash();
+
+		// 使用私钥进行签名；
+		prepTx.sign(adminKey);
+
+		// 提交交易；
+		TransactionResponse txResp = prepTx.commit();
+
+		EventResponse response = new EventResponse();
+		response.ledgerHash = ledgerHash;
+		response.eventAccount = eventAccount;
+		response.txResp = txResp;
+		response.txHash = transactionHash;
+		response.name = name;
+		response.content = content;
+		response.sequence = sequence + 1;
+		return response;
+	}
+
 	public static void validKeyPair(IntegrationBase.KeyPairResponse keyPairResponse, LedgerQuery ledgerRepository,
 			KeyPairType keyPairType) {
 		TransactionResponse txResp = keyPairResponse.txResp;
@@ -279,10 +348,11 @@ public class IntegrationBase {
 		if (keyPairType == KeyPairType.USER) {
 			assertTrue(ledgerRepository.getUserAccountSet(ledgerRepository.getLatestBlock())
 					.contains(keyPair.getAddress()));
-		}
-
-		if (keyPairType == KeyPairType.DATAACCOUNT) {
+		} else if (keyPairType == KeyPairType.DATAACCOUNT) {
 			assertNotNull(ledgerRepository.getDataAccountSet(ledgerRepository.getLatestBlock())
+					.getAccount(keyPair.getAddress()));
+		} else if (keyPairType == KeyPairType.EVENTACCOUNT) {
+			assertNotNull(ledgerRepository.getUserEvents(ledgerRepository.getLatestBlock())
 					.getAccount(keyPair.getAddress()));
 		}
 		System.out.printf("validKeyPair end %s \r\n", index);
@@ -337,6 +407,38 @@ public class IntegrationBase {
 		}
 	}
 
+	public static void validEventPublish(EventResponse response, LedgerQuery ledgerRepository,
+									BlockchainService blockchainService) {
+		// 先验证应答
+		TransactionResponse txResp = response.getTxResp();
+		HashDigest transactionHash = response.getTxHash();
+		HashDigest ledgerHash = response.getLedgerHash();
+		String eaAddress = response.getEventAccount().toBase58();
+		String eventName = response.getName();
+		long eventSequence = response.getSequence();
+
+		ledgerRepository.retrieveLatestBlock();
+
+		assertEquals(TransactionState.SUCCESS, txResp.getExecutionState());
+		assertEquals(txResp.getBlockHeight(), ledgerRepository.getLatestBlockHeight());
+		assertEquals(txResp.getContentHash(), transactionHash);
+		assertEquals(txResp.getBlockHash(), ledgerRepository.getLatestBlockHash());
+
+		Event[] events = blockchainService.getUserEvents(ledgerHash, eaAddress, eventName, 0, (int)eventSequence+1);
+		assertEquals(eventSequence+1, events.length);
+		Event latestEvent = events[events.length-1];
+		assertEquals(eventName, latestEvent.getName());
+		BytesValue bv = latestEvent.getContent();
+		if(bv.getType() == DataType.TEXT) {
+			assertEquals(response.getContent(), bv.getBytes().toUTF8String());
+		} else if(bv.getType() == DataType.BYTES) {
+			assertTrue(BytesUtils.equals((byte[])response.getContent(), bv.getBytes().toBytes()));
+		} else {
+			assertEquals((long)response.getContent(), BytesUtils.toLong(bv.getBytes().toBytes()));
+		}
+		assertEquals(eventSequence, latestEvent.getSequence());
+	}
+
 	public static LedgerQuery[] buildLedgers(LedgerBindingConfig[] bindingConfigs,
 			DbConnectionFactory[] dbConnectionFactories) {
 		int[] ids = { 0, 1, 2, 3 };
@@ -370,6 +472,8 @@ public class IntegrationBase {
 			assertEquals(latestBlock0.getDataAccountSetHash(), otherLatestBlock.getDataAccountSetHash());
 			assertEquals(latestBlock0.getContractAccountSetHash(), otherLatestBlock.getContractAccountSetHash());
 			assertEquals(latestBlock0.getPreviousHash(), otherLatestBlock.getPreviousHash());
+			assertEquals(latestBlock0.getSystemEventSetHash(), otherLatestBlock.getSystemEventSetHash());
+			assertEquals(latestBlock0.getUserEventSetHash(), otherLatestBlock.getUserEventSetHash());
 		}
 	}
 
@@ -646,8 +750,46 @@ public class IntegrationBase {
 		}
 	}
 
+	public static class EventResponse {
+		Bytes eventAccount;
+		HashDigest ledgerHash;
+		HashDigest txHash;
+		TransactionResponse txResp;
+		String name;
+		Object content;
+		long sequence;
+
+		public Bytes getEventAccount() {
+			return eventAccount;
+		}
+
+		public HashDigest getLedgerHash() {
+			return ledgerHash;
+		}
+
+		public HashDigest getTxHash() {
+			return txHash;
+		}
+
+		public TransactionResponse getTxResp() {
+			return txResp;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public Object getContent() {
+			return content;
+		}
+
+		public long getSequence() {
+			return sequence;
+		}
+	}
+
 	public enum KeyPairType {
-		USER, DATAACCOUNT
+		USER, DATAACCOUNT, EVENTACCOUNT
 	}
 
 	// 合约测试使用的初始化数据;
