@@ -26,10 +26,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ClassPathResource;
 
 import com.jd.blockchain.binaryproto.DataContractRegistry;
-//import com.jd.blockchain.contract.ReadContract;
 import com.jd.blockchain.crypto.AddressEncoding;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.HashDigest;
@@ -40,7 +40,6 @@ import com.jd.blockchain.ledger.BytesValueEncoding;
 import com.jd.blockchain.ledger.LedgerBlock;
 import com.jd.blockchain.ledger.LedgerInitOperation;
 import com.jd.blockchain.ledger.OperationResult;
-import com.jd.blockchain.ledger.ParticipantInfoData;
 import com.jd.blockchain.ledger.ParticipantNodeState;
 import com.jd.blockchain.ledger.PreparedTransaction;
 import com.jd.blockchain.ledger.TransactionResponse;
@@ -245,9 +244,7 @@ public class IntegrationBase {
 		// 定义交易；
 		TransactionTemplate txTpl = blockchainService.newTransaction(ledgerHash);
 
-		ParticipantInfoData participantInfoData = new ParticipantInfoData("peer4", participantKeyPair.getPubKey(), new NetworkAddress("127.0.0.1", 20000));
-
-		txTpl.states().update(new BlockchainIdentityData(participantInfoData.getPubKey()), participantInfoData.getNetworkAddress(), ParticipantNodeState.ACTIVED);
+		txTpl.states().update(new BlockchainIdentityData(participantKeyPair.getPubKey()), ParticipantNodeState.CONSENSUS);
 
 		// 签名；
 		PreparedTransaction ptx = txTpl.prepare();
@@ -468,6 +465,121 @@ public class IntegrationBase {
 
 		ClassPathResource res = new ClassPathResource(resourceClassPath);
 		try (InputStream in = res.getInputStream()) {
+			ledgerBindingConfig = LedgerBindingConfig.resolve(in);
+		} catch (IOException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
+		return ledgerBindingConfig;
+	}
+
+	public static List<String> loadBindingConfig2(int id, HashDigest ledgerHash, String dbType) {
+		LedgerBindingConfig ledgerBindingConfig;
+		String newLedger = ledgerHash.toBase58();
+		String resourceClassPath = "ledger-binding-" + dbType + "-" + id + ".conf";
+		String ledgerBindingUrl = IntegrationBase.class.getResource("/") + resourceClassPath;
+
+		List<String> writeLines = new ArrayList<>();
+		try {
+			URL url = new URL(ledgerBindingUrl);
+			File ledgerBindingConf = new File(url.getPath());
+			System.out.printf("URL-ledgerBindingConf = %s \r\n", url.getPath());
+			if (ledgerBindingConf.exists()) {
+				List<String> readLines = FileUtils.readLines(ledgerBindingConf);
+
+				if (readLines != null && !readLines.isEmpty()) {
+					String oldLedgerLine = null;
+					for (String readLine : readLines) {
+						if (readLine.startsWith("ledger")) {
+							oldLedgerLine = readLine;
+							break;
+						}
+					}
+					String[] oldLedgerArray = oldLedgerLine.split("=");
+
+					String oldLedger = oldLedgerArray[1];
+					if (!oldLedger.equalsIgnoreCase(newLedger)) {
+						for (String readLine : readLines) {
+							String newLine = readLine.replace(oldLedger, newLedger);
+							if (dbType.equalsIgnoreCase("rocksdb")) {
+								if (newLine.contains("db.uri")) {
+									String[] propArray = newLine.split("=");
+									String dbKey = propArray[0];
+									String dbValue = LedgerInitConsensusConfig.rocksdbConnectionStrings[id];
+									newLine = dbKey + "=" + dbValue;
+								}
+							}
+							writeLines.add(newLine);
+						}
+					} else if (dbType.equalsIgnoreCase("rocksdb")) {
+						for (String readLine : readLines) {
+							String newLine = readLine;
+							if (readLine.contains("db.uri")) {
+								String[] propArray = readLine.split("=");
+								String dbKey = propArray[0];
+								String dbValue = LedgerInitConsensusConfig.rocksdbConnectionStrings[id];
+								newLine = dbKey + "=" + dbValue;
+							}
+							writeLines.add(newLine);
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return writeLines;
+	}
+
+	public static LedgerBindingConfig loadBindingConfig4TwoLedgers(int firstId, String dbType, HashDigest ledgerHash) throws Exception {
+		LedgerBindingConfig ledgerBindingConfig;
+		List<String> writeLines = new ArrayList<>();
+		List<String> stringList = loadBindingConfig2(firstId, ledgerHash, dbType);
+		writeLines.addAll(stringList);
+		StringBuilder builder = new StringBuilder();
+		for (String line : writeLines) {
+			builder.append(line).append("\r\n");
+		}
+		try (InputStream in = IOUtils.toInputStream(builder.toString())) {
+			ledgerBindingConfig = LedgerBindingConfig.resolve(in);
+		} catch (IOException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
+		return ledgerBindingConfig;
+	}
+
+	public static LedgerBindingConfig loadBindingConfig4TwoLedgers(int firstId, int secondId, String dbType, HashDigest... ledgerHashs) throws Exception {
+		LedgerBindingConfig ledgerBindingConfig;
+		List<String> writeLines = new ArrayList<>();
+		StringBuilder buf = new StringBuilder("ledger.bindings=");
+		for (HashDigest ledgerHash : ledgerHashs) {
+			if (buf.length() > 20) {
+				buf.append(",");
+			}
+			buf.append(ledgerHash.toBase58());
+		}
+		writeLines.add(buf.toString());
+		for (int i = 0; i < ledgerHashs.length; i++) {
+			if (i == 0) {
+				List<String> stringList = loadBindingConfig2(firstId, ledgerHashs[i], dbType);
+				writeLines.addAll(stringList);
+			} else if (i == 1) {
+				List<String> stringList = loadBindingConfig2(secondId, ledgerHashs[i], dbType);
+				writeLines.addAll(stringList);
+			}
+		}
+		StringBuilder builder = new StringBuilder();
+		boolean isWrite = false;
+		for (String line : writeLines) {
+			if (line.startsWith("ledger.bindings=")) {
+				if (!isWrite) {
+					builder.append(line).append("\r\n");
+					isWrite=true;
+				}
+			} else {
+				builder.append(line).append("\r\n");
+			}
+		}
+		try (InputStream in = IOUtils.toInputStream(builder.toString())) {
 			ledgerBindingConfig = LedgerBindingConfig.resolve(in);
 		} catch (IOException e) {
 			throw new IllegalStateException(e.getMessage(), e);
