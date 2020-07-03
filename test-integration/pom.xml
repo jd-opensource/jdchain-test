@@ -41,6 +41,10 @@
 			<groupId>com.jd.blockchain</groupId>
 			<artifactId>sdk-client</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.jd.blockchain</groupId>
+			<artifactId>sdk-manager</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>com.jd.blockchain</groupId>

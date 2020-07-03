@@ -35,9 +35,9 @@ public class LedgerInitConsensusConfig {
 
     public static String[] memConnectionStrings = new String[4];
 
-    public static String[] rocksdbConnectionStrings = new String[4];
+    public static String[] rocksdbConnectionStrings = new String[11];
 
-    public static String[] rocksdbDirStrings = new String[4];
+    public static String[] rocksdbDirStrings = new String[11];
 
     public static String[] mqProvider = new String[1];
 
