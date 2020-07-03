@@ -111,13 +111,6 @@
 				<version>${framework.version}</version>
 			</dependency>
 
-
-			<dependency>
-				<groupId>com.jd.blockchain</groupId>
-				<artifactId>sdk-manager</artifactId>
-				<version>${framework.version}</version>
-			</dependency>
-
 			<dependency>
 				<groupId>com.jd.blockchain</groupId>
 				<artifactId>crypto-classic</artifactId>

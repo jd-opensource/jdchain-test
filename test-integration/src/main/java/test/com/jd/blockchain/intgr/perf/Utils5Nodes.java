@@ -78,7 +78,7 @@ public class Utils5Nodes {
     public static ParticipantNode[] loadParticipantNodes() {
         ParticipantNode[] participantNodes = new ParticipantNode[PUB_KEYS.length];
         for (int i = 0; i < PUB_KEYS.length; i++) {
-            participantNodes[i] = new PartNode(i, KeyGenUtils.decodePubKey(PUB_KEYS[i]), ParticipantNodeState.ACTIVED);
+            participantNodes[i] = new PartNode(i, KeyGenUtils.decodePubKey(PUB_KEYS[i]), ParticipantNodeState.CONSENSUS);
         }
         return participantNodes;
     }
