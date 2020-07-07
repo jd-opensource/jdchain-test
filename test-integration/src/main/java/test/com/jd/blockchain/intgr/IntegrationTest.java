@@ -168,7 +168,7 @@ public class IntegrationTest {
 		gwkey0.setPrivKeyValue(LedgerInitializeWebTest.PRIV_KEYS[0]);
 		gwkey0.setPrivKeyPassword(encodedBase58Pwd);
 
-		GatewayTestRunner gateway0 = new GatewayTestRunner("127.0.0.1", 10300, gwkey0, peerSrvAddr0, LedgerInitConsensusConfig.bftsmartProvider, null);
+		GatewayTestRunner gateway0 = new GatewayTestRunner("127.0.0.1", 10300, gwkey0, LedgerInitConsensusConfig.bftsmartProvider, null, peerSrvAddr0);
 
 		AsyncCallback<Object> gwStarting0 = gateway0.start();
 

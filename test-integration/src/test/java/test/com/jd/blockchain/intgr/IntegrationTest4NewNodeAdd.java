@@ -734,7 +734,7 @@ public class IntegrationTest4NewNodeAdd {
         gwkey1.setPrivKeyValue(IntegrationBase.PRIV_KEYS[1]);
         gwkey1.setPrivKeyPassword(encodedBase58Pwd);
         GatewayTestRunner gateway = new GatewayTestRunner("127.0.0.1", 11040, gwkey1,
-                peerServer, LedgerInitConsensusConfig.bftsmartProvider,null);
+                LedgerInitConsensusConfig.bftsmartProvider,null, peerServer);
 
         ThreadInvoker.AsyncCallback<Object> gwStarting = gateway.start();
 
@@ -843,8 +843,8 @@ public class IntegrationTest4NewNodeAdd {
         gwkey0.setPrivKeyValue(IntegrationBase.PRIV_KEYS[0]);
         gwkey0.setPrivKeyPassword(encodedBase58Pwd);
 
-        GatewayTestRunner gateway = new GatewayTestRunner("127.0.0.1", gatewayPort, gwkey0,
-                peerNodes[0].getServiceAddress(), providers,null);
+        GatewayTestRunner gateway = new GatewayTestRunner("127.0.0.1", 11000, gwkey0,
+                providers,null, peerNodes[0].getServiceAddress());
 
         ThreadInvoker.AsyncCallback<Object> gwStarting = gateway.start();
 
