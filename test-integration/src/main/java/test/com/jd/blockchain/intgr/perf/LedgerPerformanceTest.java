@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.DoubleStream;
 
 import com.jd.blockchain.ledger.*;
+import com.jd.blockchain.ledger.core.UserRolesPrivileges;
 import org.springframework.core.io.ClassPathResource;
 
 import com.jd.blockchain.binaryproto.DataContractRegistry;
@@ -645,6 +646,10 @@ public class LedgerPerformanceTest {
 			return new FreedomSecurityPolicy(endpoints, nodes);
 		}
 
+		@Override
+		public UserRolesPrivileges getUserRolesPrivilegs(Bytes userAddress) {
+			return null;
+		}
 	}
 
 	private static class FreedomSecurityPolicy implements SecurityPolicy {
