@@ -990,8 +990,8 @@ public class IntegrationTest4NewNodeAdd {
         List<BasicNameValuePair> para=new ArrayList<BasicNameValuePair>();
 
         BasicNameValuePair base58LedgerHash = new BasicNameValuePair("ledgerHash", ledgerHash.toBase58());
-        BasicNameValuePair host = new BasicNameValuePair("host",  participant.getConsensusSetting().getHost());
-        BasicNameValuePair port = new BasicNameValuePair("port",  String.valueOf(participant.getConsensusSetting().getPort()));
+        BasicNameValuePair host = new BasicNameValuePair("consensusHost",  participant.getConsensusSetting().getHost());
+        BasicNameValuePair port = new BasicNameValuePair("consensusPort",  String.valueOf(participant.getConsensusSetting().getPort()));
 
         para.add(base58LedgerHash);
         para.add(host);
