@@ -224,7 +224,7 @@ public class IntegrationBase {
 		// 定义交易；
 		TransactionTemplate txTpl = blockchainService.newTransaction(ledgerHash);
 
-		txTpl.participants().register("peer4", new BlockchainIdentityData(participant.getPubKey()), new NetworkAddress("127.0.0.1", 20000));
+		txTpl.participants().register("peer4", new BlockchainIdentityData(participant.getPubKey()));
 
 		// 签名；
 		PreparedTransaction ptx = txTpl.prepare();

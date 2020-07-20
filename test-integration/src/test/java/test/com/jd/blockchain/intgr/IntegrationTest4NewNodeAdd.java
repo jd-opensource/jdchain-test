@@ -9,7 +9,6 @@ import com.jd.blockchain.sdk.client.GatewayServiceFactory;
 import com.jd.blockchain.storage.service.DbConnectionFactory;
 import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
-import com.jd.blockchain.transaction.TxResponseMessage;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker;
 import com.jd.blockchain.utils.http.ResponseConverter;
 import com.jd.blockchain.utils.net.NetworkAddress;
@@ -21,7 +20,6 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.junit.Before;
 import org.junit.Test;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeTest;
@@ -151,11 +149,6 @@ public class IntegrationTest4NewNodeAdd {
         newParticipant3 = new NewParticipant(6, "peer6", new_pubKey3, new_privkey3, new NetworkAddress(NEW_NODE_HOST, NEW_NODE_HTTP_PORT3), new NetworkAddress(NEW_NODE_HOST, NEW_NODE_CONSENSUS_PORT3));
     }
 
-//    @Test
-//    public void testLedgerInit() {
-//        //账本初始化
-//        ledgerHash = initLedger4Nodes(rocksdbConnectionStrings);
-//    }
     // 依次添加三个新的参与方，涉及到F的改变，验证是否能成功；
     @Test
     public void testAdd3NewNodes() {
@@ -274,17 +267,17 @@ public class IntegrationTest4NewNodeAdd {
             // 注册新的无效用户
             KeyPairResponse keyPairResponse = registUnvalidSignatureUserByGateway0(new AsymmetricKeypair(new_pubKey2, new_privkey2), blockchainService, ledgerHash);
 
-            assertEquals(keyPairResponse.getTxResp().getExecutionState(), TransactionState.IGNORED_BY_BLOCK_FULL_ROLLBACK);
+            assertEquals(keyPairResponse.getTxResp().getExecutionState(), TransactionState.EMPTY_BLOCK_ERROR);
 
             // 注册新的无效用户
             KeyPairResponse keyPairResponse1 = registUnvalidSignatureUserByGateway0(new AsymmetricKeypair(new_pubKey2, new_privkey2), blockchainService, ledgerHash);
 
-            assertEquals(keyPairResponse1.getTxResp().getExecutionState(), TransactionState.IGNORED_BY_BLOCK_FULL_ROLLBACK);
+            assertEquals(keyPairResponse1.getTxResp().getExecutionState(), TransactionState.EMPTY_BLOCK_ERROR);
 
             // 注册新的无效用户
             KeyPairResponse keyPairResponse2 = registUnvalidSignatureUserByGateway0(new AsymmetricKeypair(new_pubKey2, new_privkey2), blockchainService, ledgerHash);
 
-            assertEquals(keyPairResponse2.getTxResp().getExecutionState(), TransactionState.IGNORED_BY_BLOCK_FULL_ROLLBACK);
+            assertEquals(keyPairResponse2.getTxResp().getExecutionState(), TransactionState.EMPTY_BLOCK_ERROR);
 
 
             // 注册新的参与方
@@ -546,18 +539,18 @@ public class IntegrationTest4NewNodeAdd {
             System.out.println("---------- Active New Node And View Update Completed 2----------");
 
             // 通过老的网关0，发送交易，由于网关没有重新接入，获得的视图ID是0，没有更新，此时发送的交易到了共识节点一定会被特殊处理
-            TransactionResponse txResp = registUserByExistGateway(blockchainService);
-
-            assertEquals(txResp.getExecutionState(), TransactionState.SUCCESS);
-
-            System.out.println("---------- After Add New Node, Commit Tx By Old Gateway Completed----------");
-
-            // 再次发送交易检查网关本地的视图配置能否正确更新
-            TransactionResponse txResp1 = registUserByExistGateway(blockchainService);
-
-            assertEquals(txResp1.getExecutionState(), TransactionState.SUCCESS);
-
-            System.out.println("---------- After Add New Node, Commit Tx By Old Gateway Completed Again----------");
+//            TransactionResponse txResp = registUserByExistGateway(blockchainService);
+//
+//            assertEquals(txResp.getExecutionState(), TransactionState.SUCCESS);
+//
+//            System.out.println("---------- After Add New Node, Commit Tx By Old Gateway Completed----------");
+//
+//            // 再次发送交易检查网关本地的视图配置能否正确更新
+//            TransactionResponse txResp1 = registUserByExistGateway(blockchainService);
+//
+//            assertEquals(txResp1.getExecutionState(), TransactionState.SUCCESS);
+//
+//            System.out.println("---------- After Add New Node, Commit Tx By Old Gateway Completed Again----------");
 
             Thread.sleep(Integer.MAX_VALUE);
 
@@ -997,8 +990,12 @@ public class IntegrationTest4NewNodeAdd {
         List<BasicNameValuePair> para=new ArrayList<BasicNameValuePair>();
 
         BasicNameValuePair base58LedgerHash = new BasicNameValuePair("ledgerHash", ledgerHash.toBase58());
+        BasicNameValuePair host = new BasicNameValuePair("consensusHost",  participant.getConsensusSetting().getHost());
+        BasicNameValuePair port = new BasicNameValuePair("consensusPort",  String.valueOf(participant.getConsensusSetting().getPort()));
 
         para.add(base58LedgerHash);
+        para.add(host);
+        para.add(port);
 
         try {
             httpPost.setEntity(new UrlEncodedFormEntity(para,"UTF-8"));
@@ -1104,7 +1101,7 @@ public class IntegrationTest4NewNodeAdd {
         // 定义交易；
         TransactionTemplate txTpl = blockchainService.newTransaction(ledgerHash);
 
-        txTpl.participants().register(newParticipant.getName(), new BlockchainIdentityData(newParticipant.getPubKey()), newParticipant.getConsensusSetting());
+        txTpl.participants().register(newParticipant.getName(), new BlockchainIdentityData(newParticipant.getPubKey()));
 
         // 签名；
         PreparedTransaction ptx = txTpl.prepare();
