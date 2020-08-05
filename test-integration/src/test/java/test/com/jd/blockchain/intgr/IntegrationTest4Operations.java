@@ -375,8 +375,6 @@ public class IntegrationTest4Operations {
             Object content;
             if (eventMessage.getContent().getType() == DataType.TEXT) {
                 content = eventMessage.getContent().getBytes().toUTF8String();
-            } else if (eventMessage.getContent().getType() == DataType.BYTES) {
-                content = new String(eventMessage.getContent().getBytes().toBytes());
             } else {
                 content = BytesUtils.toLong(eventMessage.getContent().getBytes().toBytes());
             }

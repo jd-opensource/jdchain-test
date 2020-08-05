@@ -8,31 +8,6 @@
  */
 package test.com.jd.blockchain.intgr;
 
-import static com.jd.blockchain.transaction.ContractReturnValue.decode;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicLong;
-
-import com.jd.blockchain.ledger.BytesValue;
-import com.jd.blockchain.ledger.DataType;
-import com.jd.blockchain.ledger.Event;
-import com.jd.blockchain.utils.io.BytesUtils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.springframework.core.io.ClassPathResource;
-
 import com.jd.blockchain.binaryproto.DataContractRegistry;
 import com.jd.blockchain.crypto.AddressEncoding;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
@@ -40,7 +15,10 @@ import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.ledger.BlockchainIdentityData;
 import com.jd.blockchain.ledger.BlockchainKeyGenerator;
 import com.jd.blockchain.ledger.BlockchainKeypair;
+import com.jd.blockchain.ledger.BytesValue;
 import com.jd.blockchain.ledger.BytesValueEncoding;
+import com.jd.blockchain.ledger.DataType;
+import com.jd.blockchain.ledger.Event;
 import com.jd.blockchain.ledger.LedgerBlock;
 import com.jd.blockchain.ledger.LedgerInitOperation;
 import com.jd.blockchain.ledger.OperationResult;
@@ -61,7 +39,25 @@ import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.transaction.GenericValueHolder;
 import com.jd.blockchain.utils.Bytes;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker;
+import com.jd.blockchain.utils.io.BytesUtils;
 import com.jd.blockchain.utils.net.NetworkAddress;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.springframework.core.io.ClassPathResource;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static com.jd.blockchain.transaction.ContractReturnValue.decode;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -299,12 +295,9 @@ public class IntegrationBase {
 		TransactionTemplate txTemp = blockchainService.newTransaction(ledgerHash);
 		long now = System.currentTimeMillis();
 		Object content;
-		if(now %3 == 0) {
+		if(now %2 == 0) {
 			content = "string" + now + new Random().nextInt(100000);
 			txTemp.eventAccount(eventAccount).publish(name, (String) content, sequence);
-		} else if(now %3 == 1) {
-			content = BytesUtils.toBytes("bytes" + now + new Random().nextInt(100000));
-			txTemp.eventAccount(eventAccount).publish(name, (byte[])content, sequence);
 		} else {
 			content = now;
 			txTemp.eventAccount(eventAccount).publish(name, (long)content, sequence);
