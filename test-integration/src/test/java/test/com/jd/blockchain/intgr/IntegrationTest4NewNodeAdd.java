@@ -30,6 +30,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertEquals;
 import static test.com.jd.blockchain.intgr.IntegrationBase.*;
@@ -121,6 +124,8 @@ public class IntegrationTest4NewNodeAdd {
 
     private NewParticipant newParticipant3;
 
+    private final ExecutorService sendReqExecutors = Executors.newFixedThreadPool(20);
+
     @Before
     public void init() throws Exception {
         for (int i = 0; i < 11; i++) {
@@ -149,9 +154,24 @@ public class IntegrationTest4NewNodeAdd {
         newParticipant3 = new NewParticipant(6, "peer6", new_pubKey3, new_privkey3, new NetworkAddress(NEW_NODE_HOST, NEW_NODE_HTTP_PORT3), new NetworkAddress(NEW_NODE_HOST, NEW_NODE_CONSENSUS_PORT3));
     }
 
-    // 先注册，再拷贝数据库，在激活新节点之前，原有网络又产生了3笔新的交易，验证激活是否能成功，交易重放是否能达到预期
+//    @Test
+//    public void test4RocksdbTransactionsReplay() {
+//        //账本初始化
+//        ledgerHash = initLedger4Nodes(rocksdbConnectionStrings);
+//
+//        // 启动4个Peer节点
+//        PeerServer[] peerNodes = peerNodeStart4(ledgerHash, DB_TYPE_ROCKSDB);
+//
+//
+//
+//
+//
+//
+//    }
+
+    // 先注册，再拷贝数据库，在激活新节点之前，原有网络又产生了批量新的交易，验证激活是否能成功，交易重放是否能达到预期
     @Test
-    public void test4RocksdbTransactionsReplay() throws Exception {
+    public void test4RocksdbTransactionsReplayUserRegistOp() throws Exception {
 
         try {
 
@@ -174,12 +194,8 @@ public class IntegrationTest4NewNodeAdd {
             copyRocksdbToNewNode(0, 4);
             System.out.println("---------- DataBase Copy To New Node Completed ----------");
 
-            // 添加三笔交易
-            registUserByExistGateway(blockchainService);
-
-            registUserByExistGateway(blockchainService);
-
-            registUserByExistGateway(blockchainService);
+            // 提交一批交易
+            commitBatchTransactions(blockchainService);
 
             // 启动一个新的参与方，此时只启动HTTP服务，共识服务未开启
             startNewPeerNode(ledgerHash, DB_TYPE_ROCKSDB, newParticipant1, 4);
@@ -189,6 +205,76 @@ public class IntegrationTest4NewNodeAdd {
             Thread.sleep(5000);
             activePartiNode(newParticipant1, ledgerHash);
             System.out.println("---------- Active New Node And View Update Completed ----------");
+
+//            // 通过老的网关0，发送交易，由于网关没有重新接入，获得的视图ID是0，没有更新，此时发送的交易到了共识节点一定会被特殊处理
+//            TransactionResponse txResp = registUserByExistGateway(blockchainService);
+//
+//            assertEquals(txResp.getExecutionState(), TransactionState.SUCCESS);
+//
+//            System.out.println("---------- After Add New Node, Commit Tx By Old Gateway Completed----------");
+//
+//            // 再次发送交易检查网关本地的视图配置能否正确更新
+//            TransactionResponse txResp1 = registUserByExistGateway(blockchainService);
+//
+//            assertEquals(txResp1.getExecutionState(), TransactionState.SUCCESS);
+
+//            System.out.println("---------- After Add New Node, Commit Tx By Old Gateway Completed Again----------");
+
+            Thread.sleep(Integer.MAX_VALUE);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Thread.sleep(Integer.MAX_VALUE);
+        }
+    }
+
+    // 新节点通过对以前注册，激活的参与方进行交易重放后能否成功激活
+    @Test
+    public void test4RocksdbReplayParticipantOps() throws Exception {
+        try {
+            //账本初始化
+            ledgerHash = initLedger4Nodes(rocksdbConnectionStrings);
+
+            // 启动4个Peer节点
+            PeerServer[] peerNodes = peerNodeStart4(ledgerHash, DB_TYPE_ROCKSDB);
+
+            // 创建连接peer0的网关
+            BlockchainService blockchainService = createBlockChainService(LedgerInitConsensusConfig.bftsmartProvider, peerNodes, GATEWAY_MANAGER_PORT1);
+
+
+            // 注册新的参与方
+            registParticipantByGateway0(blockchainService, newParticipant1, ledgerHash);
+
+            // 注册新的参与方2
+            registParticipantByGateway0(blockchainService, newParticipant2, ledgerHash);
+
+            Thread.sleep(5000);
+            System.out.println("---------- Ledger Init And Regist Participants Completed ----------");
+
+            // 手动复制账本
+            copyRocksdbToNewNode(0, 4);
+
+            copyRocksdbToNewNode(0, 5);
+
+            System.out.println("---------- DataBase Copy To New Node Completed ----------");
+
+            // 启动一个新的参与方，此时只启动HTTP服务，共识服务未开启
+            startNewPeerNode(ledgerHash, DB_TYPE_ROCKSDB, newParticipant1, 4);
+            System.out.println("---------- New Node Start Http But Without Consensus Completed ----------");
+
+            // 激活新参与方的共识状态，更新原有共识网络的视图ID，启动新的参与方共识
+            Thread.sleep(5000);
+            activePartiNode(newParticipant1, ledgerHash);
+            System.out.println("---------- Active New Node And View Update Completed ----------");
+
+            // 启动一个新的参与方2，此时只启动HTTP服务，共识服务未开启
+            startNewPeerNode(ledgerHash, DB_TYPE_ROCKSDB, newParticipant2, 5);
+            System.out.println("---------- New Node Start Http But Without Consensus Completed 2----------");
+
+            // 激活新参与方2的共识状态，更新原有共识网络的视图ID，启动新的参与方共识
+            Thread.sleep(5000);
+            activePartiNode(newParticipant2, ledgerHash);
+            System.out.println("---------- Active New Node And View Update Completed 2----------");
 
             // 通过老的网关0，发送交易，由于网关没有重新接入，获得的视图ID是0，没有更新，此时发送的交易到了共识节点一定会被特殊处理
             TransactionResponse txResp = registUserByExistGateway(blockchainService);
@@ -202,6 +288,14 @@ public class IntegrationTest4NewNodeAdd {
 
             assertEquals(txResp1.getExecutionState(), TransactionState.SUCCESS);
 
+            TransactionResponse txResp2 = registUserByExistGateway(blockchainService);
+
+            assertEquals(txResp2.getExecutionState(), TransactionState.SUCCESS);
+
+            TransactionResponse txResp3 = registUserByExistGateway(blockchainService);
+
+            assertEquals(txResp3.getExecutionState(), TransactionState.SUCCESS);
+
             System.out.println("---------- After Add New Node, Commit Tx By Old Gateway Completed Again----------");
 
             Thread.sleep(Integer.MAX_VALUE);
@@ -210,7 +304,6 @@ public class IntegrationTest4NewNodeAdd {
             e.printStackTrace();
             Thread.sleep(Integer.MAX_VALUE);
         }
-
 
     }
 
@@ -863,12 +956,32 @@ public class IntegrationTest4NewNodeAdd {
 //                value = path + "rocks.db" + File.separator + "rocksdb" + 4 + ".db";
 //            }
 //            if (key.endsWith("parti.address")) {
-//                value = "LdeNy6XjnVGqkr22DUJaieVHpud2GmLEqFDhh";
+//                value = "LdeNy6XjnVGqkr22DUJaiceVHpud2GmLEqFDhh";
 //            }
 //            newContents.add(key + "=" + value);
 //        }
 //        FileUtils.writeLines(new File(newUrl), newContents);
 //    }
+
+    private void commitBatchTransactions(BlockchainService blockchainService) throws InterruptedException {
+        int size = 5;
+        CountDownLatch countDownLatch = new CountDownLatch(size);
+
+        for (int i = 0; i < size; i++) {
+            Thread.sleep(100);
+            sendReqExecutors.execute(() -> {
+                System.out.printf(" sdk execute time = %s threadId = %s \r\n", System.currentTimeMillis(), Thread.currentThread().getId());
+                IntegrationBase.KeyPairResponse userResponse = IntegrationBase.testSDK_RegisterUser(getGw0KeyPair(), ledgerHash, blockchainService);
+                countDownLatch.countDown();
+            });
+        }
+
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
     private KeyPairResponse registUnvalidSignatureUserByGateway0(AsymmetricKeypair adminKey, BlockchainService blockchainService, HashDigest ledgerHash) {
         // 注册用户，并验证最终写入；
