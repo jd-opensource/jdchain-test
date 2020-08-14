@@ -10,9 +10,9 @@ import com.jd.blockchain.storage.service.DbConnectionFactory;
 import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker;
-import com.jd.blockchain.utils.http.ResponseConverter;
+import com.jd.blockchain.utils.http.converters.JsonResponseConverter;
 import com.jd.blockchain.utils.net.NetworkAddress;
-import com.jd.blockchain.utils.web.client.WebResponseConverter;
+import com.jd.blockchain.utils.web.model.WebResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -154,22 +154,7 @@ public class IntegrationTest4NewNodeAdd {
         newParticipant3 = new NewParticipant(6, "peer6", new_pubKey3, new_privkey3, new NetworkAddress(NEW_NODE_HOST, NEW_NODE_HTTP_PORT3), new NetworkAddress(NEW_NODE_HOST, NEW_NODE_CONSENSUS_PORT3));
     }
 
-//    @Test
-//    public void test4RocksdbTransactionsReplay() {
-//        //账本初始化
-//        ledgerHash = initLedger4Nodes(rocksdbConnectionStrings);
-//
-//        // 启动4个Peer节点
-//        PeerServer[] peerNodes = peerNodeStart4(ledgerHash, DB_TYPE_ROCKSDB);
-//
-//
-//
-//
-//
-//
-//    }
-
-    // 先注册，再拷贝数据库，在激活新节点之前，原有网络又产生了批量新的交易，验证激活是否能成功，交易重放是否能达到预期
+    // 先注册多个新节点，再拷贝数据库，每激活一个新节点之前，都在原有网络产生了批量新的交易，验证激活是否能成功，交易重放是否能达到预期
     @Test
     public void test4RocksdbTransactionsReplayUserRegistOp() throws Exception {
 
@@ -184,41 +169,72 @@ public class IntegrationTest4NewNodeAdd {
             // 创建连接peer0的网关
             BlockchainService blockchainService = createBlockChainService(LedgerInitConsensusConfig.bftsmartProvider, peerNodes, GATEWAY_MANAGER_PORT1);
 
-            // 注册新的参与方
+            // 注册3个新的参与方
             registParticipantByGateway0(blockchainService, newParticipant1, ledgerHash);
+            registParticipantByGateway0(blockchainService, newParticipant2, ledgerHash);
+            registParticipantByGateway0(blockchainService, newParticipant3, ledgerHash);
 
             Thread.sleep(5000);
-            System.out.println("---------- Ledger Init And Regist Participant Completed ----------");
+            System.out.println("---------- Ledger Init And Regist Participants Completed ----------");
 
             // 手动复制账本
             copyRocksdbToNewNode(0, 4);
-            System.out.println("---------- DataBase Copy To New Node Completed ----------");
+            copyRocksdbToNewNode(0, 5);
+            copyRocksdbToNewNode(0, 6);
+            System.out.println("---------- DataBase Copy To New Nodes Completed ----------");
 
-            // 提交一批交易
+            // 激活节点前提交一批交易
             commitBatchTransactions(blockchainService);
 
             // 启动一个新的参与方，此时只启动HTTP服务，共识服务未开启
             startNewPeerNode(ledgerHash, DB_TYPE_ROCKSDB, newParticipant1, 4);
-            System.out.println("---------- New Node Start Http But Without Consensus Completed ----------");
+            System.out.println("---------- New Node Start Http But Without Consensus Completed1 ----------");
 
             // 激活新参与方的共识状态，更新原有共识网络的视图ID，启动新的参与方共识
             Thread.sleep(5000);
             activePartiNode(newParticipant1, ledgerHash);
-            System.out.println("---------- Active New Node And View Update Completed ----------");
+            System.out.println("---------- Active New Node And View Update Completed1 ----------");
 
-//            // 通过老的网关0，发送交易，由于网关没有重新接入，获得的视图ID是0，没有更新，此时发送的交易到了共识节点一定会被特殊处理
-//            TransactionResponse txResp = registUserByExistGateway(blockchainService);
-//
-//            assertEquals(txResp.getExecutionState(), TransactionState.SUCCESS);
-//
-//            System.out.println("---------- After Add New Node, Commit Tx By Old Gateway Completed----------");
-//
-//            // 再次发送交易检查网关本地的视图配置能否正确更新
-//            TransactionResponse txResp1 = registUserByExistGateway(blockchainService);
-//
-//            assertEquals(txResp1.getExecutionState(), TransactionState.SUCCESS);
+            // 多次提交交易
+            commitBatchTransactions(blockchainService);
+            commitBatchTransactions(blockchainService);
 
-//            System.out.println("---------- After Add New Node, Commit Tx By Old Gateway Completed Again----------");
+            // 启动一个新的参与方，此时只启动HTTP服务，共识服务未开启
+            startNewPeerNode(ledgerHash, DB_TYPE_ROCKSDB, newParticipant2, 5);
+            System.out.println("---------- New Node Start Http But Without Consensus Completed2 ----------");
+
+            // 激活新参与方的共识状态，更新原有共识网络的视图ID，启动新的参与方共识
+            Thread.sleep(5000);
+            activePartiNode(newParticipant2, ledgerHash);
+            System.out.println("---------- Active New Node And View Update Completed2 ----------");
+
+            // 多次提交交易
+            commitBatchTransactions(blockchainService);
+            commitBatchTransactions(blockchainService);
+
+            // 启动一个新的参与方，此时只启动HTTP服务，共识服务未开启
+            startNewPeerNode(ledgerHash, DB_TYPE_ROCKSDB, newParticipant3, 6);
+            System.out.println("---------- New Node Start Http But Without Consensus Completed3 ----------");
+
+            // 激活新参与方的共识状态，更新原有共识网络的视图ID，启动新的参与方共识
+            Thread.sleep(5000);
+            activePartiNode(newParticipant3, ledgerHash);
+
+            System.out.println("---------- Active New Node And View Update Completed3 ----------");
+
+            // 通过老的网关0，发送交易，由于网关没有重新接入，获得的视图ID是0，没有更新，此时发送的交易到了共识节点一定会被特殊处理
+            TransactionResponse txResp = registUserByExistGateway(blockchainService);
+
+            assertEquals(txResp.getExecutionState(), TransactionState.SUCCESS);
+
+            System.out.println("---------- After Add New Node, Commit Tx By Old Gateway Completed----------");
+
+            // 再次发送交易检查网关本地的视图配置能否正确更新
+            TransactionResponse txResp1 = registUserByExistGateway(blockchainService);
+
+            assertEquals(txResp1.getExecutionState(), TransactionState.SUCCESS);
+
+            System.out.println("---------- After Add New Node, Commit Tx By Old Gateway Completed Again----------");
 
             Thread.sleep(Integer.MAX_VALUE);
 
@@ -240,7 +256,6 @@ public class IntegrationTest4NewNodeAdd {
 
             // 创建连接peer0的网关
             BlockchainService blockchainService = createBlockChainService(LedgerInitConsensusConfig.bftsmartProvider, peerNodes, GATEWAY_MANAGER_PORT1);
-
 
             // 注册新的参与方
             registParticipantByGateway0(blockchainService, newParticipant1, ledgerHash);
@@ -454,10 +469,8 @@ public class IntegrationTest4NewNodeAdd {
 
             // 激活新参与方的共识状态，更新原有共识网络的视图ID，启动新的参与方共识
             Thread.sleep(5000);
-            TransactionResponse transactionResponse = activePartiNode(newParticipant1, ledgerHash);
+            activePartiNode(newParticipant1, ledgerHash);
             System.out.println("---------- Active New Node And View Update Completed ----------");
-
-            System.out.println("Active Result :  " + transactionResponse.getExecutionState());
 
             Thread.sleep(Integer.MAX_VALUE);
 
@@ -495,10 +508,10 @@ public class IntegrationTest4NewNodeAdd {
 
             // 激活新参与方的共识状态，更新原有共识网络的视图ID，启动新的参与方共识
             Thread.sleep(5000);
-            TransactionResponse transactionResponse = activePartiNode(newParticipant1, ledgerHash);
+            WebResponse webResponse = activePartiNode(newParticipant1, ledgerHash);
             System.out.println("---------- Active New Node And View Update Completed ----------");
 
-            System.out.println("Active Result :  " + transactionResponse.getExecutionState());
+            System.out.println("Active Result :  " + webResponse.isSuccess());
 
 //            registUserByNewGateway(new NetworkAddress(NEW_NODE_HOST, NEW_NODE_HTTP_PORT));
 //            System.out.println("---------- Access New Gateway And Regist User Completed ----------");
@@ -564,8 +577,6 @@ public class IntegrationTest4NewNodeAdd {
             e.printStackTrace();
             Thread.sleep(Integer.MAX_VALUE);
         }
-
-
     }
 
     // 验证依次动态入网两个参与方，并验证后续交易能否正常
@@ -964,7 +975,7 @@ public class IntegrationTest4NewNodeAdd {
 //    }
 
     private void commitBatchTransactions(BlockchainService blockchainService) throws InterruptedException {
-        int size = 5;
+        int size = 1;
         CountDownLatch countDownLatch = new CountDownLatch(size);
 
         for (int i = 0; i < size; i++) {
@@ -1155,7 +1166,7 @@ public class IntegrationTest4NewNodeAdd {
         System.out.printf("%s -> %s \r\n", newFile.getPath(), newFile.exists());
     }
 
-    private TransactionResponse activePartiNode(NewParticipant participant, HashDigest ledgerHash) {
+    private WebResponse activePartiNode(NewParticipant participant, HashDigest ledgerHash) {
 
         System.out.println("Address = " + AddressEncoding.generateAddress(participant.getPubKey()));
 
@@ -1187,9 +1198,12 @@ public class IntegrationTest4NewNodeAdd {
             HttpClient httpClient = HttpClients.createDefault();
 
             HttpResponse response = httpClient.execute(httpPost);
-            ResponseConverter responseConverter = new WebResponseConverter(TransactionResponse.class);
-            Object converterResponse = responseConverter.getResponse(null, response.getEntity().getContent(), null);
-            return (TransactionResponse) converterResponse;
+
+            JsonResponseConverter jsonConverter = new JsonResponseConverter(WebResponse.class);
+
+            WebResponse webResponse = (WebResponse) jsonConverter.getResponse(null, response.getEntity().getContent(), null);
+
+            return webResponse;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -1311,13 +1325,6 @@ public class IntegrationTest4NewNodeAdd {
         System.out.printf("LedgerHash = %s \r\n", ledgerHash.toBase58());
         return ledgerHash;
     }
-
-//    private HashDigest initLedger5Nodes(String[] dbConnections) {
-//        LedgerInitializeWeb5Nodes ledgerInit = new LedgerInitializeWeb5Nodes();
-//        HashDigest ledgerHash = ledgerInit.testInitWith5Nodes(LedgerInitConsensusConfig.bftsmartConfig, dbConnections);
-//        System.out.printf("LedgerHash = %s \r\n", ledgerHash.toBase58());
-//        return ledgerHash;
-//    }
 
     static class NewParticipant {
         int id;
