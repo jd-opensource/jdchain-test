@@ -21,7 +21,7 @@ public class MerkleTreePerformanceTester {
 	private static final String[] SUPPORTED_PROVIDERS = { ClassicCryptoService.class.getName(),
 			SMCryptoService.class.getName() };
 
-	public static void main(String[] args) {
+	public static void main_(String[] args) {
 		try {
 			int round = 10;
 			if (args.length > 0) {
