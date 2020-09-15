@@ -15,13 +15,11 @@ import com.jd.blockchain.ledger.SystemEvent;
 import com.jd.blockchain.ledger.core.LedgerQuery;
 import com.jd.blockchain.sdk.SystemEventListener;
 import com.jd.blockchain.sdk.SystemEventPoint;
-import com.jd.blockchain.sdk.SystemEventPointData;
 import com.jd.blockchain.sdk.UserEventListener;
 import com.jd.blockchain.sdk.BlockchainService;
 import com.jd.blockchain.sdk.EventContext;
 import com.jd.blockchain.sdk.EventListenerHandle;
 import com.jd.blockchain.sdk.UserEventPoint;
-import com.jd.blockchain.sdk.UserEventPointData;
 import com.jd.blockchain.sdk.client.GatewayServiceFactory;
 import com.jd.blockchain.storage.service.DbConnectionFactory;
 import com.jd.blockchain.test.PeerServer;
@@ -292,7 +290,7 @@ public class IntegrationTest4Operations {
                     BlockchainUserEventListener a1emListener = new BlockchainUserEventListener();
                     UserEventPoint[] a1emEventPoints = new UserEventPoint[eventNames.size()];
                     for (int m = 0; m < eventNames.get(eventAddress[0]).length; m++) {
-                        a1emEventPoints[m] = new UserEventPointData(eventAddress[0].toBase58(), eventNames.get(eventAddress[0])[m], s);
+                        a1emEventPoints[m] = new UserEventPoint(eventAddress[0].toBase58(), eventNames.get(eventAddress[0])[m], s);
                         a1emListener.register(eventAddress[0], eventNames.get(eventAddress[0])[m], NEW_EVENT_SEQUENCE_SIZE - 1, NEW_EVENT_SEQUENCE_SIZE - s);
                     }
                     blockchainService.monitorUserEvent(ledgerHash, a1emEventPoints, a1emListener);
@@ -302,7 +300,7 @@ public class IntegrationTest4Operations {
                     int m = 0;
                     for (Map.Entry<Bytes, String[]> kv : eventNames.entrySet()) {
                         for (int n = 0; n < kv.getValue().length; n++) {
-                            amemEventPoints[m * kv.getValue().length + n] = new UserEventPointData(kv.getKey().toBase58(), kv.getValue()[n], s);
+                            amemEventPoints[m * kv.getValue().length + n] = new UserEventPoint(kv.getKey().toBase58(), kv.getValue()[n], s);
                             amemListener.register(kv.getKey(), kv.getValue()[n], NEW_EVENT_SEQUENCE_SIZE - 1, NEW_EVENT_SEQUENCE_SIZE - s);
                         }
                         m++;
@@ -311,7 +309,7 @@ public class IntegrationTest4Operations {
                 }
 
                 blockListener = new BlockchainNewBlockEventListener();
-                blockListenerHandler = blockchainService.monitorSystemEvent(ledgerHash, new SystemEventPointData(SystemEvent.NEW_BLOCK.getName(), 0, 100), blockListener);
+                blockListenerHandler = blockchainService.monitorSystemEvent(ledgerHash, SystemEvent.NEW_BLOCK_CREATED, 0, blockListener);
             }
 
             // 发布事件
@@ -377,8 +375,6 @@ public class IntegrationTest4Operations {
             Object content;
             if (eventMessage.getContent().getType() == DataType.TEXT) {
                 content = eventMessage.getContent().getBytes().toUTF8String();
-            } else if (eventMessage.getContent().getType() == DataType.BYTES) {
-                content = new String(eventMessage.getContent().getBytes().toBytes());
             } else {
                 content = BytesUtils.toLong(eventMessage.getContent().getBytes().toBytes());
             }
@@ -416,7 +412,7 @@ public class IntegrationTest4Operations {
         public void onEvents(Event[] eventMessages, EventContext<SystemEventPoint> eventContext) {
             for(Event eventMessage : eventMessages) {
                 height.incrementAndGet();
-                System.out.println("name:" + eventMessage.getName() + ", sequence:" + eventMessage.getSequence() + ", content:" + eventMessage.getContent().getBytes().toUTF8String());
+                System.out.println("name:" + eventMessage.getName() + ", sequence:" + eventMessage.getSequence() + ", content:" + BytesUtils.toLong(eventMessage.getContent().getBytes().toBytes()));
             }
         }
     }
