@@ -5,11 +5,7 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
-import com.jd.blockchain.ledger.core.*;
-import com.jd.blockchain.storage.service.DbConnectionFactory;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import org.bouncycastle.util.Arrays;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ClassPathResource;
@@ -32,7 +28,15 @@ import com.jd.blockchain.ledger.LedgerInitProperties;
 import com.jd.blockchain.ledger.Operation;
 import com.jd.blockchain.ledger.TransactionContent;
 import com.jd.blockchain.ledger.UserRegisterOperation;
+import com.jd.blockchain.ledger.core.LedgerInitDecision;
+import com.jd.blockchain.ledger.core.LedgerInitProposal;
+import com.jd.blockchain.ledger.core.LedgerManager;
+import com.jd.blockchain.ledger.core.LedgerQuery;
+import com.jd.blockchain.ledger.core.LedgerRepository;
+import com.jd.blockchain.ledger.core.UserAccount;
+import com.jd.blockchain.ledger.core.UserAccountQuery;
 import com.jd.blockchain.storage.service.DbConnection;
+import com.jd.blockchain.storage.service.DbConnectionFactory;
 import com.jd.blockchain.storage.service.impl.composite.CompositeConnectionFactory;
 //import com.jd.blockchain.storage.service.utils.MemoryBasedDb;
 import com.jd.blockchain.tools.initializer.DBConnectionConfig;
@@ -76,9 +80,8 @@ public class LedgerInitializeWebTest {
 		Properties props = loadConsensusSetting(LedgerInitConsensusConfig.bftsmartConfig.getConfigPath());
 		// ConsensusProperties csProps = new ConsensusProperties(props);
 		ConsensusProvider csProvider = getConsensusProvider();
-		ConsensusSettings csProps = csProvider.getSettingsFactory()
-				.getConsensusSettingsBuilder()
-				.createSettings(props, Utils.loadParticipantNodes());
+		ConsensusSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
+				Utils.loadParticipantNodes());
 
 		// 启动服务器；
 		NetworkAddress initAddr0 = initSetting.getConsensusParticipant(0).getInitializerAddress();
@@ -125,7 +128,7 @@ public class LedgerInitializeWebTest {
 		TransactionContent initTxContent2 = node2.getInitTxContent();
 		TransactionContent initTxContent3 = node3.getInitTxContent();
 
-		if (!initTxContent0.getHash().equals(initTxContent1.getHash())) {
+		if (!equals(initTxContent0, initTxContent1)) {
 			Operation[] oplist0 = initTxContent0.getOperations();
 			Operation[] oplist1 = initTxContent1.getOperations();
 
@@ -208,6 +211,12 @@ public class LedgerInitializeWebTest {
 		testRequestDecision(node3, node2, initCsService2);
 	}
 
+	public static boolean equals(TransactionContent initTxContent0, TransactionContent initTxContent1) {
+		byte[] txBytes0 = BinaryProtocol.encode(initTxContent0, TransactionContent.class);
+		byte[] txBytes1 = BinaryProtocol.encode(initTxContent1, TransactionContent.class);
+		return Arrays.areEqual(txBytes0, txBytes1);
+	}
+
 	private LedgerInitProposal testPreparePermisssion(NodeWebContext node, PrivKey privKey,
 			LedgerInitConfiguration setting) {
 		LedgerInitProposal permission = node.preparePermision(privKey, setting);
@@ -245,9 +254,8 @@ public class LedgerInitializeWebTest {
 		Properties props = loadConsensusSetting(LedgerInitConsensusConfig.bftsmartConfig.getConfigPath());
 		// ConsensusProperties csProps = new ConsensusProperties(props);
 		ConsensusProvider csProvider = getConsensusProvider();
-		ConsensusSettings csProps = csProvider.getSettingsFactory()
-				.getConsensusSettingsBuilder()
-				.createSettings(props, Utils.loadParticipantNodes());
+		ConsensusSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
+				Utils.loadParticipantNodes());
 
 		// 启动服务器；
 		NetworkAddress initAddr0 = initSetting.getConsensusParticipant(0).getInitializerAddress();
@@ -434,11 +442,10 @@ public class LedgerInitializeWebTest {
 			return invoker.start();
 		}
 
-
 		public AsyncCallback<HashDigest> startInitCommand(PrivKey privKey, String base58Pwd,
-														  LedgerInitProperties ledgerSetting, ConsensusSettings csProps, ConsensusProvider csProvider,
-														  DBConnectionConfig dbConnConfig, Prompter prompter, LedgerBindingConfig conf,
-														  CountDownLatch quitLatch, DbConnectionFactory db) {
+				LedgerInitProperties ledgerSetting, ConsensusSettings csProps, ConsensusProvider csProvider,
+				DBConnectionConfig dbConnConfig, Prompter prompter, LedgerBindingConfig conf, CountDownLatch quitLatch,
+				DbConnectionFactory db) {
 			this.dbConnConfig = dbConnConfig;
 			// this.mqConnConfig = mqConnConfig;
 			this.db = db;
@@ -461,7 +468,6 @@ public class LedgerInitializeWebTest {
 
 			return invoker.start();
 		}
-
 
 		public LedgerInitProposal preparePermision(PrivKey privKey, LedgerInitConfiguration initConfig) {
 			return controller.prepareLocalPermission(id, privKey, initConfig);
