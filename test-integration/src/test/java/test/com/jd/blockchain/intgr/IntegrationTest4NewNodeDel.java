@@ -650,6 +650,76 @@ public class IntegrationTest4NewNodeDel {
 
     }
 
+    // 依次移除两个共识节点，并重新激活的场景
+    @Test
+    public void testCase9() {
+        try {
+
+            //账本初始化
+            ledgerHash = initLedger4Nodes(rocksdbConnectionStrings);
+
+            // 启动4个Peer节点
+            PeerServer[] peerNodes = peerNodeStart4(ledgerHash, DB_TYPE_ROCKSDB);
+
+            // 创建连接peer0的网关
+            BlockchainService blockchainService = createBlockChainService(LedgerInitConsensusConfig.bftsmartProvider, peerNodes, GATEWAY_MANAGER_PORT1);
+
+            // 注册新的参与方
+            registParticipantByGateway0(blockchainService, newParticipant1, ledgerHash);
+
+            Thread.sleep(5000);
+            System.out.println("---------- Ledger Init And Regist Participant Completed ----------");
+
+            // 手动复制账本
+            copyRocksdbToNewNode(0, 4);
+            System.out.println("---------- DataBase Copy To New Node Completed 1----------");
+
+            startNewPeerAndActive(ledgerHash, DB_TYPE_ROCKSDB, newParticipant1, 4);
+
+            // 注册新的参与方2
+            registParticipantByGateway0(blockchainService, newParticipant2, ledgerHash);
+
+            Thread.sleep(5000);
+            System.out.println("----------Regist Participant2 Completed 2----------");
+
+            // 手动复制账本
+            copyRocksdbToNewNode(0, 5);
+            System.out.println("---------- DataBase Copy To New Node Completed 2----------");
+
+            startNewPeerAndActive(ledgerHash, DB_TYPE_ROCKSDB, newParticipant2, 5);
+
+            // 注册新的参与方3
+            registParticipantByGateway0(blockchainService, newParticipant3, ledgerHash);
+
+            Thread.sleep(5000);
+            System.out.println("----------Regist Participant3 Completed 3----------");
+
+            // 手动复制账本
+            copyRocksdbToNewNode(0, 6);
+            System.out.println("---------- DataBase Copy To New Node Completed 3----------");
+
+            startNewPeerAndActive(ledgerHash, DB_TYPE_ROCKSDB, newParticipant3, 6);
+
+            Thread.sleep(5000);
+            deActivePartiNode(peer2, ledgerHash);
+            System.out.println("---------- Deactive peer1 Completed ----------");
+
+            Thread.sleep(5000);
+            deActivePartiNode(newParticipant3, ledgerHash);
+
+            Thread.sleep(5000);
+            activePartiNode(peer2, ledgerHash, NEW_NODE_HOST, "12000");
+
+//            // 通过老的网关0，发送交易，由于网关没有重新接入，获得的视图ID是0，没有更新，此时发送的交易到了共识节点一定会被特殊处理
+//            registUserByExistGatewayWrapper(blockchainService);
+
+            Thread.sleep(Integer.MAX_VALUE);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void registUserByExistGatewayWrapper(BlockchainService blockchainService) {
 
         TransactionResponse txResp = registUserByExistGateway(blockchainService);
