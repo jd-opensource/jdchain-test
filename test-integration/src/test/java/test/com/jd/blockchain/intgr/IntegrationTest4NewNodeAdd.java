@@ -792,7 +792,7 @@ public class IntegrationTest4NewNodeAdd {
         // 签名；
         PreparedTransaction ptx = txTpl.prepare();
 
-        HashDigest transactionHash = ptx.getHash();
+        HashDigest transactionHash = ptx.getTransactionHash();
 
         ptx.sign(adminKey);
 
@@ -903,7 +903,7 @@ public class IntegrationTest4NewNodeAdd {
         // 签名；
         PreparedTransaction ptx = txTpl.prepare();
 
-        HashDigest transactionHash = ptx.getHash();
+        HashDigest transactionHash = ptx.getTransactionHash();
 
         ptx.sign(adminKey);
 
@@ -1092,7 +1092,7 @@ public class IntegrationTest4NewNodeAdd {
         // 签名；
         PreparedTransaction ptx = txTpl.prepare();
 
-        HashDigest transactionHash = ptx.getHash();
+        HashDigest transactionHash = ptx.getTransactionHash();
 
         ptx.sign(adminKey);
 

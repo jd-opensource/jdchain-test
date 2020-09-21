@@ -8,7 +8,7 @@ import com.jd.blockchain.crypto.CryptoProvider;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.crypto.service.classic.ClassicCryptoService;
 import com.jd.blockchain.ledger.core.CryptoConfig;
-import com.jd.blockchain.ledger.core.MerkleDataSet_old;
+import com.jd.blockchain.ledger.core.MerkleSequenceDataset;
 import com.jd.blockchain.storage.service.DbConnection;
 import com.jd.blockchain.storage.service.ExPolicyKVStorage;
 import com.jd.blockchain.storage.service.VersioningKVStorage;
@@ -153,7 +153,7 @@ public class MerkleDatasetPerformanceTester {
 		long startTs = System.currentTimeMillis();
 		HashDigest rootHash;
 		int randomId = rand.nextInt(1000);
-		MerkleDataSet_old mds = new MerkleDataSet_old(cryptoConfig, MKL_KEY_PREFIX, exStorage, verStorage);
+		MerkleSequenceDataset mds = new MerkleSequenceDataset(cryptoConfig, MKL_KEY_PREFIX, exStorage, verStorage);
 		for (int i = 0; i < round; i++) {
 			for (int j = 0; j < batchCount; j++) {
 				key = "data_" + startTs + "_" + randomId + "_" + (i * batchCount + j);
@@ -162,7 +162,7 @@ public class MerkleDatasetPerformanceTester {
 			}
 			mds.commit();
 			rootHash = mds.getRootHash();
-			mds = new MerkleDataSet_old(rootHash, cryptoConfig, Bytes.fromString(MKL_KEY_PREFIX), exStorage, verStorage, false);
+			mds = new MerkleSequenceDataset(rootHash, cryptoConfig, Bytes.fromString(MKL_KEY_PREFIX), exStorage, verStorage, false);
 		}
 
 		long elapsedTs = System.currentTimeMillis() - startTs;

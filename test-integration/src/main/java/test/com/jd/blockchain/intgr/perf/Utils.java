@@ -7,8 +7,12 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.jd.blockchain.ledger.ParticipantNodeState;
+import com.jd.blockchain.ledger.TransactionContent;
+
+import org.bouncycastle.util.Arrays;
 import org.springframework.core.io.ClassPathResource;
 
+import com.jd.blockchain.binaryproto.BinaryProtocol;
 import com.jd.blockchain.consensus.ConsensusProvider;
 import com.jd.blockchain.consensus.ConsensusSettings;
 import com.jd.blockchain.crypto.AddressEncoding;
@@ -91,6 +95,12 @@ public class Utils {
 			participantNodes[i] = new PartNode(i, KeyGenUtils.decodePubKey(PUB_KEYS[i]), ParticipantNodeState.CONSENSUS);
 		}
 		return participantNodes;
+	}
+	
+	public static boolean areEqual(TransactionContent initTxContent0, TransactionContent initTxContent1) {
+		byte[] txBytes0 = BinaryProtocol.encode(initTxContent0, TransactionContent.class);
+		byte[] txBytes1 = BinaryProtocol.encode(initTxContent1, TransactionContent.class);
+		return Arrays.areEqual(txBytes0, txBytes1);
 	}
 
 	public static class NodeContext {
