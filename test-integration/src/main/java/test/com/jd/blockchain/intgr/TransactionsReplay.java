@@ -8,14 +8,12 @@ import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.crypto.KeyGenUtils;
 import com.jd.blockchain.crypto.PrivKey;
 import com.jd.blockchain.crypto.PubKey;
+import com.jd.blockchain.crypto.service.classic.ClassicAlgorithm;
 import com.jd.blockchain.gateway.GatewayConfigProperties.KeyPairConfig;
 import com.jd.blockchain.ledger.BlockchainKeyGenerator;
 import com.jd.blockchain.ledger.BlockchainKeypair;
 import com.jd.blockchain.ledger.LedgerInitProperties;
 import com.jd.blockchain.ledger.LedgerTransaction;
-import com.jd.blockchain.ledger.Operation;
-import com.jd.blockchain.ledger.TransactionRequest;
-import com.jd.blockchain.ledger.TransactionState;
 import com.jd.blockchain.ledger.UserRegisterOperation;
 import com.jd.blockchain.ledger.core.DefaultOperationHandleRegisteration;
 import com.jd.blockchain.ledger.core.LedgerManage;
@@ -23,7 +21,6 @@ import com.jd.blockchain.ledger.core.LedgerQuery;
 import com.jd.blockchain.ledger.core.LedgerRepository;
 import com.jd.blockchain.ledger.core.OperationHandleRegisteration;
 import com.jd.blockchain.ledger.core.TransactionBatchProcessor;
-import com.jd.blockchain.sdk.converters.ClientResolveUtil;
 import com.jd.blockchain.sdk.service.PeerBlockchainServiceFactory;
 import com.jd.blockchain.service.TransactionBatchResultHandle;
 import com.jd.blockchain.storage.service.impl.composite.CompositeConnectionFactory;
@@ -44,13 +41,12 @@ import test.com.jd.blockchain.intgr.perf.Utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
 import static com.jd.blockchain.ledger.TransactionState.LEDGER_ERROR;
+import static com.jd.blockchain.transaction.TxBuilder.computeTxContentHash;
 
 
 public class TransactionsReplay {
@@ -137,14 +133,14 @@ public class TransactionsReplay {
 		for (int height = 1; height < 20; height++) {
 			TransactionBatchProcessor txbatchProcessor = new TransactionBatchProcessor(ledgerRepository0, opReg);
 			for (int i = 0; i < 5; i++) {
-				TxBuilder txbuilder = new TxBuilder(ledgerHash0);
+				TxBuilder txbuilder = new TxBuilder(ledgerHash0, pubKey.getAlgorithm());
 				TxContentBlob txContentBlob = new TxContentBlob(ledgerHash0);
 				txContentBlob.setTime(startTs++);
 				BlockchainKeypair userKey = BlockchainKeyGenerator.getInstance().generate();
 				UserRegisterOperation userRegisterOperation = txbuilder.users().register(userKey.getIdentity());
 				txContentBlob.addOperation(userRegisterOperation);
-				txContentBlob.setHash(TxBuilder.computeTxContentHash(txContentBlob));
-				TxRequestBuilder txRequestBuilder = new TxRequestBuilder(txContentBlob);
+				HashDigest contentHash = computeTxContentHash(ClassicAlgorithm.SHA256, txContentBlob);
+				TxRequestBuilder txRequestBuilder = new TxRequestBuilder(contentHash, txContentBlob);
 				txRequestBuilder.signAsEndpoint(new AsymmetricKeypair(pubKey, privKey));
 				txRequestBuilder.signAsNode(new AsymmetricKeypair(pubKey, privKey));
 				txbatchProcessor.schedule(txRequestBuilder.buildRequest());
@@ -207,29 +203,11 @@ public class TransactionsReplay {
 				try {
 					HashDigest pullBlockHash = blockchainServiceFactory.getBlockchainService().getBlock(ledgerHash, height).getHash();
 
-					LedgerTransaction[] transactions = blockchainServiceFactory.getBlockchainService().getTransactions(ledgerHash, height, 0, -1);
+					LedgerTransaction[] transactions = blockchainServiceFactory.getBlockchainService().getTransactions(ledgerHash, height, 0, 10);
 
-					LedgerTransaction[] orderTransactions = orderTransactions(transactions);
 
-					for (LedgerTransaction ledgerTransaction : orderTransactions) {
-
-						TxContentBlob txContentBlob = new TxContentBlob(ledgerHash);
-
-						txContentBlob.setTime(ledgerTransaction.getTransactionContent().getTimestamp());
-
-						// convert operation, from json to object
-						for (Operation operation : ledgerTransaction.getTransactionContent().getOperations()) {
-							txContentBlob.addOperation(ClientResolveUtil.read(operation));
-						}
-
-						txContentBlob.setHash(TxBuilder.computeTxContentHash(txContentBlob));
-
-						TxRequestBuilder txRequestBuilder = new TxRequestBuilder(txContentBlob);
-						txRequestBuilder.addNodeSignature(ledgerTransaction.getNodeSignatures());
-						txRequestBuilder.addEndpointSignature(ledgerTransaction.getEndpointSignatures());
-						TransactionRequest transactionRequest = txRequestBuilder.buildRequest();
-
-						txbatchProcessor.schedule(transactionRequest);
+					for (LedgerTransaction ledgerTransaction : transactions) {
+						txbatchProcessor.schedule(ledgerTransaction.getRequest());
 					}
 
 					handle = txbatchProcessor.prepare();
@@ -250,18 +228,6 @@ public class TransactionsReplay {
 		}
 
 		return WebResponse.createSuccessResult(null);
-	}
-
-	// order transactions by timestamp in block
-	private static LedgerTransaction[] orderTransactions(LedgerTransaction[] transactions) {
-		List<LedgerTransaction> transactionList = Arrays.asList(transactions);
-		transactionList.sort(new Comparator<LedgerTransaction>() {
-			@Override
-			public int compare(LedgerTransaction t1, LedgerTransaction t2) {
-				return (int)(t1.getTransactionContent().getTimestamp() - t2.getTransactionContent().getTimestamp());
-			}
-		});
-		return transactionList.toArray(new LedgerTransaction[transactions.length]);
 	}
 
 	public static ConsensusProvider getConsensusProvider (String providerName){
