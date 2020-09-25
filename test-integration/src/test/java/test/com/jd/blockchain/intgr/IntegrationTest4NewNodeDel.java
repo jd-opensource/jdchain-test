@@ -702,7 +702,7 @@ public class IntegrationTest4NewNodeDel {
 
             Thread.sleep(5000);
             deActivePartiNode(peer2, ledgerHash);
-            System.out.println("---------- Deactive peer1 Completed ----------");
+            System.out.println("---------- Deactive peer2 Completed ----------");
 
             Thread.sleep(5000);
             deActivePartiNode(newParticipant3, ledgerHash);

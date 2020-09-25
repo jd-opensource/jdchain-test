@@ -14,6 +14,8 @@ import com.jd.blockchain.ledger.BlockchainKeyGenerator;
 import com.jd.blockchain.ledger.BlockchainKeypair;
 import com.jd.blockchain.ledger.LedgerInitProperties;
 import com.jd.blockchain.ledger.LedgerTransaction;
+import com.jd.blockchain.ledger.Operation;
+import com.jd.blockchain.ledger.TransactionRequest;
 import com.jd.blockchain.ledger.UserRegisterOperation;
 import com.jd.blockchain.ledger.core.DefaultOperationHandleRegisteration;
 import com.jd.blockchain.ledger.core.LedgerManage;
@@ -21,6 +23,7 @@ import com.jd.blockchain.ledger.core.LedgerQuery;
 import com.jd.blockchain.ledger.core.LedgerRepository;
 import com.jd.blockchain.ledger.core.OperationHandleRegisteration;
 import com.jd.blockchain.ledger.core.TransactionBatchProcessor;
+import com.jd.blockchain.sdk.converters.ClientResolveUtil;
 import com.jd.blockchain.sdk.service.PeerBlockchainServiceFactory;
 import com.jd.blockchain.service.TransactionBatchResultHandle;
 import com.jd.blockchain.storage.service.impl.composite.CompositeConnectionFactory;
@@ -207,9 +210,25 @@ public class TransactionsReplay {
 
 
 					for (LedgerTransaction ledgerTransaction : transactions) {
-						txbatchProcessor.schedule(ledgerTransaction.getRequest());
-					}
 
+
+						TxContentBlob txContentBlob = new TxContentBlob(ledgerHash);
+
+						txContentBlob.setTime(ledgerTransaction.getRequest().getTransactionContent().getTimestamp());
+
+						// convert operation, from json to object
+						for (Operation operation : ledgerTransaction.getRequest().getTransactionContent().getOperations()) {
+							txContentBlob.addOperation(ClientResolveUtil.read(operation));
+						}
+
+						TxRequestBuilder txRequestBuilder = new TxRequestBuilder(ledgerTransaction.getTransactionHash(), txContentBlob);
+						txRequestBuilder.addNodeSignature(ledgerTransaction.getRequest().getNodeSignatures());
+						txRequestBuilder.addEndpointSignature(ledgerTransaction.getRequest().getEndpointSignatures());
+						TransactionRequest transactionRequest = txRequestBuilder.buildRequest();
+
+						txbatchProcessor.schedule(transactionRequest);
+					}
+					
 					handle = txbatchProcessor.prepare();
 
 					if (!(handle.getBlock().getHash().toBase58().equals(pullBlockHash.toBase58()))) {
