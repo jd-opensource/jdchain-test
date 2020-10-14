@@ -54,7 +54,7 @@ import static com.jd.blockchain.transaction.TxBuilder.computeTxContentHash;
 public class TransactionsReplay {
 	public static final String PASSWORD = "abc";
 
-	public static void main(String[] args) {
+	public static void main_(String[] args) {
 
 		// init ledgers of all nodes ;
 		IntegratedContext context = initLedgers();
