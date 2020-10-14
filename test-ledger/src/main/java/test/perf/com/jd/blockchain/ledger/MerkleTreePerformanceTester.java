@@ -10,7 +10,7 @@ import com.jd.blockchain.crypto.service.classic.ClassicCryptoService;
 import com.jd.blockchain.crypto.service.sm.SMCryptoService;
 import com.jd.blockchain.ledger.CryptoSetting;
 import com.jd.blockchain.ledger.core.CryptoConfig;
-import com.jd.blockchain.ledger.proof.HashSortingMerkleTree;
+import com.jd.blockchain.ledger.proof.MerkleHashTrie;
 import com.jd.blockchain.storage.service.utils.MemoryKVStorage;
 import com.jd.blockchain.utils.Bytes;
 
@@ -21,7 +21,7 @@ public class MerkleTreePerformanceTester {
 	private static final String[] SUPPORTED_PROVIDERS = { ClassicCryptoService.class.getName(),
 			SMCryptoService.class.getName() };
 
-	public static void main(String[] args) {
+	public static void main_(String[] args) {
 		try {
 			int round = 10;
 			if (args.length > 0) {
@@ -78,7 +78,7 @@ public class MerkleTreePerformanceTester {
 		long startTs = System.currentTimeMillis();
 
 		MemoryKVStorage storage = new MemoryKVStorage();
-		HashSortingMerkleTree merkleTree = new HashSortingMerkleTree(setting, prefix, storage);
+		MerkleHashTrie merkleTree = new MerkleHashTrie(setting, prefix, storage);
 		String key;
 		for (int r = 0; r < batch; r++) {
 			for (int i = 0; i < count; i++) {

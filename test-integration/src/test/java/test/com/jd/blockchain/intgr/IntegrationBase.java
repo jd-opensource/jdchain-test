@@ -104,7 +104,7 @@ public class IntegrationBase {
 		// 签名；
 		PreparedTransaction ptx = txTpl.prepare();
 
-		HashDigest transactionHash = ptx.getHash();
+		HashDigest transactionHash = ptx.getTransactionHash();
 
 		ptx.sign(adminKey);
 
@@ -130,7 +130,7 @@ public class IntegrationBase {
 
 		PreparedTransaction prepTx = txTpl.prepare();
 
-		HashDigest transactionHash = prepTx.getHash();
+		HashDigest transactionHash = prepTx.getTransactionHash();
 
 		prepTx.sign(adminKey);
 
@@ -163,7 +163,7 @@ public class IntegrationBase {
 		// 签名；
 		PreparedTransaction ptx = txTpl.prepare();
 
-		HashDigest transactionHash = ptx.getHash();
+		HashDigest transactionHash = ptx.getTransactionHash();
 
 		ptx.sign(adminKey);
 
@@ -194,7 +194,7 @@ public class IntegrationBase {
 		// TX 准备就绪；
 		PreparedTransaction prepTx = txTemp.prepare();
 
-		HashDigest transactionHash = prepTx.getHash();
+		HashDigest transactionHash = prepTx.getTransactionHash();
 
 		// 使用私钥进行签名；
 		prepTx.sign(adminKey);
@@ -225,7 +225,7 @@ public class IntegrationBase {
 		// 签名；
 		PreparedTransaction ptx = txTpl.prepare();
 
-		HashDigest transactionHash = ptx.getHash();
+		HashDigest transactionHash = ptx.getTransactionHash();
 
 		ptx.sign(adminKey);
 
@@ -249,7 +249,7 @@ public class IntegrationBase {
 		// 签名；
 		PreparedTransaction ptx = txTpl.prepare();
 
-		HashDigest transactionHash = ptx.getHash();
+		HashDigest transactionHash = ptx.getTransactionHash();
 
 		ptx.sign(adminKey);
 
@@ -274,7 +274,7 @@ public class IntegrationBase {
 		// 签名；
 		PreparedTransaction ptx = txTpl.prepare();
 
-		HashDigest transactionHash = ptx.getHash();
+		HashDigest transactionHash = ptx.getTransactionHash();
 
 		ptx.sign(adminKey);
 
@@ -306,7 +306,7 @@ public class IntegrationBase {
 		// TX 准备就绪；
 		PreparedTransaction prepTx = txTemp.prepare();
 
-		HashDigest transactionHash = prepTx.getHash();
+		HashDigest transactionHash = prepTx.getTransactionHash();
 
 		// 使用私钥进行签名；
 		prepTx.sign(adminKey);
@@ -816,7 +816,7 @@ public class IntegrationBase {
 		assertTrue(txResp.isSuccess());
 
         // 验证结果；
-        assertEquals(ptx.getHash(),txResp.getContentHash());
+        assertEquals(ptx.getTransactionHash(),txResp.getContentHash());
 
 		LedgerBlock block = ledgerRepository.getBlock(txResp.getBlockHeight());
 		byte[] contractCodeInDb = ledgerRepository.getContractAccountSet(block)

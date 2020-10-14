@@ -23,6 +23,7 @@ import com.jd.blockchain.crypto.PubKey;
 import com.jd.blockchain.ledger.BlockchainIdentity;
 import com.jd.blockchain.ledger.BlockchainKeyGenerator;
 import com.jd.blockchain.ledger.BlockchainKeypair;
+import com.jd.blockchain.ledger.CryptoSetting;
 import com.jd.blockchain.ledger.DataAccountRegisterOperation;
 import com.jd.blockchain.ledger.DigitalSignature;
 import com.jd.blockchain.ledger.LedgerBlock;
@@ -118,17 +119,16 @@ public class RolesAuthorizationTest {
 
 		LedgerManager ledgerManager = new LedgerManager();
 		LedgerRepository ledger = ledgerManager.register(ledgerHash, storage);
-
+		CryptoSetting cryptoSetting = ledger.getAdminInfo().getSettings().getCryptoSetting();
 		// 验证角色和用户的权限配置；
 		assertUserRolesPermissions(ledger);
 
 		// 预置数据：准备一个新用户和数据账户；
-		TransactionRequest predefinedTx = buildRequest(ledger.getHash(), ADMIN_USER, ADMIN_USER,
+		TransactionRequest predefinedTx = buildRequest(ledger.getHash(), cryptoSetting, ADMIN_USER, ADMIN_USER,
 				new TransactionDefiner() {
 					@Override
 					public void define(TransactionBuilder txBuilder) {
-						txBuilder.security().roles().configure("NORMAL")
-								.enable(LedgerPermission.REGISTER_DATA_ACCOUNT)
+						txBuilder.security().roles().configure("NORMAL").enable(LedgerPermission.REGISTER_DATA_ACCOUNT)
 								.disable(LedgerPermission.REGISTER_USER)
 								.enable(TransactionPermission.CONTRACT_OPERATION);
 
@@ -142,25 +142,26 @@ public class RolesAuthorizationTest {
 
 		TransactionBatchResult procResult = executeTransactions(ledger, predefinedTx);
 
-		//断言预定义数据的交易和区块成功；
+		// 断言预定义数据的交易和区块成功；
 		assertBlock(1, procResult);
 		assertTransactionAllSuccess(procResult);
 
-		//断言预定义的数据符合预期；
+		// 断言预定义的数据符合预期；
 		assertPredefineData(ledgerHash, storage);
 
 		// 用不具备“注册用户”权限的用户，注册另一个新用户，预期交易失败；
 		BlockchainKeypair tempUser = BlockchainKeyGenerator.getInstance().generate();
-		TransactionRequest tx = buildRequest(ledger.getHash(), NEW_USER, ADMIN_USER, new TransactionDefiner() {
-			@Override
-			public void define(TransactionBuilder txBuilder) {
-				txBuilder.users().register(tempUser.getIdentity());
-			}
-		});
+		TransactionRequest tx = buildRequest(ledger.getHash(), cryptoSetting, NEW_USER, ADMIN_USER,
+				new TransactionDefiner() {
+					@Override
+					public void define(TransactionBuilder txBuilder) {
+						txBuilder.users().register(tempUser.getIdentity());
+					}
+				});
 
 		procResult = executeTransactions(ledger, tx);
 		assertBlock(2, procResult);
-		
+
 		assertTransactionAllFail(procResult, TransactionState.REJECTED_BY_SECURITY_POLICY);
 	}
 
@@ -191,7 +192,7 @@ public class RolesAuthorizationTest {
 			assertEquals(procResult.getBlock().getHeight(), transactionResponse.getBlockHeight());
 		}
 	}
-	
+
 	/**
 	 * 断言全部交易结果都是失败的；
 	 * 
@@ -201,7 +202,7 @@ public class RolesAuthorizationTest {
 		Iterator<TransactionResponse> responses = procResult.getResponses();
 		while (responses.hasNext()) {
 			TransactionResponse transactionResponse = (TransactionResponse) responses.next();
-			
+
 			assertEquals(false, transactionResponse.isSuccess());
 			assertEquals(txState, transactionResponse.getExecutionState());
 		}
@@ -247,9 +248,9 @@ public class RolesAuthorizationTest {
 		return procResult;
 	}
 
-	private TransactionRequest buildRequest(HashDigest ledgerHash, BlockchainKeypair endpoint, BlockchainKeypair node,
-			TransactionDefiner definer) {
-		TransactionBuilder txBuilder = new TxBuilder(ledgerHash);
+	private TransactionRequest buildRequest(HashDigest ledgerHash, CryptoSetting cryptoSetting,
+			BlockchainKeypair endpoint, BlockchainKeypair node, TransactionDefiner definer) {
+		TransactionBuilder txBuilder = new TxBuilder(ledgerHash, cryptoSetting.getHashAlgorithm());
 		definer.define(txBuilder);
 		TransactionRequestBuilder reqBuilder = txBuilder.prepareRequest();
 		reqBuilder.signAsEndpoint(endpoint);
