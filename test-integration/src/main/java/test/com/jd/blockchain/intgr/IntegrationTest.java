@@ -296,7 +296,7 @@ public class IntegrationTest {
 									}
 									return (AsyncFuture<byte[]>) invocation.callRealMethod();
 								}
-							}).when(mockedMessageHandle).processOrdered(anyInt(), any(), anyString(), anyString());
+							}).when(mockedMessageHandle).processOrdered(anyInt(), any(), any());
 						} else if (nodePubKey1.equals(serverSettings.getReplicaSettings().getPubKey())) {
 
 							doAnswer(new Answer<AsyncFuture<byte[]>>() {
@@ -309,7 +309,7 @@ public class IntegrationTest {
 									}
 									return (AsyncFuture<byte[]>) invocation.callRealMethod();
 								}
-							}).when(mockedMessageHandle).processOrdered(anyInt(), any(), anyString(), anyString());
+							}).when(mockedMessageHandle).processOrdered(anyInt(), any(), any());
 						} else if (nodePubKey2.equals(serverSettings.getReplicaSettings().getPubKey())) {
 
 							doAnswer(new Answer<AsyncFuture<byte[]>>() {
@@ -322,7 +322,7 @@ public class IntegrationTest {
 									}
 									return (AsyncFuture<byte[]>) invocation.callRealMethod();
 								}
-							}).when(mockedMessageHandle).processOrdered(anyInt(), any(), anyString(), anyString());
+							}).when(mockedMessageHandle).processOrdered(anyInt(), any(), any());
 						} else if (nodePubKey3.equals(serverSettings.getReplicaSettings().getPubKey())) {
 
 							doAnswer(new Answer<AsyncFuture<byte[]>>() {
@@ -335,7 +335,7 @@ public class IntegrationTest {
 									}
 									return (AsyncFuture<byte[]>) invocation.callRealMethod();
 								}
-							}).when(mockedMessageHandle).processOrdered(anyInt(), any(), anyString(), anyString());
+							}).when(mockedMessageHandle).processOrdered(anyInt(), any(), any());
 						}
 
 						return new BftsmartNodeServer(serverSettings, mockedMessageHandle, stateMachineReplicate);
