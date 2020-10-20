@@ -228,6 +228,8 @@ public class IntegrationTest4NewNodeDel {
             // 通过老的网关0，发送交易，由于网关没有重新接入，获得的视图ID是0，没有更新，此时发送的交易到了共识节点一定会被特殊处理
             registUserByExistGatewayWrapper(blockchainService);
 
+            System.out.println("---------- testCase0 ----------");
+
             Thread.sleep(Integer.MAX_VALUE);
 
         } catch (Exception e) {
@@ -282,6 +284,8 @@ public class IntegrationTest4NewNodeDel {
 
             // 通过老的网关0，发送交易，由于网关没有重新接入，获得的视图ID是0，没有更新，此时发送的交易到了共识节点一定会被特殊处理
             registUserByExistGatewayWrapper(blockchainService);
+
+            System.out.println("---------- testCase1 ----------");
 
             Thread.sleep(Integer.MAX_VALUE);
 
@@ -345,6 +349,8 @@ public class IntegrationTest4NewNodeDel {
 
             // 通过老的网关0，发送交易，由于网关没有重新接入，获得的视图ID是0，没有更新，此时发送的交易到了共识节点一定会被特殊处理
             registUserByExistGatewayWrapper(blockchainService);
+
+            System.out.println("---------- testCase2 ----------");
 
             Thread.sleep(Integer.MAX_VALUE);
 
@@ -415,6 +421,8 @@ public class IntegrationTest4NewNodeDel {
             // 再次发送交易检查网关本地的视图配置能否正确更新
             registUserByExistGatewayWrapper(blockchainService);
 
+            System.out.println("---------- testCase3 ----------");
+
             Thread.sleep(Integer.MAX_VALUE);
 
         } catch (Exception e) {
@@ -457,6 +465,7 @@ public class IntegrationTest4NewNodeDel {
             Thread.sleep(5000);
             deActivePartiNode(peer2, ledgerHash);
 
+            System.out.println("---------- testCase4 ----------");
             Thread.sleep(Integer.MAX_VALUE);
 
         } catch (Exception e) {
@@ -484,6 +493,7 @@ public class IntegrationTest4NewNodeDel {
             Thread.sleep(5000);
             deActivePartiNode(peer2, ledgerHash);
 
+            System.out.println("---------- testCase5 ----------");
             Thread.sleep(Integer.MAX_VALUE);
 
         } catch (Exception e) {
@@ -532,6 +542,8 @@ public class IntegrationTest4NewNodeDel {
             registUserByExistGatewayWrapper(blockchainService);
             registUserByExistGatewayWrapper(blockchainService);
             registUserByExistGatewayWrapper(blockchainService);
+
+            System.out.println("---------- testCase6 ----------");
 
             Thread.sleep(Integer.MAX_VALUE);
 
@@ -592,6 +604,8 @@ public class IntegrationTest4NewNodeDel {
             registUserByExistGatewayWrapper(blockchainService);
             registUserByExistGatewayWrapper(blockchainService);
 
+            System.out.println("---------- testCase7 ----------");
+
             Thread.sleep(Integer.MAX_VALUE);
 
         } catch (Exception e) {
@@ -640,6 +654,8 @@ public class IntegrationTest4NewNodeDel {
                 Thread.sleep(5000);
                 activePartiNode(peer1, ledgerHash, NEW_NODE_HOST, "12000");
             }
+
+            System.out.println("---------- testCase8 ----------");
 
             Thread.sleep(Integer.MAX_VALUE);
 
@@ -712,6 +728,8 @@ public class IntegrationTest4NewNodeDel {
 
 //            // 通过老的网关0，发送交易，由于网关没有重新接入，获得的视图ID是0，没有更新，此时发送的交易到了共识节点一定会被特殊处理
 //            registUserByExistGatewayWrapper(blockchainService);
+
+            System.out.println("---------- testCase9 ----------");
 
             Thread.sleep(Integer.MAX_VALUE);
 
