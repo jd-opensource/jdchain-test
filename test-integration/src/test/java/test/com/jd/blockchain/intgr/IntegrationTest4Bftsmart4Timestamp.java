@@ -53,7 +53,7 @@ public class IntegrationTest4Bftsmart4Timestamp {
         int stopNode = 1;
         peerServers[stopNode].stop();
         System.out.println("----- peer server stop -----");
-        Thread.sleep(10000);
+        Thread.sleep(60000);
         // 然后重启
         peerServers[stopNode].start();
         System.out.println("----- peer server start -----");
