@@ -27,15 +27,17 @@ public class IntegrationTest4Bftsmart4Timestamp {
 
     private static final boolean isRegisterUser = true;
 
-    private static final boolean isRegisterDataAccount = true;
+    private static final boolean isRegisterDataAccount = false;
 
-    private static final boolean isRegisterParticipant = true;
+    private static final boolean isRegisterParticipant = false;
 
-    private static final boolean isParticipantStateUpdate = true;
+    private static final boolean isParticipantStateUpdate = false;
 
-    private static final boolean isWriteKv = true;
+    private static final boolean isWriteKv = false;
 
     private static final String DB_TYPE_MEM = "mem";
+
+    public static final String DB_TYPE_ROCKSDB = "rocksdb";
 
     public static final  String  BFTSMART_PROVIDER = "com.jd.blockchain.consensus.bftsmart.BftsmartConsensusProvider";
 
@@ -44,7 +46,21 @@ public class IntegrationTest4Bftsmart4Timestamp {
         test(LedgerInitConsensusConfig.bftsmartProvider, DB_TYPE_MEM, LedgerInitConsensusConfig.memConnectionStrings);
     }
 
-    public void test(String[] providers, String dbType, String[] dbConnections) {
+    @Test
+    public void testRocksdbAndRestartOne() throws Exception {
+        PeerServer[] peerServers = test(LedgerInitConsensusConfig.bftsmartProvider, DB_TYPE_MEM, LedgerInitConsensusConfig.memConnectionStrings);
+        // 停掉peer1
+        int stopNode = 1;
+        peerServers[stopNode].stop();
+        System.out.println("----- peer server stop -----");
+        Thread.sleep(10000);
+        // 然后重启
+        peerServers[stopNode].start();
+        System.out.println("----- peer server start -----");
+        Thread.sleep(Integer.MAX_VALUE);
+    }
+
+    public PeerServer[] test(String[] providers, String dbType, String[] dbConnections) {
 
 
         final ExecutorService sendReqExecutors = Executors.newFixedThreadPool(20);
@@ -207,12 +223,12 @@ public class IntegrationTest4Bftsmart4Timestamp {
                     }
                 }
             }
-            Thread.sleep(Integer.MAX_VALUE);
+            Thread.sleep(20000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        IntegrationBase.testConsistencyAmongNodes(ledgers);
+        return peerNodes;
     }
     private HashDigest initLedger(String[] dbConnections) {
         LedgerInitializeWeb4Nodes ledgerInit = new LedgerInitializeWeb4Nodes();
