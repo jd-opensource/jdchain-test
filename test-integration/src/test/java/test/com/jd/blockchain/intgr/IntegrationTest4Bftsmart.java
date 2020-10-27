@@ -73,6 +73,13 @@ public class IntegrationTest4Bftsmart {
         // 启动Peer节点
         PeerServer[] peerNodes = peerNodeStart(ledgerHash, dbType);
 
+        try {
+            // 休眠20秒，保证Peer节点启动成功
+            Thread.sleep(20000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         DbConnectionFactory dbConnectionFactory0 = peerNodes[0].getDBConnectionFactory();
         DbConnectionFactory dbConnectionFactory1 = peerNodes[1].getDBConnectionFactory();
         DbConnectionFactory dbConnectionFactory2 = peerNodes[2].getDBConnectionFactory();
