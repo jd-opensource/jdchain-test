@@ -1053,6 +1053,14 @@ public class IntegrationTest4NewNodeAdd {
     }
 
     public BlockchainService createBlockChainService(String[] providers, PeerServer[] peerNodes, int gatewayPort) {
+
+        try {
+            // 休眠20秒，保证Peer节点启动成功
+            Thread.sleep(20000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         DbConnectionFactory dbConnectionFactory0 = peerNodes[0].getDBConnectionFactory();
         DbConnectionFactory dbConnectionFactory1 = peerNodes[1].getDBConnectionFactory();
         DbConnectionFactory dbConnectionFactory2 = peerNodes[2].getDBConnectionFactory();
