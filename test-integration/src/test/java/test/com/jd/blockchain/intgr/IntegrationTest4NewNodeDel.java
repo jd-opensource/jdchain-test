@@ -535,10 +535,11 @@ public class IntegrationTest4NewNodeDel {
             Thread.sleep(5000);
             deActivePartiNode(peer0, ledgerHash);
 
+            Thread.sleep(8000);
             // 通过老的网关0，发送交易，由于网关没有重新接入，获得的视图ID是0，没有更新，此时发送的交易到了共识节点一定会被特殊处理
             registUserByExistGatewayWrapper(blockchainService);
 
-            Thread.sleep(5000);
+//            Thread.sleep(5000);
             registUserByExistGatewayWrapper(blockchainService);
             registUserByExistGatewayWrapper(blockchainService);
             registUserByExistGatewayWrapper(blockchainService);
@@ -946,6 +947,20 @@ public class IntegrationTest4NewNodeDel {
             FileUtils.forceDelete(newFile);
         }
         FileUtils.copyDirectory(oldNodeFile, newFile);
+
+//        String oldLog = "/Users/zhangshuang3/Desktop/Project_new2/jdchain-develop-1.4.0/test/test-integration/src/test" + File.separator + ledgerHash.toBase58() + "." + String.valueOf(oldId) + ".txs" + ".log";
+//
+//        String newLog = "/Users/zhangshuang3/Desktop/Project_new2/jdchain-develop-1.4.0/test/test-integration/src/test" + File.separator + ledgerHash.toBase58() + "." + String.valueOf(newId) + ".txs" + ".log";
+//
+//        File oldLogFile = new File(oldLog);
+//
+//        File newLogFile = new File(newLog);
+//
+//        if (newLogFile.exists()) {
+//            FileUtils.forceDelete(newLogFile);
+//        }
+//
+//        FileUtils.copyFile(oldLogFile, newLogFile);
         return newFile;
     }
 

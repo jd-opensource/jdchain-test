@@ -1024,8 +1024,24 @@ public class IntegrationTest4NewNodeAdd {
             FileUtils.forceDelete(newFile);
         }
         FileUtils.copyDirectory(oldNodeFile, newFile);
+
+//        String oldLog = "/Users/zhangshuang3/Desktop/Project_new2/jdchain-develop-1.4.0/test/test-integration/src/test" + File.separator + ledgerHash.toBase58() + "." + String.valueOf(oldId) + ".txs" + ".log";
+//
+//        String newLog = "/Users/zhangshuang3/Desktop/Project_new2/jdchain-develop-1.4.0/test/test-integration/src/test" + File.separator + ledgerHash.toBase58() + "." + String.valueOf(newId) + ".txs" + ".log";
+//
+//        File oldLogFile = new File(oldLog);
+//
+//        File newLogFile = new File(newLog);
+//
+//        if (newLogFile.exists()) {
+//            FileUtils.forceDelete(newLogFile);
+//        }
+//
+//        FileUtils.copyFile(oldLogFile, newLogFile);
+
         return newFile;
     }
+
 
     private File copyRocksdbToNewNode2(int oldId, int newId) throws IOException {
         String oldDbUrl = rocksdbConnectionStrings2[oldId];
