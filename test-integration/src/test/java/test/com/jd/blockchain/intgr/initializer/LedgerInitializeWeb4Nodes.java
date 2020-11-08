@@ -154,7 +154,7 @@ public class LedgerInitializeWeb4Nodes {
 		assertEquals(0, genesisBlock.getHeight());
 		assertEquals(ledgerHash0, genesisBlock.getHash());
 
-		UserAccountQuery userset0 = ledger0.getUserAccountSet(genesisBlock);
+		UserAccountCollection userset0 = ledger0.getUserAccountSet(genesisBlock);
 
 		PubKey pubKey0 = KeyGenUtils.decodePubKey(PUB_KEYS[0]);
 		Bytes address0 = AddressEncoding.generateAddress(pubKey0);

@@ -35,7 +35,7 @@ import com.jd.blockchain.ledger.TransactionState;
 import com.jd.blockchain.ledger.TransactionTemplate;
 import com.jd.blockchain.ledger.TypedKVEntry;
 import com.jd.blockchain.ledger.core.DataAccount;
-import com.jd.blockchain.ledger.core.DataAccountQuery;
+import com.jd.blockchain.ledger.core.DataAccountCollection;
 import com.jd.blockchain.ledger.core.LedgerManage;
 import com.jd.blockchain.ledger.core.LedgerManager;
 import com.jd.blockchain.ledger.core.LedgerQuery;
@@ -468,7 +468,7 @@ public class IntegrationTestAll4Redis {
 		assertEquals(txResp.getBlockHeight(), backgroundLedgerBlock.getHeight());
 
 		// 验证合约中的赋值，外部可以获得;
-		DataAccountQuery dataAccountSet = ledgerRepository.getDataAccountSet(backgroundLedgerBlock);
+		DataAccountCollection dataAccountSet = ledgerRepository.getDataAccountSet(backgroundLedgerBlock);
 		AsymmetricKeypair key = Crypto.getSignatureFunction("ED25519").generateKeypair();
 		PubKey pubKey = key.getPubKey();
 		Bytes dataAddress = AddressEncoding.generateAddress(pubKey);

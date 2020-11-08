@@ -34,7 +34,7 @@ import com.jd.blockchain.ledger.core.LedgerManager;
 import com.jd.blockchain.ledger.core.LedgerQuery;
 import com.jd.blockchain.ledger.core.LedgerRepository;
 import com.jd.blockchain.ledger.core.UserAccount;
-import com.jd.blockchain.ledger.core.UserAccountQuery;
+import com.jd.blockchain.ledger.core.UserAccountCollection;
 import com.jd.blockchain.storage.service.DbConnection;
 import com.jd.blockchain.storage.service.DbConnectionFactory;
 import com.jd.blockchain.storage.service.impl.composite.CompositeConnectionFactory;
@@ -309,7 +309,7 @@ public class LedgerInitializeWebTest {
 
 		LedgerBlock genesisBlock = ledger0.getLatestBlock();
 
-		UserAccountQuery userset0 = ledger0.getUserAccountSet(genesisBlock);
+		UserAccountCollection userset0 = ledger0.getUserAccountSet(genesisBlock);
 
 		PubKey pubKey0 = KeyGenUtils.decodePubKey(PUB_KEYS[0]);
 		Bytes address0 = AddressEncoding.generateAddress(pubKey0);
