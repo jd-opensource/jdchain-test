@@ -38,6 +38,7 @@ import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.transaction.GenericValueHolder;
 import com.jd.blockchain.utils.Bytes;
+import com.jd.blockchain.utils.Property;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker;
 import com.jd.blockchain.utils.io.BytesUtils;
 import com.jd.blockchain.utils.net.NetworkAddress;
@@ -116,6 +117,32 @@ public class IntegrationBase {
 		keyPairResponse.txResp = txResp;
 		keyPairResponse.txHash = transactionHash;
 		return keyPairResponse;
+	}
+
+	public static void testSDK_Update_Consensus_Settings(AsymmetricKeypair adminKey, HashDigest ledgerHash,
+													   BlockchainService blockchainService) {
+
+		List<Property> properties = new ArrayList<Property>();
+
+		// 修改bftsmart.conf配置文件中的选项；
+		properties.add(new Property("system.communication.useSenderThread",  "false"));
+
+		Property[] propertiesArray = properties.toArray(new Property[properties.size()]);
+
+		TransactionTemplate txTpl = blockchainService.newTransaction(ledgerHash);
+
+		txTpl.settings().update(propertiesArray);
+
+		// TX 准备就绪；
+		PreparedTransaction prepTx = txTpl.prepare();
+
+		// 使用私钥进行签名；
+		prepTx.sign(adminKey);
+
+		// 提交交易；
+		TransactionResponse transactionResponse = prepTx.commit();
+
+		System.out.println(transactionResponse.isSuccess());
 	}
 
 	public static KeyPairResponse testSDK_BlockFullRollBack(AsymmetricKeypair adminKey, HashDigest ledgerHash,

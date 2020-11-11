@@ -9,6 +9,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.jd.blockchain.utils.Property;
 import org.junit.Test;
 
 import com.jd.blockchain.consensus.ConsensusProviders;
@@ -40,6 +41,8 @@ public class IntegrationTest4Bftsmart {
     private static final boolean isRegisterParticipant = true;
 
     private static final boolean isParticipantStateUpdate = true;
+
+    private static final boolean isConsensusSettingUpdate = false;
 
     private static final boolean isWriteKv = true;
 
@@ -195,6 +198,20 @@ public class IntegrationTest4Bftsmart {
         System.out.printf("update participant state after ,new consensus env node num = %d\r\n", consensusSettingsNew.getNodes().length);
         for (int i = 0; i < participantCount; i++) {
             System.out.printf("part%d state = %d\r\n",i, ledgerRepository.getAdminInfo(ledgerRepository.retrieveLatestBlock()).getParticipants()[i].getParticipantNodeState().CODE);
+        }
+
+        if (isConsensusSettingUpdate) {
+            BftsmartConsensusSettings consensusSettings2 = (BftsmartConsensusSettings) ConsensusProviders.getProvider(providers[0]).getSettingsFactory().getConsensusSettingsEncoder().decode(ledgerRepository.getAdminInfo().getSettings().getConsensusSetting().toBytes());
+            for (Property property : consensusSettings2.getSystemConfigs()) {
+                System.out.printf("before update name  = %s, before update value  = %s\r\n", property.getName(), property.getValue());
+            }
+
+            IntegrationBase.testSDK_Update_Consensus_Settings(adminKey, ledgerHash, blockchainService);
+
+            BftsmartConsensusSettings consensusSettings3 = (BftsmartConsensusSettings) ConsensusProviders.getProvider(providers[0]).getSettingsFactory().getConsensusSettingsEncoder().decode(ledgerRepository.getAdminInfo(ledgerRepository.retrieveLatestBlock()).getSettings().getConsensusSetting().toBytes());
+            for (Property property : consensusSettings3.getSystemConfigs()) {
+                System.out.printf("after update name  = %s, after update value  = %s\r\n", property.getName(), property.getValue());
+            }
         }
 
         try {
