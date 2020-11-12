@@ -30,7 +30,7 @@ import com.jd.blockchain.ledger.LedgerPermission;
 import com.jd.blockchain.ledger.LedgerSecurityException;
 import com.jd.blockchain.ledger.TransactionPermission;
 import com.jd.blockchain.ledger.core.DefaultOperationHandleRegisteration;
-import com.jd.blockchain.ledger.core.LedgerDataQuery;
+import com.jd.blockchain.ledger.core.LedgerDataSet;
 import com.jd.blockchain.ledger.core.LedgerEditor;
 import com.jd.blockchain.ledger.core.LedgerManager;
 import com.jd.blockchain.ledger.core.LedgerRepository;
@@ -288,7 +288,7 @@ public class LedgerPerformanceTest {
 		ConsoleUtils.info("\r\n\r\n================= 准备测试交易 [执行合约] =================");
 
 		LedgerBlock latestBlock = ledger.getLatestBlock();
-		LedgerDataQuery previousDataSet = ledger.getLedgerData(latestBlock);
+		LedgerDataSet previousDataSet = ledger.getLedgerDataSet(latestBlock);
 		LedgerEditor newEditor = ledger.createNextBlock();
 		TransactionBatchProcessor txProc = new TransactionBatchProcessor(DEFAULT_SECURITY_MANAGER, newEditor, ledger,
 				opHandler);
@@ -321,7 +321,7 @@ public class LedgerPerformanceTest {
 		long batchStartTs = System.currentTimeMillis();
 		for (int i = 0; i < batchCount; i++) {
 			LedgerBlock latestBlock = ledger.getLatestBlock();
-			LedgerDataQuery previousDataSet = ledger.getLedgerData(latestBlock);
+			LedgerDataSet previousDataSet = ledger.getLedgerDataSet(latestBlock);
 			if (statistic) {
 				ConsoleUtils.info("------ 开始执行交易, 即将生成区块[高度：%s] ------", (latestBlock.getHeight() + 1));
 			}
@@ -647,7 +647,7 @@ public class LedgerPerformanceTest {
 		public static final FreedomLedgerSecurityManager INSTANCE = new FreedomLedgerSecurityManager();
 
 		@Override
-		public SecurityPolicy createSecurityPolicy(Set<Bytes> endpoints, Set<Bytes> nodes) {
+		public SecurityPolicy getSecurityPolicy(Set<Bytes> endpoints, Set<Bytes> nodes) {
 			return new FreedomSecurityPolicy(endpoints, nodes);
 		}
 

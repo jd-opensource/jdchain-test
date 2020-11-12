@@ -28,7 +28,7 @@ import com.jd.blockchain.ledger.LedgerInitProperties;
 import com.jd.blockchain.ledger.TransactionRequest;
 import com.jd.blockchain.ledger.TransactionRequestBuilder;
 import com.jd.blockchain.ledger.core.DefaultOperationHandleRegisteration;
-import com.jd.blockchain.ledger.core.LedgerDataQuery;
+import com.jd.blockchain.ledger.core.LedgerDataSet;
 import com.jd.blockchain.ledger.core.LedgerEditor;
 import com.jd.blockchain.ledger.core.LedgerManager;
 import com.jd.blockchain.ledger.core.LedgerRepository;
@@ -79,7 +79,7 @@ public class LedgerBlockGeneratingTest {
 			LedgerBlock latestBlock = ledger.getLatestBlock();
 			assertEquals(height + i, latestBlock.getHeight());
 
-			LedgerDataQuery previousDataSet = ledger.getLedgerData(latestBlock);
+			LedgerDataSet previousDataSet = ledger.getLedgerDataSet(latestBlock);
 			ConsoleUtils.info("------ 开始执行交易, 即将生成区块[%s] ------", (latestBlock.getHeight() + 1));
 			long startTs = System.currentTimeMillis();
 
