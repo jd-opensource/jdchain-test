@@ -1,24 +1,8 @@
 package test.com.jd.blockchain.intgr;
 
-import static test.com.jd.blockchain.intgr.IntegrationBase.buildLedgers;
-import static test.com.jd.blockchain.intgr.IntegrationBase.peerNodeStart;
-import static test.com.jd.blockchain.intgr.IntegrationBase.validKeyPair;
-import static test.com.jd.blockchain.intgr.IntegrationBase.validKvWrite;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import com.jd.blockchain.utils.Property;
-import org.junit.Test;
-
 import com.jd.blockchain.consensus.ConsensusProviders;
 import com.jd.blockchain.consensus.bftsmart.BftsmartConsensusSettings;
-import com.jd.blockchain.crypto.AsymmetricKeypair;
-import com.jd.blockchain.crypto.HashDigest;
-import com.jd.blockchain.crypto.KeyGenUtils;
-import com.jd.blockchain.crypto.PrivKey;
-import com.jd.blockchain.crypto.PubKey;
+import com.jd.blockchain.crypto.*;
 import com.jd.blockchain.gateway.GatewayConfigProperties;
 import com.jd.blockchain.ledger.BlockchainKeypair;
 import com.jd.blockchain.ledger.core.LedgerQuery;
@@ -28,11 +12,17 @@ import com.jd.blockchain.storage.service.DbConnectionFactory;
 import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker;
-
+import org.junit.Test;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeTest;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeWeb4Nodes;
 
-public class IntegrationTest4Bftsmart {
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import static test.com.jd.blockchain.intgr.IntegrationBase.*;
+
+public class IntegrationTest4Bftsmart4Gateway2Peer {
 
     private static final boolean isRegisterUser = true;
 
@@ -41,8 +31,6 @@ public class IntegrationTest4Bftsmart {
     private static final boolean isRegisterParticipant = true;
 
     private static final boolean isParticipantStateUpdate = true;
-
-    private static final boolean isConsensusSettingUpdate = false;
 
     private static final boolean isWriteKv = true;
 
@@ -75,13 +63,6 @@ public class IntegrationTest4Bftsmart {
 
         // 启动Peer节点
         PeerServer[] peerNodes = peerNodeStart(ledgerHash, dbType);
-
-        try {
-            // 休眠20秒，保证Peer节点启动成功
-            Thread.sleep(20000);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         DbConnectionFactory dbConnectionFactory0 = peerNodes[0].getDBConnectionFactory();
         DbConnectionFactory dbConnectionFactory1 = peerNodes[1].getDBConnectionFactory();
@@ -198,20 +179,6 @@ public class IntegrationTest4Bftsmart {
         System.out.printf("update participant state after ,new consensus env node num = %d\r\n", consensusSettingsNew.getNodes().length);
         for (int i = 0; i < participantCount; i++) {
             System.out.printf("part%d state = %d\r\n",i, ledgerRepository.getAdminInfo(ledgerRepository.retrieveLatestBlock()).getParticipants()[i].getParticipantNodeState().CODE);
-        }
-
-        if (isConsensusSettingUpdate) {
-            BftsmartConsensusSettings consensusSettings2 = (BftsmartConsensusSettings) ConsensusProviders.getProvider(providers[0]).getSettingsFactory().getConsensusSettingsEncoder().decode(ledgerRepository.getAdminInfo().getSettings().getConsensusSetting().toBytes());
-            for (Property property : consensusSettings2.getSystemConfigs()) {
-                System.out.printf("before update name  = %s, before update value  = %s\r\n", property.getName(), property.getValue());
-            }
-
-            IntegrationBase.testSDK_Update_Consensus_Settings(adminKey, ledgerHash, blockchainService);
-
-            BftsmartConsensusSettings consensusSettings3 = (BftsmartConsensusSettings) ConsensusProviders.getProvider(providers[0]).getSettingsFactory().getConsensusSettingsEncoder().decode(ledgerRepository.getAdminInfo(ledgerRepository.retrieveLatestBlock()).getSettings().getConsensusSetting().toBytes());
-            for (Property property : consensusSettings3.getSystemConfigs()) {
-                System.out.printf("after update name  = %s, after update value  = %s\r\n", property.getName(), property.getValue());
-            }
         }
 
         try {

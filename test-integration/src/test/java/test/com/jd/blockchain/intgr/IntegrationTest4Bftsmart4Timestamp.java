@@ -1,24 +1,9 @@
 package test.com.jd.blockchain.intgr;
 
-import static test.com.jd.blockchain.intgr.IntegrationBase.buildLedgers;
-import static test.com.jd.blockchain.intgr.IntegrationBase.peerNodeStart;
-import static test.com.jd.blockchain.intgr.IntegrationBase.validKeyPair;
-import static test.com.jd.blockchain.intgr.IntegrationBase.validKvWrite;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import com.jd.blockchain.utils.Property;
-import org.junit.Test;
-
 import com.jd.blockchain.consensus.ConsensusProviders;
 import com.jd.blockchain.consensus.bftsmart.BftsmartConsensusSettings;
-import com.jd.blockchain.crypto.AsymmetricKeypair;
-import com.jd.blockchain.crypto.HashDigest;
-import com.jd.blockchain.crypto.KeyGenUtils;
-import com.jd.blockchain.crypto.PrivKey;
-import com.jd.blockchain.crypto.PubKey;
+import com.jd.blockchain.consensus.bftsmart.service.BftsmartNodeServer;
+import com.jd.blockchain.crypto.*;
 import com.jd.blockchain.gateway.GatewayConfigProperties;
 import com.jd.blockchain.ledger.BlockchainKeypair;
 import com.jd.blockchain.ledger.core.LedgerQuery;
@@ -28,27 +13,29 @@ import com.jd.blockchain.storage.service.DbConnectionFactory;
 import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker;
-
+import org.junit.Test;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeTest;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeWeb4Nodes;
 
-public class IntegrationTest4Bftsmart {
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import static test.com.jd.blockchain.intgr.IntegrationBase.*;
+
+public class IntegrationTest4Bftsmart4Timestamp {
 
     private static final boolean isRegisterUser = true;
 
-    private static final boolean isRegisterDataAccount = true;
+    private static final boolean isRegisterDataAccount = false;
 
-    private static final boolean isRegisterParticipant = true;
+    private static final boolean isRegisterParticipant = false;
 
-    private static final boolean isParticipantStateUpdate = true;
+    private static final boolean isParticipantStateUpdate = false;
 
-    private static final boolean isConsensusSettingUpdate = false;
-
-    private static final boolean isWriteKv = true;
+    private static final boolean isWriteKv = false;
 
     private static final String DB_TYPE_MEM = "mem";
-
-    private static final String DB_TYPE_REDIS = "redis";
 
     public static final String DB_TYPE_ROCKSDB = "rocksdb";
 
@@ -60,11 +47,20 @@ public class IntegrationTest4Bftsmart {
     }
 
     @Test
-    public void test4Redis() {
-//        test(LedgerInitConsensusConfig.bftsmartProvider, DB_TYPE_REDIS, LedgerInitConsensusConfig.redisConnectionStrings);
+    public void testRocksdbAndRestartOne() throws Exception {
+        PeerServer[] peerServers = test(LedgerInitConsensusConfig.bftsmartProvider, DB_TYPE_MEM, LedgerInitConsensusConfig.memConnectionStrings);
+        // 停掉peer1
+        int stopNode = 1;
+        peerServers[stopNode].stop();
+        System.out.println("----- peer server stop -----");
+        Thread.sleep(60000);
+        // 然后重启
+        peerServers[stopNode].start();
+        System.out.println("----- peer server start -----");
+        Thread.sleep(Integer.MAX_VALUE);
     }
 
-    public void test(String[] providers, String dbType, String[] dbConnections) {
+    public PeerServer[] test(String[] providers, String dbType, String[] dbConnections) {
 
 
         final ExecutorService sendReqExecutors = Executors.newFixedThreadPool(20);
@@ -75,13 +71,6 @@ public class IntegrationTest4Bftsmart {
 
         // 启动Peer节点
         PeerServer[] peerNodes = peerNodeStart(ledgerHash, dbType);
-
-        try {
-            // 休眠20秒，保证Peer节点启动成功
-            Thread.sleep(20000);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         DbConnectionFactory dbConnectionFactory0 = peerNodes[0].getDBConnectionFactory();
         DbConnectionFactory dbConnectionFactory1 = peerNodes[1].getDBConnectionFactory();
@@ -200,28 +189,46 @@ public class IntegrationTest4Bftsmart {
             System.out.printf("part%d state = %d\r\n",i, ledgerRepository.getAdminInfo(ledgerRepository.retrieveLatestBlock()).getParticipants()[i].getParticipantNodeState().CODE);
         }
 
-        if (isConsensusSettingUpdate) {
-            BftsmartConsensusSettings consensusSettings2 = (BftsmartConsensusSettings) ConsensusProviders.getProvider(providers[0]).getSettingsFactory().getConsensusSettingsEncoder().decode(ledgerRepository.getAdminInfo().getSettings().getConsensusSetting().toBytes());
-            for (Property property : consensusSettings2.getSystemConfigs()) {
-                System.out.printf("before update name  = %s, before update value  = %s\r\n", property.getName(), property.getValue());
-            }
-
-            IntegrationBase.testSDK_Update_Consensus_Settings(adminKey, ledgerHash, blockchainService);
-
-            BftsmartConsensusSettings consensusSettings3 = (BftsmartConsensusSettings) ConsensusProviders.getProvider(providers[0]).getSettingsFactory().getConsensusSettingsEncoder().decode(ledgerRepository.getAdminInfo(ledgerRepository.retrieveLatestBlock()).getSettings().getConsensusSetting().toBytes());
-            for (Property property : consensusSettings3.getSystemConfigs()) {
-                System.out.printf("after update name  = %s, after update value  = %s\r\n", property.getName(), property.getValue());
-            }
-        }
-
         try {
             System.out.println("----------------- Init Completed -----------------");
-            Thread.sleep(Integer.MAX_VALUE);
+            // 产生一笔远远落后于当前时间的区块
+            Thread.sleep(30000);
+            // 发送交易
+            size = 15;
+            CountDownLatch latch = new CountDownLatch(size);
+            if (isRegisterUser) {
+                for (int i = 0; i < size; i++) {
+                    sendReqExecutors.execute(() -> {
+
+                        System.out.printf(" sdk execute time = %s threadId = %s \r\n", System.currentTimeMillis(), Thread.currentThread().getId());
+                        IntegrationBase.testSDK_RegisterUser(adminKey, ledgerHash, blockchainService);
+                        latch.countDown();
+                    });
+                }
+            }
+            latch.await();
+
+            // 完成后继续发送交易以确认其操作正常
+            if (isRegisterDataAccount) {
+                IntegrationBase.KeyPairResponse dataAccountResponse = IntegrationBase.testSDK_RegisterDataAccount(adminKey, ledgerHash, blockchainService);
+
+                validKeyPair(dataAccountResponse, ledgerRepository, IntegrationBase.KeyPairType.DATAACCOUNT);
+
+                if (isWriteKv) {
+
+                    for (int m = 0; m < 13; m++) {
+                        BlockchainKeypair da = dataAccountResponse.keyPair;
+                        IntegrationBase.KvResponse kvResponse = IntegrationBase.testSDK_InsertData(adminKey, ledgerHash, blockchainService, da.getAddress());
+                        validKvWrite(kvResponse, ledgerRepository, blockchainService);
+                    }
+                }
+            }
+            Thread.sleep(20000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        IntegrationBase.testConsistencyAmongNodes(ledgers);
+        return peerNodes;
     }
     private HashDigest initLedger(String[] dbConnections) {
         LedgerInitializeWeb4Nodes ledgerInit = new LedgerInitializeWeb4Nodes();

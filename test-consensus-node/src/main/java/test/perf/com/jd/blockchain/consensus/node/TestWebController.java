@@ -77,7 +77,7 @@ public class TestWebController {
 	@RequestMapping(path = "/configs/nodes/set/{id}/{host}/{port}", method = RequestMethod.GET)
 	public String setNode(@PathVariable("id") int id, @PathVariable("host") String host,
 						  @PathVariable("port") int port) {
-		nodesConfig.add(id, host, port);
+		nodesConfig.add(id, host, port, -1);
 		return getNodes();
 	}
 

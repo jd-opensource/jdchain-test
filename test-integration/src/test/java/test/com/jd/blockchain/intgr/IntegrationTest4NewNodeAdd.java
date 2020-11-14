@@ -206,6 +206,7 @@ public class IntegrationTest4NewNodeAdd {
             // 再次发送交易检查网关本地的视图配置能否正确更新
             registUserByExistGatewayWrapper(blockchainService);
 
+            System.out.println("---------- test4RocksdbTransactionsReplayUserRegistOp ----------");
             Thread.sleep(Integer.MAX_VALUE);
 
         } catch (Exception e) {
@@ -318,7 +319,7 @@ public class IntegrationTest4NewNodeAdd {
             registUserByExistGatewayWrapper(blockchainService);
             // 再次发送交易检查网关本地的视图配置能否正确更新
             registUserByExistGatewayWrapper(blockchainService);
-
+            System.out.println("---------- testAdd3NewNodes ----------");
             Thread.sleep(Integer.MAX_VALUE);
 
         } catch (Exception e) {
@@ -362,6 +363,7 @@ public class IntegrationTest4NewNodeAdd {
 
             startNewPeerAndActive(ledgerHash, DB_TYPE_ROCKSDB, newParticipant1, 4);
 
+            System.out.println("---------- testBlockRollbacknewStartPeerStateTransferVerify ----------");
             Thread.sleep(Integer.MAX_VALUE);
 
         } catch (Exception e) {
@@ -398,6 +400,9 @@ public class IntegrationTest4NewNodeAdd {
 
 //            registUserByNewGateway(new NetworkAddress(NEW_NODE_HOST, NEW_NODE_HTTP_PORT));
 //            System.out.println("---------- Access New Gateway And Regist User Completed ----------");
+
+            System.out.println("---------- test4RocksdbAddNewNodeAndPublishTxByNewGateway ----------");
+
             Thread.sleep(Integer.MAX_VALUE);
 
         } catch (Exception e) {
@@ -438,6 +443,8 @@ public class IntegrationTest4NewNodeAdd {
 
             // 再次发送交易检查网关本地的视图配置能否正确更新
             registUserByExistGatewayWrapper(blockchainService);
+
+            System.out.println("---------- test4RocksdbAddNewNodeAndPublishTxByOldGateway ----------");
 
             Thread.sleep(Integer.MAX_VALUE);
 
@@ -496,6 +503,8 @@ public class IntegrationTest4NewNodeAdd {
 
             registUserByExistGatewayWrapper(blockchainService);
 
+            System.out.println("---------- test4RocksdbAddTwoNewNodeAndPublishTxByOldGateway ----------");
+
             Thread.sleep(Integer.MAX_VALUE);
 
         } catch (Exception e) {
@@ -547,6 +556,8 @@ public class IntegrationTest4NewNodeAdd {
 
             // 再次发送交易检查网关本地的视图配置能否正确更新
             registUserByExistGatewayWrapper(blockchainService);
+
+            System.out.println("---------- test4RocksdbAddTwoNewNodeAndActiveLastOne ----------");
 
             Thread.sleep(Integer.MAX_VALUE);
 
@@ -610,6 +621,8 @@ public class IntegrationTest4NewNodeAdd {
             // 再次发送交易检查网关本地的视图配置能否正确更新
             registUserByExistGatewayWrapper(blockchainService);
 
+            System.out.println("---------- test4RocksdbAdd3NewNodeAndActiveLastOne ----------");
+
             Thread.sleep(Integer.MAX_VALUE);
 
         } catch (Exception e) {
@@ -671,6 +684,8 @@ public class IntegrationTest4NewNodeAdd {
 
             // 再次发送交易检查网关本地的视图配置能否正确更新
             registUserByExistGatewayWrapper(blockchainService);
+
+            System.out.println("---------- test4RocksdbAdd3NewNodeAndActiveLastTwo ----------");
 
             Thread.sleep(Integer.MAX_VALUE);
 
@@ -1009,8 +1024,24 @@ public class IntegrationTest4NewNodeAdd {
             FileUtils.forceDelete(newFile);
         }
         FileUtils.copyDirectory(oldNodeFile, newFile);
+
+//        String oldLog = "/Users/zhangshuang3/Desktop/Project_new2/jdchain-develop-1.4.0/test/test-integration/src/test" + File.separator + ledgerHash.toBase58() + "." + String.valueOf(oldId) + ".txs" + ".log";
+//
+//        String newLog = "/Users/zhangshuang3/Desktop/Project_new2/jdchain-develop-1.4.0/test/test-integration/src/test" + File.separator + ledgerHash.toBase58() + "." + String.valueOf(newId) + ".txs" + ".log";
+//
+//        File oldLogFile = new File(oldLog);
+//
+//        File newLogFile = new File(newLog);
+//
+//        if (newLogFile.exists()) {
+//            FileUtils.forceDelete(newLogFile);
+//        }
+//
+//        FileUtils.copyFile(oldLogFile, newLogFile);
+
         return newFile;
     }
+
 
     private File copyRocksdbToNewNode2(int oldId, int newId) throws IOException {
         String oldDbUrl = rocksdbConnectionStrings2[oldId];
@@ -1038,6 +1069,14 @@ public class IntegrationTest4NewNodeAdd {
     }
 
     public BlockchainService createBlockChainService(String[] providers, PeerServer[] peerNodes, int gatewayPort) {
+
+        try {
+            // 休眠20秒，保证Peer节点启动成功
+            Thread.sleep(20000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         DbConnectionFactory dbConnectionFactory0 = peerNodes[0].getDBConnectionFactory();
         DbConnectionFactory dbConnectionFactory1 = peerNodes[1].getDBConnectionFactory();
         DbConnectionFactory dbConnectionFactory2 = peerNodes[2].getDBConnectionFactory();
