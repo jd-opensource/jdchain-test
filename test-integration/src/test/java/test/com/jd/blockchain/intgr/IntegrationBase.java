@@ -372,7 +372,7 @@ public class IntegrationBase {
 			assertNotNull(ledgerRepository.getDataAccountSet(ledgerRepository.getLatestBlock())
 					.getAccount(keyPair.getAddress()));
 		} else if (keyPairType == KeyPairType.EVENTACCOUNT) {
-			assertNotNull(ledgerRepository.getEventAccountSet(ledgerRepository.getLatestBlock())
+			assertNotNull(ledgerRepository.getLedgerEvents(ledgerRepository.getLatestBlock()).getEventAccountSet()
 					.getAccount(keyPair.getAddress()));
 		}
 		System.out.printf("validKeyPair end %s \r\n", index);
