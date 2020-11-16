@@ -48,6 +48,7 @@ import com.jd.blockchain.tools.initializer.web.HttpInitConsensServiceFactory;
 import com.jd.blockchain.tools.initializer.web.LedgerInitConfiguration;
 import com.jd.blockchain.tools.initializer.web.LedgerInitConsensusService;
 import com.jd.blockchain.tools.initializer.web.LedgerInitializeWebController;
+import com.jd.blockchain.tools.initializer.web.ParticipantReplica;
 import com.jd.blockchain.utils.Bytes;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker.AsyncCallback;
@@ -81,7 +82,7 @@ public class LedgerInitializeWebTest {
 		// ConsensusProperties csProps = new ConsensusProperties(props);
 		ConsensusProvider csProvider = getConsensusProvider();
 		ConsensusSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
-				Utils.loadParticipantNodes());
+					Utils.loadParticipantNodes());
 
 		// 启动服务器；
 		NetworkAddress initAddr0 = initSetting.getConsensusParticipant(0).getInitializerAddress();

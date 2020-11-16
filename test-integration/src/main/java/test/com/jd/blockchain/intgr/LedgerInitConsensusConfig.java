@@ -8,13 +8,10 @@
  */
 package test.com.jd.blockchain.intgr;
 
+import java.io.File;
+
 import com.jd.blockchain.consensus.ConsensusProvider;
 import com.jd.blockchain.consensus.ConsensusProviders;
-import com.jd.blockchain.utils.io.FileUtils;
-
-import test.com.jd.blockchain.intgr.perf.LedgerPerformanceTest;
-
-import java.io.File;
 
 /**
  *

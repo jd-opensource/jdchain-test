@@ -50,7 +50,6 @@ import java.util.concurrent.CountDownLatch;
 import static com.jd.blockchain.ledger.TransactionState.LEDGER_ERROR;
 import static com.jd.blockchain.transaction.TxBuilder.computeTxContentHash;
 
-
 public class TransactionsReplay {
 	public static final String PASSWORD = "abc";
 
@@ -65,16 +64,20 @@ public class TransactionsReplay {
 		Node node3 = context.getNode(3);
 
 		NetworkAddress peerSrvAddr0 = new NetworkAddress("127.0.0.1", 10200);
-		PeerServer peer0 = new PeerServer(peerSrvAddr0, node0.getBindingConfig(), node0.getStorageDB(), node0.getLedgerManager());
+		PeerServer peer0 = new PeerServer(peerSrvAddr0, node0.getBindingConfig(), node0.getStorageDB(),
+				node0.getLedgerManager());
 
 		NetworkAddress peerSrvAddr1 = new NetworkAddress("127.0.0.1", 10210);
-		PeerServer peer1 = new PeerServer(peerSrvAddr1, node1.getBindingConfig(), node1.getStorageDB(), node1.getLedgerManager());
+		PeerServer peer1 = new PeerServer(peerSrvAddr1, node1.getBindingConfig(), node1.getStorageDB(),
+				node1.getLedgerManager());
 
 		NetworkAddress peerSrvAddr2 = new NetworkAddress("127.0.0.1", 10220);
-		PeerServer peer2 = new PeerServer(peerSrvAddr2, node2.getBindingConfig(), node2.getStorageDB(), node2.getLedgerManager());
+		PeerServer peer2 = new PeerServer(peerSrvAddr2, node2.getBindingConfig(), node2.getStorageDB(),
+				node2.getLedgerManager());
 
 		NetworkAddress peerSrvAddr3 = new NetworkAddress("127.0.0.1", 10230);
-		PeerServer peer3 = new PeerServer(peerSrvAddr3, node3.getBindingConfig(), node3.getStorageDB(), node3.getLedgerManager());
+		PeerServer peer3 = new PeerServer(peerSrvAddr3, node3.getBindingConfig(), node3.getStorageDB(),
+				node3.getLedgerManager());
 
 		AsyncCallback<Object> peerStarting0 = peer0.start();
 		AsyncCallback<Object> peerStarting1 = peer1.start();
@@ -96,7 +99,8 @@ public class TransactionsReplay {
 		PrivKey privKey = KeyGenUtils.decodePrivKeyWithRawPassword(LedgerInitializeWebTest.PRIV_KEYS[0], PASSWORD);
 		PubKey pubKey = KeyGenUtils.decodePubKey(LedgerInitializeWebTest.PUB_KEYS[0]);
 
-		GatewayTestRunner gateway0 = new GatewayTestRunner("127.0.0.1", 10300, gwkey0, LedgerInitConsensusConfig.bftsmartProvider, null, peerSrvAddr0);
+		GatewayTestRunner gateway0 = new GatewayTestRunner("127.0.0.1", 10300, gwkey0,
+				LedgerInitConsensusConfig.bftsmartProvider, null, peerSrvAddr0);
 
 		AsyncCallback<Object> gwStarting0 = gateway0.start();
 
@@ -108,8 +112,10 @@ public class TransactionsReplay {
 
 		HashDigest ledgerHash = ledgerManage3.getLedgerHashs()[0];
 
-		LedgerRepository ledgerRepository0 = (LedgerRepository) ledgerManage0.register(ledgerHash, node0.getStorageDB().connect("memory://local/0").getStorageService());
-		LedgerRepository ledgerRepository3 = (LedgerRepository) ledgerManage3.register(ledgerHash, node0.getStorageDB().connect("memory://local/3").getStorageService());
+		LedgerRepository ledgerRepository0 = (LedgerRepository) ledgerManage0.register(ledgerHash,
+				node0.getStorageDB().connect("memory://local/0").getStorageService());
+		LedgerRepository ledgerRepository3 = (LedgerRepository) ledgerManage3.register(ledgerHash,
+				node0.getStorageDB().connect("memory://local/3").getStorageService());
 
 		addNewBlocksForNode0(node0, pubKey, privKey);
 
@@ -130,18 +136,22 @@ public class TransactionsReplay {
 
 		HashDigest ledgerHash0 = ledgerManage0.getLedgerHashs()[0];
 		long startTs = System.currentTimeMillis();
-		LedgerRepository ledgerRepository0 = (LedgerRepository) ledgerManage0.register(ledgerHash0, node0.getStorageDB().connect("memory://local/0").getStorageService());
+		LedgerRepository ledgerRepository0 = (LedgerRepository) ledgerManage0.register(ledgerHash0,
+				node0.getStorageDB().connect("memory://local/0").getStorageService());
 
 		for (int height = 1; height < 20; height++) {
 			TransactionBatchProcessor txbatchProcessor = new TransactionBatchProcessor(ledgerRepository0, opReg);
 			for (int i = 0; i < 5; i++) {
-				TxBuilder txbuilder = new TxBuilder(ledgerHash0, ledgerRepository0.getAdminSettings().getSettings().getCryptoSetting().getHashAlgorithm());
+				TxBuilder txbuilder = new TxBuilder(ledgerHash0,
+						ledgerRepository0.getAdminSettings().getSettings().getCryptoSetting().getHashAlgorithm());
 				TxContentBlob txContentBlob = new TxContentBlob(ledgerHash0);
 				txContentBlob.setTime(startTs++);
 				BlockchainKeypair userKey = BlockchainKeyGenerator.getInstance().generate();
 				UserRegisterOperation userRegisterOperation = txbuilder.users().register(userKey.getIdentity());
 				txContentBlob.addOperation(userRegisterOperation);
-				HashDigest contentHash = computeTxContentHash(ledgerRepository0.getAdminSettings().getSettings().getCryptoSetting().getHashAlgorithm(), txContentBlob);
+				HashDigest contentHash = computeTxContentHash(
+						ledgerRepository0.getAdminSettings().getSettings().getCryptoSetting().getHashAlgorithm(),
+						txContentBlob);
 				TxRequestBuilder txRequestBuilder = new TxRequestBuilder(contentHash, txContentBlob);
 				txRequestBuilder.signAsEndpoint(new AsymmetricKeypair(pubKey, privKey));
 				txRequestBuilder.signAsNode(new AsymmetricKeypair(pubKey, privKey));
@@ -153,7 +163,8 @@ public class TransactionsReplay {
 		}
 	}
 
-	private static WebResponse checkLedgerDiff(LedgerRepository ledgerRepository, AsymmetricKeypair localKeyPair, String remoteManageHost, String remoteManagePort) {
+	private static WebResponse checkLedgerDiff(LedgerRepository ledgerRepository, AsymmetricKeypair localKeyPair,
+			String remoteManageHost, String remoteManagePort) {
 
 		List<String> providers = new ArrayList<String>();
 
@@ -174,19 +185,21 @@ public class TransactionsReplay {
 		try {
 			providers.add(LedgerInitConsensusConfig.bftsmartProvider[0]);
 
-			PeerBlockchainServiceFactory blockchainServiceFactory = PeerBlockchainServiceFactory.connect(localKeyPair, new NetworkAddress(remoteManageHost, Integer.parseInt(remoteManagePort)), providers);
+			PeerBlockchainServiceFactory blockchainServiceFactory = PeerBlockchainServiceFactory.connect(localKeyPair,
+					new NetworkAddress(remoteManageHost, Integer.parseInt(remoteManagePort)), providers);
 
-			remoteLatestBlockHeight = blockchainServiceFactory.getBlockchainService().getLedger(ledgerHash).getLatestBlockHeight();
-
+			remoteLatestBlockHeight = blockchainServiceFactory.getBlockchainService().getLedger(ledgerHash)
+					.getLatestBlockHeight();
 
 			if ((localLatestBlockHeight <= remoteLatestBlockHeight)) {
 
-
 				// 检查本节点与拉取节点相同高度的区块，哈希是否一致,不一致说明其中一个节点的数据库被污染了
-				remoteBlockHash = blockchainServiceFactory.getBlockchainService().getBlock(ledgerHash, localLatestBlockHeight).getHash();
+				remoteBlockHash = blockchainServiceFactory.getBlockchainService()
+						.getBlock(ledgerHash, localLatestBlockHeight).getHash();
 
-				if (!(localLatestBlockHash.toBase58().equals(remoteBlockHash.toBase58()))){
-					throw new IllegalStateException("[ManagementController] checkLedgerDiff, ledger database is inconsistent, please check ledger database!");
+				if (!(localLatestBlockHash.toBase58().equals(remoteBlockHash.toBase58()))) {
+					throw new IllegalStateException(
+							"[ManagementController] checkLedgerDiff, ledger database is inconsistent, please check ledger database!");
 				}
 
 				// 本节点与拉取节点高度一致，不需要进行交易重放
@@ -194,22 +207,27 @@ public class TransactionsReplay {
 					return WebResponse.createSuccessResult(null);
 				}
 			} else {
-				throw new IllegalStateException("[ManagementController] checkLedgerDiff, local latest block height > remote node latest block height!");
+				throw new IllegalStateException(
+						"[ManagementController] checkLedgerDiff, local latest block height > remote node latest block height!");
 			}
 
 			// 对差异进行交易重放
-			for (int height = (int)localLatestBlockHeight + 1; height <= remoteLatestBlockHeight; height++) {
+			for (int height = (int) localLatestBlockHeight + 1; height <= remoteLatestBlockHeight; height++) {
 
 				TransactionBatchProcessor txbatchProcessor = new TransactionBatchProcessor(ledgerRepository, opReg);
 				// transactions replay
 				try {
-					HashDigest pullBlockHash = blockchainServiceFactory.getBlockchainService().getBlock(ledgerHash, height).getHash();
-					int preTotalCount = (int) blockchainServiceFactory.getBlockchainService().getTransactionCount(ledgerHash, height - 1);
-					int curTotalCount = (int) blockchainServiceFactory.getBlockchainService().getTransactionCount(ledgerHash, height);
-					//获取区块内的增量交易
+					HashDigest pullBlockHash = blockchainServiceFactory.getBlockchainService()
+							.getBlock(ledgerHash, height).getHash();
+					int preTotalCount = (int) blockchainServiceFactory.getBlockchainService()
+							.getTransactionCount(ledgerHash, height - 1);
+					int curTotalCount = (int) blockchainServiceFactory.getBlockchainService()
+							.getTransactionCount(ledgerHash, height);
+					// 获取区块内的增量交易
 					int addition_count = curTotalCount - preTotalCount;
 
-					LedgerTransaction[] transactions = blockchainServiceFactory.getBlockchainService().getTransactions(ledgerHash, height, preTotalCount, addition_count);
+					LedgerTransaction[] transactions = blockchainServiceFactory.getBlockchainService()
+							.getTransactions(ledgerHash, height, preTotalCount, addition_count);
 
 					for (LedgerTransaction ledgerTransaction : transactions) {
 
@@ -218,29 +236,33 @@ public class TransactionsReplay {
 						txContentBlob.setTime(ledgerTransaction.getRequest().getTransactionContent().getTimestamp());
 
 						// convert operation, from json to object
-						for (Operation operation : ledgerTransaction.getRequest().getTransactionContent().getOperations()) {
+						for (Operation operation : ledgerTransaction.getRequest().getTransactionContent()
+								.getOperations()) {
 							txContentBlob.addOperation(ClientResolveUtil.read(operation));
 						}
 
-						TxRequestBuilder txRequestBuilder = new TxRequestBuilder(ledgerTransaction.getTransactionHash(), txContentBlob);
+						TxRequestBuilder txRequestBuilder = new TxRequestBuilder(ledgerTransaction.getTransactionHash(),
+								txContentBlob);
 						txRequestBuilder.addNodeSignature(ledgerTransaction.getRequest().getNodeSignatures());
 						txRequestBuilder.addEndpointSignature(ledgerTransaction.getRequest().getEndpointSignatures());
 						TransactionRequest transactionRequest = txRequestBuilder.buildRequest();
 
 						txbatchProcessor.schedule(transactionRequest);
 					}
-					
+
 					handle = txbatchProcessor.prepare();
 
 					if (!(handle.getBlock().getHash().toBase58().equals(pullBlockHash.toBase58()))) {
-						throw new IllegalStateException("[ManagementController] checkLedgerDiff, transactions replay, block hash result is inconsistent!");
+						throw new IllegalStateException(
+								"[ManagementController] checkLedgerDiff, transactions replay, block hash result is inconsistent!");
 					}
 
 					handle.commit();
 
 				} catch (Exception e) {
 					handle.cancel(LEDGER_ERROR);
-					throw new IllegalStateException("[ManagementController] checkLedgerDiff, transactions replay failed!", e);
+					throw new IllegalStateException(
+							"[ManagementController] checkLedgerDiff, transactions replay failed!", e);
 				}
 			}
 		} catch (Exception e) {
@@ -250,11 +272,11 @@ public class TransactionsReplay {
 		return WebResponse.createSuccessResult(null);
 	}
 
-	public static ConsensusProvider getConsensusProvider (String providerName){
+	public static ConsensusProvider getConsensusProvider(String providerName) {
 		return ConsensusProviders.getProvider(providerName);
 	}
 
-	private static LedgerInitProperties loadInitSetting_integration () {
+	private static LedgerInitProperties loadInitSetting_integration() {
 		ClassPathResource ledgerInitSettingResource = new ClassPathResource("ledger_init_test_web2.init");
 		try (InputStream in = ledgerInitSettingResource.getInputStream()) {
 			LedgerInitProperties setting = LedgerInitProperties.resolve(in);
@@ -264,14 +286,14 @@ public class TransactionsReplay {
 		}
 	}
 
-	private static IntegratedContext initLedgers () {
+	private static IntegratedContext initLedgers() {
 		Prompter consolePrompter = new PresetAnswerPrompter("N"); // new ConsolePrompter();
 		LedgerInitProperties initSetting = loadInitSetting_integration();
-		Properties props = LedgerInitializeWebTest.loadConsensusSetting(LedgerInitConsensusConfig.bftsmartConfig.getConfigPath());
+		Properties props = LedgerInitializeWebTest
+				.loadConsensusSetting(LedgerInitConsensusConfig.bftsmartConfig.getConfigPath());
 		ConsensusProvider csProvider = getConsensusProvider(LedgerInitConsensusConfig.bftsmartConfig.getProvider());
-		ConsensusSettings csProps = csProvider.getSettingsFactory()
-				.getConsensusSettingsBuilder()
-				.createSettings(props, Utils.loadParticipantNodes());
+		ConsensusSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
+				Utils.loadParticipantNodes());
 
 		// 启动服务器；
 		NetworkAddress initAddr0 = initSetting.getConsensusParticipant(0).getInitializerAddress();
@@ -305,14 +327,12 @@ public class TransactionsReplay {
 		AsyncCallback<HashDigest> callback0 = nodeCtx0.startInitCommand(privkey0, encodedPassword, initSetting, csProps,
 				csProvider, testDb0, consolePrompter, bindingConfig0, quitLatch, dbFactory0);
 
-
 		TestDbFactory dbFactory1 = new TestDbFactory(new CompositeConnectionFactory());
 		DBConnectionConfig testDb1 = new DBConnectionConfig();
 		testDb1.setConnectionUri("memory://local/1");
 		LedgerBindingConfig bindingConfig1 = new LedgerBindingConfig();
 		AsyncCallback<HashDigest> callback1 = nodeCtx1.startInitCommand(privkey1, encodedPassword, initSetting, csProps,
 				csProvider, testDb1, consolePrompter, bindingConfig1, quitLatch, dbFactory1);
-
 
 		TestDbFactory dbFactory2 = new TestDbFactory(new CompositeConnectionFactory());
 		DBConnectionConfig testDb2 = new DBConnectionConfig();
@@ -388,5 +408,3 @@ public class TransactionsReplay {
 	}
 
 }
-
-
