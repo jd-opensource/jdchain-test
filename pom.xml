@@ -25,6 +25,7 @@
 		<module>test-common</module>
 		<module>test-consensus-client</module>
 		<module>test-consensus-node</module>
+		<module>test-consensus-bftsmart</module>
 		<module>test-ledger</module>
 		<module>test-contract</module>
 		<module>test-integration</module>
