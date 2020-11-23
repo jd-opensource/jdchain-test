@@ -136,6 +136,14 @@ public class ConesensusEnvironment {
 
 		return setup_BFTSMaRT(realmName, consensusProperties, nodesNetworkAddresses, messageHandler, smr);
 	}
+	
+	public static ConesensusEnvironment setup_BFTSMaRT(String realmName, String consensusConfig,
+			NetworkAddress[] nodesNetworkAddresses, MessageHandle messageHandler) throws IOException {
+		Properties consensusProperties = PropertiesUtils.loadProperties(consensusConfig, "UTF-8");
+		StateMachineReplicate smr = Mockito.mock(StateMachineReplicate.class);
+		
+		return setup_BFTSMaRT(realmName, consensusProperties, nodesNetworkAddresses, messageHandler, smr);
+	}
 
 	public static ConesensusEnvironment setup_BFTSMaRT(String realmName, Properties consensusProperties,
 			NetworkAddress[] nodesNetworkAddresses, MessageHandle messageHandler) {
@@ -184,6 +192,8 @@ public class ConesensusEnvironment {
 	//----------------------------------------
 
 	public void startNodeServers() {
+		
+		
 		startNodeServers(nodeServers);
 	}
 

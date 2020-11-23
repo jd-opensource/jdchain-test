@@ -3,10 +3,13 @@ package test.com.jd.blockchain.consensus.bftsmart;
 import java.io.IOException;
 
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.jd.blockchain.consensus.ConsensusSecurityException;
+import com.jd.blockchain.consensus.service.MessageHandle;
 import com.jd.blockchain.utils.ConsoleUtils;
 import com.jd.blockchain.utils.codec.Base58Utils;
+import com.jd.blockchain.utils.net.NetworkAddress;
 import com.jd.blockchain.utils.security.RandomUtils;
 
 public class BftsmartConsensusTest {
@@ -32,22 +35,26 @@ public class BftsmartConsensusTest {
 		final int N = 4;
 		final String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));
 
-		ConesensusEnvironment csEnv = ConesensusEnvironment.setup_BFTSMaRT(realmName, N);
-		
+		NetworkAddress[] nodesNetworkAddresses = ConesensusEnvironment.createMultiPortsAddresses("127.0.0.1", N, 11600,
+				10);
+
+		MessageHandle messageHandle = Mockito.mock(MessageHandle.class);
+		ConesensusEnvironment csEnv = ConesensusEnvironment.setup_BFTSMaRT(realmName, "classpath:bftsmart-consensus-test-normal.config",
+				nodesNetworkAddresses, messageHandle);
+
 		csEnv.startNodeServers();
-		
+
 		ConsoleUtils.info("All nodes has startted!");
-		
+
 		csEnv.setupNewClients(6);
-		
+
 		ConsoleUtils.info("There are 6 clients has been setuped!");
-		
+
 		Thread.sleep(3000);
-		
+
 		csEnv.stopNodeServers();
-		
+
 		ConsoleUtils.info("All nodes has been stopped!");
 	}
-
 
 }
