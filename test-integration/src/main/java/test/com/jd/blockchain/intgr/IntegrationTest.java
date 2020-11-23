@@ -247,7 +247,7 @@ public class IntegrationTest {
 
 		PrivKey nodePrivKey0 = context.getNode(0).getPartiKeyPair().getPrivKey();
 
-		BftsmartConsensusProvider bftsmartProvider0 = new BftsmartConsensusProvider();
+		BftsmartConsensusProvider bftsmartProvider0 = BftsmartConsensusProvider.INSTANCE;
 		BftsmartConsensusProvider mockedBftsmartProvider0 = Mockito.spy(bftsmartProvider0);
 
 		ConsensusProviders.registerProvider(mockedBftsmartProvider0);

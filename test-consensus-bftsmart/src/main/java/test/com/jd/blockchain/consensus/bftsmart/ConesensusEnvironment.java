@@ -1,6 +1,7 @@
 package test.com.jd.blockchain.consensus.bftsmart;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -45,7 +46,7 @@ import com.jd.blockchain.utils.net.NetworkAddress;
 public class ConesensusEnvironment {
 
 	private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
-	
+
 	private final ConsensusProvider CS_PROVIDER;
 
 	private String realmName;
@@ -56,10 +57,9 @@ public class ConesensusEnvironment {
 
 	private List<ConsensusClient> clients = new LinkedList<ConsensusClient>();
 
-	private MessageHandle messageHandler;
-	private StateMachineReplicate stateMachineReplicater;
-	
-	
+	private MessageHandle[] messageHandlers;
+	private StateMachineReplicate[] stateMachineReplicaters;
+
 	public String gerProviderName() {
 		return CS_PROVIDER.getName();
 	}
@@ -93,24 +93,25 @@ public class ConesensusEnvironment {
 		};
 	}
 
-	public MessageHandle getMessageHandler() {
-		return messageHandler;
+	public List<MessageHandle> getMessageHandlers() {
+		return Arrays.asList(messageHandlers);
 	}
 
-	public StateMachineReplicate getStateMachineReplicater() {
-		return stateMachineReplicater;
+	public List<StateMachineReplicate> getStateMachineReplicaters() {
+		return Arrays.asList(stateMachineReplicaters);
 	}
 
 	private ConesensusEnvironment(String realmName, Replica[] replicas, NodeServer[] nodeServers,
-			MessageHandle messageHandler, StateMachineReplicate stateMachineReplicater, ConsensusProvider consensusProvider) {
+			MessageHandle[] messageHandler, StateMachineReplicate[] stateMachineReplicater,
+			ConsensusProvider consensusProvider) {
 		this.CS_PROVIDER = consensusProvider;
-		
+
 		this.realmName = realmName;
 		this.replicas = replicas;
 		this.nodeServers = nodeServers;
 
-		this.messageHandler = messageHandler;
-		this.stateMachineReplicater = stateMachineReplicater;
+		this.messageHandlers = messageHandler;
+		this.stateMachineReplicaters = stateMachineReplicater;
 	}
 
 	public String getRealmName() {
@@ -131,29 +132,43 @@ public class ConesensusEnvironment {
 
 	public static ConesensusEnvironment setup_BFTSMaRT(String realmName, Properties consensusProperties,
 			NetworkAddress[] nodesNetworkAddresses) {
-		StateMachineReplicate smr = Mockito.mock(StateMachineReplicate.class);
-		MessageHandle messageHandler = Mockito.mock(MessageHandle.class);
+		MessageHandle[] messageHandlers = new MessageHandle[nodesNetworkAddresses.length];
+		for (int i = 0; i < messageHandlers.length; i++) {
+			messageHandlers[i] = Mockito.mock(MessageHandle.class);
+		}
 
-		return setup_BFTSMaRT(realmName, consensusProperties, nodesNetworkAddresses, messageHandler, smr);
+		StateMachineReplicate[] smrs = new StateMachineReplicate[nodesNetworkAddresses.length];
+		for (int i = 0; i < smrs.length; i++) {
+			smrs[i] = Mockito.mock(StateMachineReplicate.class);
+		}
+
+		return setup_BFTSMaRT(realmName, consensusProperties, nodesNetworkAddresses, messageHandlers, smrs);
 	}
-	
+
 	public static ConesensusEnvironment setup_BFTSMaRT(String realmName, String consensusConfig,
-			NetworkAddress[] nodesNetworkAddresses, MessageHandle messageHandler) throws IOException {
+			NetworkAddress[] nodesNetworkAddresses, MessageHandle[] messageHandler) throws IOException {
 		Properties consensusProperties = PropertiesUtils.loadProperties(consensusConfig, "UTF-8");
-		StateMachineReplicate smr = Mockito.mock(StateMachineReplicate.class);
-		
-		return setup_BFTSMaRT(realmName, consensusProperties, nodesNetworkAddresses, messageHandler, smr);
+
+		StateMachineReplicate[] smrs = new StateMachineReplicate[nodesNetworkAddresses.length];
+		for (int i = 0; i < smrs.length; i++) {
+			smrs[i] = Mockito.mock(StateMachineReplicate.class);
+		}
+
+		return setup_BFTSMaRT(realmName, consensusProperties, nodesNetworkAddresses, messageHandler, smrs);
 	}
 
 	public static ConesensusEnvironment setup_BFTSMaRT(String realmName, Properties consensusProperties,
-			NetworkAddress[] nodesNetworkAddresses, MessageHandle messageHandler) {
-		StateMachineReplicate smr = Mockito.mock(StateMachineReplicate.class);
+			NetworkAddress[] nodesNetworkAddresses, MessageHandle[] messageHandlers) {
+		StateMachineReplicate[] smrs = new StateMachineReplicate[nodesNetworkAddresses.length];
+		for (int i = 0; i < smrs.length; i++) {
+			smrs[i] = Mockito.mock(StateMachineReplicate.class);
+		}
 
-		return setup_BFTSMaRT(realmName, consensusProperties, nodesNetworkAddresses, messageHandler, smr);
+		return setup_BFTSMaRT(realmName, consensusProperties, nodesNetworkAddresses, messageHandlers, smrs);
 	}
 
 	public static ConesensusEnvironment setup_BFTSMaRT(String realmName, Properties consensusProperties,
-			NetworkAddress[] nodesNetworkAddresses, MessageHandle messageHandler, StateMachineReplicate smr) {
+			NetworkAddress[] nodesNetworkAddresses, MessageHandle messageHandler[], StateMachineReplicate[] smr) {
 		// 节点总数；
 		int nodeCount = nodesNetworkAddresses.length;
 
@@ -176,24 +191,22 @@ public class ConesensusEnvironment {
 	 * @return
 	 */
 	public static ConesensusEnvironment setup(String realmName, ConsensusSettings csSettings, Replica[] replicas,
-			MessageHandle messageHandler, StateMachineReplicate smr, ConsensusProvider consensusProvider) {
+			MessageHandle[] messageHandler, StateMachineReplicate[] smr, ConsensusProvider consensusProvider) {
 		int nodeCount = replicas.length;
 
 		NodeServer[] nodeServers = new NodeServer[nodeCount];
 		for (int i = 0; i < nodeServers.length; i++) {
-			nodeServers[i] = createNodeServer(realmName, csSettings, replicas[i],
-					messageHandler, smr, consensusProvider);
+			nodeServers[i] = createNodeServer(realmName, csSettings, replicas[i], messageHandler[i], smr[i],
+					consensusProvider);
 		}
 
 		return new ConesensusEnvironment(realmName, replicas, nodeServers, messageHandler, smr, consensusProvider);
 	}
-	
-	
-	//----------------------------------------
+
+	// ----------------------------------------
 
 	public void startNodeServers() {
-		
-		
+
 		startNodeServers(nodeServers);
 	}
 
@@ -201,8 +214,7 @@ public class ConesensusEnvironment {
 		stopNodeServers(nodeServers);
 	}
 
-	public ConsensusClient[] setupNewClients(int clientCount)
-			throws ConsensusSecurityException {
+	public ConsensusClient[] setupNewClients(int clientCount) throws ConsensusSecurityException {
 		AsymmetricKeypair[] clientKeys = initRandomKeys(clientCount);
 
 		ClientIncomingSettings[] clientSettings = authClientsFrom(nodeServers, clientKeys, CS_PROVIDER);

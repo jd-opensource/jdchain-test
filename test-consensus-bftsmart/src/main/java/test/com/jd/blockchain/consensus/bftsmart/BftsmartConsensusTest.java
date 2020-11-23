@@ -38,9 +38,12 @@ public class BftsmartConsensusTest {
 		NetworkAddress[] nodesNetworkAddresses = ConesensusEnvironment.createMultiPortsAddresses("127.0.0.1", N, 11600,
 				10);
 
-		MessageHandle messageHandle = Mockito.mock(MessageHandle.class);
+		MessageHandle[] messageHandlers = new MessageHandle[N];
+		for (int i = 0; i < messageHandlers.length; i++) {
+			messageHandlers[i] = Mockito.mock(MessageHandle.class);
+		}
 		ConesensusEnvironment csEnv = ConesensusEnvironment.setup_BFTSMaRT(realmName, "classpath:bftsmart-consensus-test-normal.config",
-				nodesNetworkAddresses, messageHandle);
+				nodesNetworkAddresses, messageHandlers);
 
 		csEnv.startNodeServers();
 
