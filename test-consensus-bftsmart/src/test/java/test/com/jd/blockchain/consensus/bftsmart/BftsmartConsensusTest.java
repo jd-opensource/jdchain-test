@@ -42,6 +42,7 @@ public class BftsmartConsensusTest {
 				nodesNetworkAddresses);
 		
 		NormalConsensusTest test = new NormalConsensusTest();
+		test.setMessageConsenusMillis(5000);
 		
 		test.run(csEnv);
 	}

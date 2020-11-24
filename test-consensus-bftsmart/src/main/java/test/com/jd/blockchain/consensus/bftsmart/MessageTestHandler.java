@@ -1,5 +1,6 @@
 package test.com.jd.blockchain.consensus.bftsmart;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -34,22 +35,22 @@ public class MessageTestHandler implements MessageHandle {
 	private volatile StateSnapshot currentSnaphot;
 
 	private volatile StateSnapshot lastSnapshot;
-	
+
 	public StateSnapshot getLastSnapshot() {
 		return lastSnapshot;
 	}
 
-	private List<StateSnapshot> snapshotHistory = new LinkedList<>();
+	private List<StateSnapshot> snapshotHistory = Collections.synchronizedList(new LinkedList<>());
 
 	/**
 	 * 报告的错误；
 	 */
 	private volatile Throwable error;
-	
+
 	public Throwable getError() {
 		return error;
 	}
-	
+
 	@Override
 	public synchronized String beginBatch(ConsensusContext consensusContext) {
 		if (this.currentContext != null) {
@@ -60,6 +61,13 @@ public class MessageTestHandler implements MessageHandle {
 		}
 		currentBatchID = batchID.getAndIncrement();
 		this.currentContext = consensusContext;
+
+		if (snapshotHistory.isEmpty()) {
+			// 建立创世快照；
+			lastSnapshot = new GenesisMessageSnapshot(currentBatchID);
+			snapshotHistory.add(lastSnapshot);
+		}
+
 		this.hashDigester = Crypto.getHashFunction(ClassicAlgorithm.SHA256).beginHash();
 		this.hashDigester.update(BytesUtils.toBytes(consensusContext.getRealmName()));
 		this.hashDigester.update(BytesUtils.toBytes(currentBatchID));
@@ -103,7 +111,7 @@ public class MessageTestHandler implements MessageHandle {
 		for (OrderedMessageHandle orderedMessageHandle : orderedMessages) {
 			orderedMessageHandle.complete(orderedMessageHandle.getMessageBytes());
 		}
-		
+
 		// 计算快照；
 		byte[] messagesHash = this.hashDigester.complete();
 		this.currentSnaphot = new OrderedMessageSnapshot(currentBatchID, messagesHash);
@@ -194,6 +202,29 @@ public class MessageTestHandler implements MessageHandle {
 		public OrderedMessageSnapshot(long batchID, byte[] hashSnapshot) {
 			this.batchID = batchID;
 			this.hashSnapshot = hashSnapshot;
+		}
+
+		@Override
+		public long getId() {
+			return batchID;
+		}
+
+		@Override
+		public byte[] getSnapshot() {
+			return hashSnapshot;
+		}
+
+	}
+
+	private static class GenesisMessageSnapshot implements StateSnapshot {
+
+		private long batchID;
+
+		private byte[] hashSnapshot;
+
+		public GenesisMessageSnapshot(long batchID) {
+			this.batchID = batchID;
+			this.hashSnapshot = BytesUtils.toBytes(batchID);
 		}
 
 		@Override

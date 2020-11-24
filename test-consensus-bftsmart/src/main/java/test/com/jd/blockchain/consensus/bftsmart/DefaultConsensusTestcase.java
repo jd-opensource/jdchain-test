@@ -22,6 +22,12 @@ import com.jd.blockchain.utils.security.RandomUtils;
 
 public abstract class DefaultConsensusTestcase implements ConsensusTestcase {
 
+	private boolean restartPeersBeforeRunning = true;
+
+	private int resetupClientCountBeforeRunning = 1;
+
+	private long messageConsenusMillis;
+
 	/**
 	 * 是否在执行测试前重启全部共识节点；
 	 * 
@@ -30,8 +36,36 @@ public abstract class DefaultConsensusTestcase implements ConsensusTestcase {
 	 * 
 	 * @return
 	 */
-	protected boolean restartPeersBeforeRunning() {
-		return true;
+	public boolean isRestartPeersBeforeRunning() {
+		return restartPeersBeforeRunning;
+	}
+
+	public void setRestartPeersBeforeRunning(boolean restartPeersBeforeRunning) {
+		this.restartPeersBeforeRunning = restartPeersBeforeRunning;
+	}
+
+	/**
+	 * 消息共识的时长；
+	 * <p>
+	 * 
+	 * 测试用例将在完成发送消息之后，等待由此属性表示的时长之后再开始检查共识的结果；
+	 * 
+	 * @return
+	 */
+	public long getMessageConsenusMillis() {
+		return messageConsenusMillis;
+	}
+
+	/**
+	 * 设置消息共识的时长；
+	 * <p>
+	 * 
+	 * 测试用例将在完成发送消息之后，等待由此属性表示的时长之后再开始检查共识的结果；
+	 * 
+	 * @param messageConsenusMillis
+	 */
+	public void setMessageConsenusMillis(long messageConsenusMillis) {
+		this.messageConsenusMillis = messageConsenusMillis;
 	}
 
 	/**
@@ -49,8 +83,6 @@ public abstract class DefaultConsensusTestcase implements ConsensusTestcase {
 		MessageTestHandler[] handlers = new MessageTestHandler[nodeCount];
 		for (int i = 0; i < handlers.length; i++) {
 			MessageTestHandler handler = new MessageTestHandler();
-			handler = spy(handler);
-
 			handlers[i] = handler;
 		}
 		return handlers;
@@ -70,8 +102,12 @@ public abstract class DefaultConsensusTestcase implements ConsensusTestcase {
 	 * 
 	 * @return
 	 */
-	protected int resetupClientsBeforeRunning() {
-		return 1;
+	public int getResetupClientCountBeforeRunning() {
+		return resetupClientCountBeforeRunning;
+	}
+
+	public void setResetupClientCountBeforeRunning(int resetupClientCountBeforeRunning) {
+		this.resetupClientCountBeforeRunning = resetupClientCountBeforeRunning;
 	}
 
 	/**
@@ -143,7 +179,7 @@ public abstract class DefaultConsensusTestcase implements ConsensusTestcase {
 	 */
 	protected void waitForConsensus(ConsensusEnvironment environment) {
 		try {
-			Thread.sleep(10000);
+			Thread.sleep(getMessageConsenusMillis());
 		} catch (InterruptedException e) {
 			throw new IllegalStateException(
 					"Thread has been iterrupted while waiting consensus finish after message sending!");
@@ -191,7 +227,7 @@ public abstract class DefaultConsensusTestcase implements ConsensusTestcase {
 	}
 
 	protected ConsensusClient[] prepareClients(ConsensusEnvironment environment) {
-		int restupClients = resetupClientsBeforeRunning();
+		int restupClients = getResetupClientCountBeforeRunning();
 		if (restupClients > 0) {
 			try {
 				return environment.resetupClients(restupClients);
@@ -204,14 +240,16 @@ public abstract class DefaultConsensusTestcase implements ConsensusTestcase {
 	}
 
 	protected ReplicaNodeServer[] preparePeers(ConsensusEnvironment environment) {
-		MessageHandle[] newHandles = resetupPeersBeforeRunning(environment.getReplicaCount());
+		MessageTestHandler[] newHandles = resetupPeersBeforeRunning(environment.getReplicaCount());
+		newHandles = spyMessageHandlers(newHandles);
+
 		if (newHandles != null) {
 			// 重装节点；
 			environment.stopNodeServers();
 			environment.setupNodeServers(newHandles);
 		}
 
-		if (restartPeersBeforeRunning()) {
+		if (isRestartPeersBeforeRunning()) {
 			// 重启节点；
 			environment.stopNodeServers();
 		}
@@ -223,6 +261,15 @@ public abstract class DefaultConsensusTestcase implements ConsensusTestcase {
 		ReplicaNodeServer[] servers = new ReplicaNodeServer[(int) nodes.getTotalCount()];
 		nodes.next(servers);
 		return servers;
+	}
+
+	protected MessageTestHandler[] spyMessageHandlers(MessageTestHandler[] handlers) {
+		MessageTestHandler[] spyHandlers = new MessageTestHandler[handlers.length];
+		for (int i = 0; i < spyHandlers.length; i++) {
+			spyHandlers[i] = spy(handlers[i]);
+			;
+		}
+		return spyHandlers;
 	}
 
 }
