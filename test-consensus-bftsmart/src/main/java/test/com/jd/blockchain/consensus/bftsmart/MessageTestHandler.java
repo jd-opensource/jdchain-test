@@ -30,14 +30,26 @@ public class MessageTestHandler implements MessageHandle {
 	private volatile HashDigester hashDigester;
 
 	private volatile List<OrderedMessageHandle> orderedMessages;
-	
+
 	private volatile StateSnapshot currentSnaphot;
+
+	private volatile StateSnapshot lastSnapshot;
+	
+	public StateSnapshot getLastSnapshot() {
+		return lastSnapshot;
+	}
+
+	private List<StateSnapshot> snapshotHistory = new LinkedList<>();
 
 	/**
 	 * 报告的错误；
 	 */
 	private volatile Throwable error;
-
+	
+	public Throwable getError() {
+		return error;
+	}
+	
 	@Override
 	public synchronized String beginBatch(ConsensusContext consensusContext) {
 		if (this.currentContext != null) {
@@ -51,6 +63,11 @@ public class MessageTestHandler implements MessageHandle {
 		this.hashDigester = Crypto.getHashFunction(ClassicAlgorithm.SHA256).beginHash();
 		this.hashDigester.update(BytesUtils.toBytes(consensusContext.getRealmName()));
 		this.hashDigester.update(BytesUtils.toBytes(currentBatchID));
+
+		if (lastSnapshot != null) {
+			this.hashDigester.update(lastSnapshot.getSnapshot());
+		}
+
 		this.orderedMessages = new LinkedList<OrderedMessageHandle>();
 		return String.valueOf(currentBatchID);
 	}
@@ -58,14 +75,14 @@ public class MessageTestHandler implements MessageHandle {
 	@Override
 	public AsyncFuture<byte[]> processOrdered(int messageSequence, byte[] messageBytes,
 			ConsensusMessageContext messageContext) {
-		
+
 		this.hashDigester.update(BytesUtils.toBytes(messageSequence));
 		this.hashDigester.update(BytesUtils.toBytes(messageContext.getTimestamp()));
 		this.hashDigester.update(messageBytes);
-		
+
 		OrderedMessageHandle msgHandle = new OrderedMessageHandle(messageSequence, messageBytes, messageContext);
 		orderedMessages.add(msgHandle);
-		
+
 		return msgHandle;
 	}
 
@@ -81,6 +98,13 @@ public class MessageTestHandler implements MessageHandle {
 			reportError(error);
 			throw error;
 		}
+
+		// 回复；
+		for (OrderedMessageHandle orderedMessageHandle : orderedMessages) {
+			orderedMessageHandle.complete(orderedMessageHandle.getMessageBytes());
+		}
+		
+		// 计算快照；
 		byte[] messagesHash = this.hashDigester.complete();
 		this.currentSnaphot = new OrderedMessageSnapshot(currentBatchID, messagesHash);
 		return currentSnaphot;
@@ -93,9 +117,12 @@ public class MessageTestHandler implements MessageHandle {
 			reportError(error);
 			throw error;
 		}
+		snapshotHistory.add(currentSnaphot);
+		this.lastSnapshot = currentSnaphot;
+
 		this.currentBatchID = -1;
 		this.currentContext = null;
-		this.hashDigester  = null;
+		this.hashDigester = null;
 		this.orderedMessages = null;
 		this.currentSnaphot = null;
 	}
@@ -104,7 +131,7 @@ public class MessageTestHandler implements MessageHandle {
 	public void rollbackBatch(int reasonCode, ConsensusMessageContext context) {
 		this.currentBatchID = -1;
 		this.currentContext = null;
-		this.hashDigester  = null;
+		this.hashDigester = null;
 		this.orderedMessages = null;
 		this.currentSnaphot = null;
 	}
@@ -117,14 +144,12 @@ public class MessageTestHandler implements MessageHandle {
 
 	@Override
 	public StateSnapshot getStateSnapshot(ConsensusContext consensusContext) {
-		// TODO Auto-generated method stub
-		return null;
+		return lastSnapshot;
 	}
 
 	@Override
 	public StateSnapshot getGenesisStateSnapshot(ConsensusContext consensusContext) {
-		// TODO Auto-generated method stub
-		return null;
+		return snapshotHistory.get(0);
 	}
 
 	private void reportError(Throwable error) {
@@ -154,14 +179,18 @@ public class MessageTestHandler implements MessageHandle {
 			this.messageContext = messageContext;
 		}
 
+		public byte[] getMessageBytes() {
+			return messageBytes;
+		}
+
 	}
-	
-	private static class OrderedMessageSnapshot implements StateSnapshot{
-		
+
+	private static class OrderedMessageSnapshot implements StateSnapshot {
+
 		private long batchID;
-		
+
 		private byte[] hashSnapshot;
-		
+
 		public OrderedMessageSnapshot(long batchID, byte[] hashSnapshot) {
 			this.batchID = batchID;
 			this.hashSnapshot = hashSnapshot;
@@ -176,6 +205,6 @@ public class MessageTestHandler implements MessageHandle {
 		public byte[] getSnapshot() {
 			return hashSnapshot;
 		}
-		
+
 	}
 }

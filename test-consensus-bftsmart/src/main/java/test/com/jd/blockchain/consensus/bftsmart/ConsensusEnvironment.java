@@ -1,6 +1,7 @@
 package test.com.jd.blockchain.consensus.bftsmart;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,26 +39,28 @@ import com.jd.blockchain.utils.SkippingIterator;
 import com.jd.blockchain.utils.net.NetworkAddress;
 
 /**
- * {@link ConesensusEnvironment} 表示由一组共识节点组成的共识网络以及一组对应的共识客户端一起构成的共识网络环境；
+ * {@link ConsensusEnvironment} 表示由一组共识节点组成的共识网络以及一组对应的共识客户端一起构成的共识网络环境；
  * 
  * @author huanghaiquan
  *
  */
-public class ConesensusEnvironment {
+public class ConsensusEnvironment {
 
 	private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
 
 	private final ConsensusProvider CS_PROVIDER;
 
+	private ConsensusSettings csSettings;
+
 	private String realmName;
 
 	private Replica[] replicas;
 
-	private NodeServer[] nodeServers;
+	private volatile NodeServer[] nodeServers;
 
 	private List<ConsensusClient> clients = new LinkedList<ConsensusClient>();
 
-	private MessageHandle[] messageHandlers;
+	private volatile MessageHandle[] messageHandlers;
 	private StateMachineReplicate[] stateMachineReplicaters;
 
 	public String gerProviderName() {
@@ -93,22 +96,22 @@ public class ConesensusEnvironment {
 		};
 	}
 
-	public List<MessageHandle> getMessageHandlers() {
-		return Arrays.asList(messageHandlers);
+	public MessageHandle[] getMessageHandlers() {
+		return messageHandlers == null ? null : messageHandlers.clone();
 	}
 
 	public List<StateMachineReplicate> getStateMachineReplicaters() {
 		return Arrays.asList(stateMachineReplicaters);
 	}
 
-	private ConesensusEnvironment(String realmName, Replica[] replicas, NodeServer[] nodeServers,
+	private ConsensusEnvironment(String realmName, ConsensusSettings csSettings, Replica[] replicas,
 			MessageHandle[] messageHandler, StateMachineReplicate[] stateMachineReplicater,
 			ConsensusProvider consensusProvider) {
 		this.CS_PROVIDER = consensusProvider;
 
 		this.realmName = realmName;
 		this.replicas = replicas;
-		this.nodeServers = nodeServers;
+		this.csSettings = csSettings;
 
 		this.messageHandlers = messageHandler;
 		this.stateMachineReplicaters = stateMachineReplicater;
@@ -118,19 +121,19 @@ public class ConesensusEnvironment {
 		return realmName;
 	}
 
-	public static ConesensusEnvironment setup_BFTSMaRT(String realmName, int nodeCount) throws IOException {
+	public static ConsensusEnvironment setup_BFTSMaRT(String realmName, int nodeCount) throws IOException {
 		// 端口从 10000 开始，每个递增 10 ；
 		NetworkAddress[] nodesNetworkAddresses = createMultiPortsAddresses("127.0.0.1", nodeCount, 11600, 10);
 		return setup_BFTSMaRT(realmName, nodesNetworkAddresses);
 	}
 
-	public static ConesensusEnvironment setup_BFTSMaRT(String realmName, NetworkAddress[] nodesNetworkAddresses)
+	public static ConsensusEnvironment setup_BFTSMaRT(String realmName, NetworkAddress[] nodesNetworkAddresses)
 			throws IOException {
 		Properties consensusProperties = PropertiesUtils.loadProperties("classpath:bftsmart-test.config", "UTF-8");
 		return setup_BFTSMaRT(realmName, consensusProperties, nodesNetworkAddresses);
 	}
 
-	public static ConesensusEnvironment setup_BFTSMaRT(String realmName, Properties consensusProperties,
+	public static ConsensusEnvironment setup_BFTSMaRT(String realmName, Properties consensusProperties,
 			NetworkAddress[] nodesNetworkAddresses) {
 		MessageHandle[] messageHandlers = new MessageHandle[nodesNetworkAddresses.length];
 		for (int i = 0; i < messageHandlers.length; i++) {
@@ -145,7 +148,12 @@ public class ConesensusEnvironment {
 		return setup_BFTSMaRT(realmName, consensusProperties, nodesNetworkAddresses, messageHandlers, smrs);
 	}
 
-	public static ConesensusEnvironment setup_BFTSMaRT(String realmName, String consensusConfig,
+	public static ConsensusEnvironment setup_BFTSMaRT(String realmName, String consensusConfig,
+			NetworkAddress[] nodesNetworkAddresses) throws IOException {
+		return setup_BFTSMaRT(realmName, consensusConfig, nodesNetworkAddresses, null);
+	}
+
+	public static ConsensusEnvironment setup_BFTSMaRT(String realmName, String consensusConfig,
 			NetworkAddress[] nodesNetworkAddresses, MessageHandle[] messageHandler) throws IOException {
 		Properties consensusProperties = PropertiesUtils.loadProperties(consensusConfig, "UTF-8");
 
@@ -157,7 +165,7 @@ public class ConesensusEnvironment {
 		return setup_BFTSMaRT(realmName, consensusProperties, nodesNetworkAddresses, messageHandler, smrs);
 	}
 
-	public static ConesensusEnvironment setup_BFTSMaRT(String realmName, Properties consensusProperties,
+	public static ConsensusEnvironment setup_BFTSMaRT(String realmName, Properties consensusProperties,
 			NetworkAddress[] nodesNetworkAddresses, MessageHandle[] messageHandlers) {
 		StateMachineReplicate[] smrs = new StateMachineReplicate[nodesNetworkAddresses.length];
 		for (int i = 0; i < smrs.length; i++) {
@@ -167,7 +175,7 @@ public class ConesensusEnvironment {
 		return setup_BFTSMaRT(realmName, consensusProperties, nodesNetworkAddresses, messageHandlers, smrs);
 	}
 
-	public static ConesensusEnvironment setup_BFTSMaRT(String realmName, Properties consensusProperties,
+	public static ConsensusEnvironment setup_BFTSMaRT(String realmName, Properties consensusProperties,
 			NetworkAddress[] nodesNetworkAddresses, MessageHandle messageHandler[], StateMachineReplicate[] smr) {
 		// 节点总数；
 		int nodeCount = nodesNetworkAddresses.length;
@@ -190,28 +198,74 @@ public class ConesensusEnvironment {
 	 * @param consensusProvider
 	 * @return
 	 */
-	public static ConesensusEnvironment setup(String realmName, ConsensusSettings csSettings, Replica[] replicas,
+	public static ConsensusEnvironment setup(String realmName, ConsensusSettings csSettings, Replica[] replicas,
 			MessageHandle[] messageHandler, StateMachineReplicate[] smr, ConsensusProvider consensusProvider) {
-		int nodeCount = replicas.length;
 
-		NodeServer[] nodeServers = new NodeServer[nodeCount];
-		for (int i = 0; i < nodeServers.length; i++) {
-			nodeServers[i] = createNodeServer(realmName, csSettings, replicas[i], messageHandler[i], smr[i],
-					consensusProvider);
-		}
+		ConsensusEnvironment csEnv = new ConsensusEnvironment(realmName, csSettings, replicas, messageHandler, smr,
+				consensusProvider);
+		csEnv.setupNodeServers();
 
-		return new ConesensusEnvironment(realmName, replicas, nodeServers, messageHandler, smr, consensusProvider);
+		return csEnv;
 	}
 
 	// ----------------------------------------
 
-	public void startNodeServers() {
+	private void setupNodeServers() {
+		if (messageHandlers == null) {
+			return;
+		}
+		int nodeCount = replicas.length;
+		NodeServer[] nodeServers = new NodeServer[nodeCount];
+		for (int i = 0; i < nodeServers.length; i++) {
+			nodeServers[i] = createNodeServer(realmName, csSettings, replicas[i], messageHandlers[i],
+					stateMachineReplicaters[i], CS_PROVIDER);
+		}
+		this.nodeServers = nodeServers;
+	}
 
+	public boolean isRunning() {
+		if (nodeServers != null) {
+			for (NodeServer node : nodeServers) {
+				if (node.isRunning()) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public void setupNodeServers(MessageHandle[] messageHandlers) {
+		if (messageHandlers == null) {
+			throw new IllegalArgumentException("No messageHandlers!");
+		}
+		if (nodeServers != null) {
+			for (NodeServer node : nodeServers) {
+				if (node.isRunning()) {
+					throw new IllegalStateException("The current node servers has not stopped!");
+				}
+			}
+		}
+		this.nodeServers = null;
+		this.messageHandlers = messageHandlers.clone();
+		setupNodeServers();
+	}
+
+	public void startNodeServers() {
+		if (nodeServers == null) {
+			throw new IllegalStateException("Node servers has not been setup!");
+		}
 		startNodeServers(nodeServers);
 	}
 
 	public void stopNodeServers() {
+		if (nodeServers == null) {
+			return;
+		}
 		stopNodeServers(nodeServers);
+	}
+
+	public ConsensusClient[] getClients() {
+		return clients.toArray(new ConsensusClient[clients.size()]);
 	}
 
 	public ConsensusClient[] setupNewClients(int clientCount) throws ConsensusSecurityException {
@@ -225,6 +279,11 @@ public class ConesensusEnvironment {
 		}
 
 		return newClients;
+	}
+
+	public ConsensusClient[] resetupClients(int clientCount) throws ConsensusSecurityException {
+		closeAllClients();
+		return setupNewClients(clientCount);
 	}
 
 	public void closeAllClients() {
@@ -274,6 +333,8 @@ public class ConesensusEnvironment {
 			ClientSettings clientSettings = consensusProvider.getClientFactory()
 					.buildClientSettings(clientIncomingSettings[i]);
 			clients[i] = consensusProvider.getClientFactory().setupClient(clientSettings);
+			
+			clients[i].connect();
 		}
 
 		return clients;
@@ -305,18 +366,24 @@ public class ConesensusEnvironment {
 	}
 
 	private static void stopNodeServers(NodeServer[] nodeServers) {
-		CountDownLatch startupLatch = new CountDownLatch(nodeServers.length);
+
+		List<NodeServer> runningNodes = new ArrayList<>();
 		for (int i = 0; i < nodeServers.length; i++) {
-			int id = i;
-			NodeServer nodeServer = nodeServers[i];
+			if (nodeServers[i].isRunning()) {
+				runningNodes.add(nodeServers[i]);
+			}
+		}
+		if (runningNodes.size() == 0) {
+			return;
+		}
+		CountDownLatch startupLatch = new CountDownLatch(runningNodes.size());
+		for (NodeServer nodeServer : runningNodes) {
 			EXECUTOR_SERVICE.execute(new Runnable() {
 
 				@Override
 				public void run() {
 					nodeServer.stop();
-					;
-					ConsoleUtils.info("Replica Node [%s : %s] stop! ", id,
-							nodeServer.getSettings().getReplicaSettings().getAddress());
+					ConsoleUtils.info("Replica [%s] stop! ", nodeServer.toString());
 					startupLatch.countDown();
 				}
 			});

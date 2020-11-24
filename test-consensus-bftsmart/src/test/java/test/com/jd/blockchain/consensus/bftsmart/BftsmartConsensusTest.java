@@ -35,29 +35,15 @@ public class BftsmartConsensusTest {
 		final int N = 4;
 		final String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));
 
-		NetworkAddress[] nodesNetworkAddresses = ConesensusEnvironment.createMultiPortsAddresses("127.0.0.1", N, 11600,
+		NetworkAddress[] nodesNetworkAddresses = ConsensusEnvironment.createMultiPortsAddresses("127.0.0.1", N, 11600,
 				10);
 
-		MessageHandle[] messageHandlers = new MessageHandle[N];
-		for (int i = 0; i < messageHandlers.length; i++) {
-			messageHandlers[i] = Mockito.mock(MessageHandle.class);
-		}
-		ConesensusEnvironment csEnv = ConesensusEnvironment.setup_BFTSMaRT(realmName, "classpath:bftsmart-consensus-test-normal.config",
-				nodesNetworkAddresses, messageHandlers);
-
-		csEnv.startNodeServers();
-
-		ConsoleUtils.info("All nodes has startted!");
-
-		csEnv.setupNewClients(6);
-
-		ConsoleUtils.info("There are 6 clients has been setuped!");
-
-		Thread.sleep(3000);
-
-		csEnv.stopNodeServers();
-
-		ConsoleUtils.info("All nodes has been stopped!");
+		ConsensusEnvironment csEnv = ConsensusEnvironment.setup_BFTSMaRT(realmName, "classpath:bftsmart-consensus-test-normal.config",
+				nodesNetworkAddresses);
+		
+		NormalConsensusTest test = new NormalConsensusTest();
+		
+		test.run(csEnv);
 	}
 
 }
