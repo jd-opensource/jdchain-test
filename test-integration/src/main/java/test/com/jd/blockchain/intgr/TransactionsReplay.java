@@ -2,7 +2,7 @@ package test.com.jd.blockchain.intgr;
 
 import com.jd.blockchain.consensus.ConsensusProvider;
 import com.jd.blockchain.consensus.ConsensusProviders;
-import com.jd.blockchain.consensus.ConsensusSettings;
+import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.crypto.KeyGenUtils;
@@ -292,7 +292,7 @@ public class TransactionsReplay {
 		Properties props = LedgerInitializeWebTest
 				.loadConsensusSetting(LedgerInitConsensusConfig.bftsmartConfig.getConfigPath());
 		ConsensusProvider csProvider = getConsensusProvider(LedgerInitConsensusConfig.bftsmartConfig.getProvider());
-		ConsensusSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
+		ConsensusViewSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
 				Utils.loadParticipantNodes());
 
 		// 启动服务器；

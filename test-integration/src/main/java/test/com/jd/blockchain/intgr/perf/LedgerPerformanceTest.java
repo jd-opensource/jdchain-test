@@ -18,7 +18,7 @@ import org.springframework.core.io.ClassPathResource;
 import com.jd.blockchain.binaryproto.DataContractRegistry;
 import com.jd.blockchain.consensus.ConsensusProvider;
 import com.jd.blockchain.consensus.ConsensusProviders;
-import com.jd.blockchain.consensus.ConsensusSettings;
+import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.Crypto;
 import com.jd.blockchain.crypto.CryptoAlgorithm;
@@ -506,7 +506,7 @@ public class LedgerPerformanceTest {
 		LedgerInitProperties initSetting = loadInitSetting();
 		Properties props = loadConsensusSetting(config);
 		ConsensusProvider csProvider = getConsensusProvider(provider);
-		ConsensusSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
+		ConsensusViewSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
 				Utils.loadParticipantNodes());
 
 		DBSetting dbsetting0;

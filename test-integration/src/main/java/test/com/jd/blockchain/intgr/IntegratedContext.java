@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.jd.blockchain.consensus.ConsensusSettings;
+import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.ledger.CryptoSetting;
@@ -62,7 +62,7 @@ public class IntegratedContext {
 		private AsymmetricKeypair partiKeyPair;
 
 		// private NetworkAddress consensusAddress;
-		private ConsensusSettings consensusSettings;
+		private ConsensusViewSettings consensusSettings;
 
 		private LedgerManager ledgerManager;
 
@@ -74,7 +74,7 @@ public class IntegratedContext {
 			this.id = id;
 		}
 
-		public ConsensusSettings getConsensusAddress() {
+		public ConsensusViewSettings getConsensusAddress() {
 			return consensusSettings;
 		}
 
@@ -98,7 +98,7 @@ public class IntegratedContext {
 			return id;
 		}
 
-		public void setConsensusSettings(ConsensusSettings consensusSettings) {
+		public void setConsensusSettings(ConsensusViewSettings consensusSettings) {
 			this.consensusSettings = consensusSettings;
 		}
 

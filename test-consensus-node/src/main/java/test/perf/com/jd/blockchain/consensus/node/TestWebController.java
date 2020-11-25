@@ -5,7 +5,7 @@ import java.util.TreeSet;
 
 import javax.annotation.PostConstruct;
 
-import com.jd.blockchain.consensus.ConsensusSettings;
+import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.consensus.Topology;
 import com.jd.blockchain.utils.codec.HexUtils;
 import com.jd.blockchain.utils.io.FileUtils;
@@ -130,7 +130,7 @@ public class TestWebController {
 		if (replica == null ) {
 			throw new IllegalStateException("Replica not start");
 		}
-		ConsensusSettings settings = replica.getConsensusSetting();
+		ConsensusViewSettings settings = replica.getConsensusSetting();
 		byte[] bytesSettings = BinarySerializeUtils.serialize(settings);
 		return HexUtils.encode(bytesSettings);
 	}

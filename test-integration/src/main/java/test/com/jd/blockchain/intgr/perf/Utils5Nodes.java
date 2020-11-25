@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.core.io.ClassPathResource;
 
 import com.jd.blockchain.consensus.ConsensusProvider;
-import com.jd.blockchain.consensus.ConsensusSettings;
+import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.consensus.Replica;
 import com.jd.blockchain.crypto.AddressEncoding;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
@@ -149,7 +149,7 @@ public class Utils5Nodes {
         }
 
         public ThreadInvoker.AsyncCallback<HashDigest> startInit(int currentId, PrivKey privKey, LedgerInitProperties setting,
-                                                                 ConsensusSettings csProps, ConsensusProvider consensusProvider, DBConnectionConfig dbConnConfig,
+                                                                 ConsensusViewSettings csProps, ConsensusProvider consensusProvider, DBConnectionConfig dbConnConfig,
                                                                  Prompter prompter, boolean autoVerifyHash) {
             CryptoAlgorithm algorithm = Crypto.getAlgorithm("SHA256");
             return startInit(currentId, privKey, setting, csProps, consensusProvider, dbConnConfig, prompter,
@@ -157,7 +157,7 @@ public class Utils5Nodes {
         }
 
         public ThreadInvoker.AsyncCallback<HashDigest> startInit(int currentId, PrivKey privKey, LedgerInitProperties setting,
-                                                                 ConsensusSettings csProps, ConsensusProvider consensusProvider, DBConnectionConfig dbConnConfig,
+                                                                 ConsensusViewSettings csProps, ConsensusProvider consensusProvider, DBConnectionConfig dbConnConfig,
                                                                  Prompter prompter, boolean autoVerifyHash, CryptoAlgorithm hashAlg) {
 
             CryptoProvider[] supportedProviders = new CryptoProvider[SUPPORTED_PROVIDERS.length];
@@ -175,7 +175,7 @@ public class Utils5Nodes {
         }
 
         public ThreadInvoker.AsyncCallback<HashDigest> startInit(int currentId, PrivKey privKey, LedgerInitProperties setting,
-                                                                 ConsensusSettings csProps, ConsensusProvider consensusProvider, DBConnectionConfig dbConnConfig,
+                                                                 ConsensusViewSettings csProps, ConsensusProvider consensusProvider, DBConnectionConfig dbConnConfig,
                                                                  Prompter prompter, CryptoSetting cryptoSetting) {
 
             LedgerInitConfiguration ledgerInitConfig = LedgerInitConfiguration.create(setting);

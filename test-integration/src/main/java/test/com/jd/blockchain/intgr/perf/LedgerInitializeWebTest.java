@@ -13,7 +13,7 @@ import org.springframework.core.io.ClassPathResource;
 import com.jd.blockchain.binaryproto.BinaryProtocol;
 import com.jd.blockchain.consensus.ConsensusProvider;
 import com.jd.blockchain.consensus.ConsensusProviders;
-import com.jd.blockchain.consensus.ConsensusSettings;
+import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.crypto.AddressEncoding;
 import com.jd.blockchain.crypto.Crypto;
 import com.jd.blockchain.crypto.HashDigest;
@@ -81,7 +81,7 @@ public class LedgerInitializeWebTest {
 		Properties props = loadConsensusSetting(LedgerInitConsensusConfig.bftsmartConfig.getConfigPath());
 		// ConsensusProperties csProps = new ConsensusProperties(props);
 		ConsensusProvider csProvider = getConsensusProvider();
-		ConsensusSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
+		ConsensusViewSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
 					Utils.loadParticipantNodes());
 
 		// 启动服务器；
@@ -255,7 +255,7 @@ public class LedgerInitializeWebTest {
 		Properties props = loadConsensusSetting(LedgerInitConsensusConfig.bftsmartConfig.getConfigPath());
 		// ConsensusProperties csProps = new ConsensusProperties(props);
 		ConsensusProvider csProvider = getConsensusProvider();
-		ConsensusSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
+		ConsensusViewSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
 				Utils.loadParticipantNodes());
 
 		// 启动服务器；
@@ -444,7 +444,7 @@ public class LedgerInitializeWebTest {
 		}
 
 		public AsyncCallback<HashDigest> startInitCommand(PrivKey privKey, String base58Pwd,
-				LedgerInitProperties ledgerSetting, ConsensusSettings csProps, ConsensusProvider csProvider,
+				LedgerInitProperties ledgerSetting, ConsensusViewSettings csProps, ConsensusProvider csProvider,
 				DBConnectionConfig dbConnConfig, Prompter prompter, LedgerBindingConfig conf, CountDownLatch quitLatch,
 				DbConnectionFactory db) {
 			this.dbConnConfig = dbConnConfig;

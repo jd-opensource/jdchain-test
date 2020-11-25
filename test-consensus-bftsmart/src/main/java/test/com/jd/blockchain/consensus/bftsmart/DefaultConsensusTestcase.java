@@ -246,7 +246,7 @@ public abstract class DefaultConsensusTestcase implements ConsensusTestcase {
 		if (newHandles != null) {
 			// 重装节点；
 			environment.stopNodeServers();
-			environment.setupNodeServers(newHandles);
+			environment.reinstallNodeServers(newHandles);
 		}
 
 		if (isRestartPeersBeforeRunning()) {

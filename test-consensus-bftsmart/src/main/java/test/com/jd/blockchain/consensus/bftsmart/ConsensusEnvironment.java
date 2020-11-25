@@ -18,7 +18,7 @@ import com.jd.blockchain.consensus.ClientIdentification;
 import com.jd.blockchain.consensus.ClientIncomingSettings;
 import com.jd.blockchain.consensus.ConsensusProvider;
 import com.jd.blockchain.consensus.ConsensusSecurityException;
-import com.jd.blockchain.consensus.ConsensusSettings;
+import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.consensus.Replica;
 import com.jd.blockchain.consensus.bftsmart.BftsmartConsensusProvider;
 import com.jd.blockchain.consensus.bftsmart.BftsmartConsensusSettings;
@@ -50,7 +50,7 @@ public class ConsensusEnvironment {
 
 	private final ConsensusProvider CS_PROVIDER;
 
-	private ConsensusSettings csSettings;
+	private ConsensusViewSettings csSettings;
 
 	private String realmName;
 
@@ -104,7 +104,7 @@ public class ConsensusEnvironment {
 		return Arrays.asList(stateMachineReplicaters);
 	}
 
-	private ConsensusEnvironment(String realmName, ConsensusSettings csSettings, Replica[] replicas,
+	private ConsensusEnvironment(String realmName, ConsensusViewSettings csSettings, Replica[] replicas,
 			MessageHandle[] messageHandler, StateMachineReplicate[] stateMachineReplicater,
 			ConsensusProvider consensusProvider) {
 		this.CS_PROVIDER = consensusProvider;
@@ -198,23 +198,26 @@ public class ConsensusEnvironment {
 	 * @param consensusProvider
 	 * @return
 	 */
-	public static ConsensusEnvironment setup(String realmName, ConsensusSettings csSettings, Replica[] replicas,
+	public static ConsensusEnvironment setup(String realmName, ConsensusViewSettings csSettings, Replica[] replicas,
 			MessageHandle[] messageHandler, StateMachineReplicate[] smr, ConsensusProvider consensusProvider) {
 
 		ConsensusEnvironment csEnv = new ConsensusEnvironment(realmName, csSettings, replicas, messageHandler, smr,
 				consensusProvider);
-		csEnv.setupNodeServers();
+		csEnv.installNodeServers();
 
 		return csEnv;
 	}
 
 	// ----------------------------------------
 
-	private void setupNodeServers() {
+	private void installNodeServers() {
 		if (messageHandlers == null) {
 			return;
 		}
 		int nodeCount = replicas.length;
+		if (nodeCount != messageHandlers.length) {
+			throw new IllegalArgumentException("The number of message handler and replica are not equal!");
+		}
 		NodeServer[] nodeServers = new NodeServer[nodeCount];
 		for (int i = 0; i < nodeServers.length; i++) {
 			nodeServers[i] = createNodeServer(realmName, csSettings, replicas[i], messageHandlers[i],
@@ -234,7 +237,7 @@ public class ConsensusEnvironment {
 		return false;
 	}
 
-	public void setupNodeServers(MessageHandle[] messageHandlers) {
+	public void reinstallNodeServers(MessageHandle[] messageHandlers) {
 		if (messageHandlers == null) {
 			throw new IllegalArgumentException("No messageHandlers!");
 		}
@@ -247,7 +250,11 @@ public class ConsensusEnvironment {
 		}
 		this.nodeServers = null;
 		this.messageHandlers = messageHandlers.clone();
-		setupNodeServers();
+		installNodeServers();
+	}
+	
+	public void joinReplica(Replica replica, NetworkAddress netAddress, MessageHandle messageHandler) {
+		
 	}
 
 	public void startNodeServers() {
@@ -318,8 +325,8 @@ public class ConsensusEnvironment {
 		for (int i = 0; i < clientKeys.length; i++) {
 			ClientIdentification clientIdentification = consensusProvider.getClientFactory().buildAuthId(clientKeys[i]);
 
-			incomingSettings[i] = nodeServers[rand.nextInt(nodeServers.length)].getConsensusManageService()
-					.authClientIncoming(clientIdentification);
+			incomingSettings[i] = nodeServers[rand.nextInt(nodeServers.length)].getClientAuthencationService()
+					.authencateIncoming(clientIdentification);
 		}
 
 		return incomingSettings;
@@ -495,16 +502,16 @@ public class ConsensusEnvironment {
 				BftsmartConsensusProvider.INSTANCE);
 	}
 
-	private static ConsensusSettings buildConsensusSettings(Properties csProperties, Replica[] replicas,
+	private static ConsensusViewSettings buildConsensusSettings(Properties csProperties, Replica[] replicas,
 			ConsensusProvider consensusProvider) {
 		return consensusProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(csProperties,
 				replicas);
 	}
 
-	private static NodeServer createNodeServer(String realmName, ConsensusSettings csSettings, Replica replica,
+	private static NodeServer createNodeServer(String realmName, ConsensusViewSettings csSettings, Replica replica,
 			MessageHandle messageHandler, StateMachineReplicate smr, ConsensusProvider consensusProvider) {
 		ServerSettings serverSettings = consensusProvider.getServerFactory().buildServerSettings(realmName, csSettings,
-				replica);
+				replica.getAddress().toBase58());
 		return consensusProvider.getServerFactory().setupServer(serverSettings, messageHandler, smr);
 	}
 
