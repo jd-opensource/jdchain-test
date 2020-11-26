@@ -8,6 +8,27 @@
  */
 package test.com.jd.blockchain.intgr;
 
+import static com.jd.blockchain.transaction.ContractReturnValue.decode;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicLong;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.springframework.core.io.ClassPathResource;
+
 import com.jd.blockchain.binaryproto.DataContractRegistry;
 import com.jd.blockchain.crypto.AddressEncoding;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
@@ -42,23 +63,6 @@ import com.jd.blockchain.utils.Property;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker;
 import com.jd.blockchain.utils.io.BytesUtils;
 import com.jd.blockchain.utils.net.NetworkAddress;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.springframework.core.io.ClassPathResource;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicLong;
-
-import static com.jd.blockchain.transaction.ContractReturnValue.decode;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -372,7 +376,7 @@ public class IntegrationBase {
 			assertNotNull(ledgerRepository.getDataAccountSet(ledgerRepository.getLatestBlock())
 					.getAccount(keyPair.getAddress()));
 		} else if (keyPairType == KeyPairType.EVENTACCOUNT) {
-			assertNotNull(ledgerRepository.getLedgerEvents(ledgerRepository.getLatestBlock()).getEventAccountSet()
+			assertNotNull(ledgerRepository.getLedgerEventSet(ledgerRepository.getLatestBlock()).getEventAccountSet()
 					.getAccount(keyPair.getAddress()));
 		}
 		System.out.printf("validKeyPair end %s \r\n", index);
