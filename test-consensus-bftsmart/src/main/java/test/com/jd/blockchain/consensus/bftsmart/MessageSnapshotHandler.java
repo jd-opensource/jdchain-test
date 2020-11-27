@@ -19,9 +19,9 @@ import com.jd.blockchain.utils.concurrent.AsyncFuture;
 import com.jd.blockchain.utils.concurrent.CompletableAsyncFuture;
 import com.jd.blockchain.utils.io.BytesUtils;
 
-public class MessageTestHandler implements MessageHandle {
+public class MessageSnapshotHandler implements MessageHandle {
 
-	private static Logger LOGGER = LoggerFactory.getLogger(MessageTestHandler.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(MessageSnapshotHandler.class);
 
 	private AtomicLong batchID = new AtomicLong();
 

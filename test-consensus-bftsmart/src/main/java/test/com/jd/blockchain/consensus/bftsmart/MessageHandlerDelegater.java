@@ -1,0 +1,83 @@
+package test.com.jd.blockchain.consensus.bftsmart;
+
+import com.jd.blockchain.consensus.service.ConsensusContext;
+import com.jd.blockchain.consensus.service.ConsensusMessageContext;
+import com.jd.blockchain.consensus.service.MessageHandle;
+import com.jd.blockchain.consensus.service.StateSnapshot;
+import com.jd.blockchain.utils.concurrent.AsyncFuture;
+
+public class MessageHandlerDelegater implements MessageHandle{
+	
+	private volatile MessageHandle messageHandle;
+	
+	public MessageHandlerDelegater() {
+	}
+	
+	public MessageHandlerDelegater(MessageHandle handler) {
+		this.messageHandle = messageHandle;
+	}
+	
+	public void delegateTo(MessageHandle messageHandle) {
+		this.messageHandle = messageHandle;
+	}
+	
+	public void clear() {
+		this.messageHandle = null;
+	}
+
+	
+	private void check() {
+		if (messageHandle == null) {
+			throw new IllegalStateException("No message handler!");
+		}
+	}
+	
+	@Override
+	public String beginBatch(ConsensusContext consensusContext) {
+		check();
+		return messageHandle.beginBatch(consensusContext);
+	}
+
+	@Override
+	public AsyncFuture<byte[]> processOrdered(int messageSequence, byte[] message, ConsensusMessageContext context) {
+		check();
+		return messageHandle.processOrdered(messageSequence, message, context);
+	}
+
+	@Override
+	public StateSnapshot completeBatch(ConsensusMessageContext context) {
+		check();
+		return messageHandle.completeBatch(context);
+	}
+
+	@Override
+	public void commitBatch(ConsensusMessageContext context) {
+		check();
+		messageHandle.commitBatch(context);
+	}
+
+	@Override
+	public void rollbackBatch(int reasonCode, ConsensusMessageContext context) {
+		check();
+		messageHandle.rollbackBatch(reasonCode, context);
+	}
+
+	@Override
+	public AsyncFuture<byte[]> processUnordered(byte[] message) {
+		check();
+		return messageHandle.processUnordered(message);
+	}
+
+	@Override
+	public StateSnapshot getStateSnapshot(ConsensusContext consensusContext) {
+		check();
+		return messageHandle.getStateSnapshot(consensusContext);
+	}
+
+	@Override
+	public StateSnapshot getGenesisStateSnapshot(ConsensusContext consensusContext) {
+		check();
+		return messageHandle.getGenesisStateSnapshot(consensusContext);
+	}
+
+}
