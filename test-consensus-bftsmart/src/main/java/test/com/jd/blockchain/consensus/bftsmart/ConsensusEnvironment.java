@@ -381,6 +381,7 @@ public class ConsensusEnvironment {
 
 		try (ConsensusManageClient manageClient = CS_PROVIDER.getManagerClientFactory()
 				.setupManageClient(clientSettings)) {
+			manageClient.connect();
 			AsyncFuture<ConsensusView> future = manageClient.getManageService().addNode(bftsmartReplica);
 			ConsensusView nextView = future.get();
 

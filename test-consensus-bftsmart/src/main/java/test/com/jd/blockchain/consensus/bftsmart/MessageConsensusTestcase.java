@@ -45,6 +45,8 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 
 	private boolean cleanClientsAfterRunning = true;
 
+	private boolean stopPeersAfterRunning = false;
+
 	/**
 	 * 消息大小；单位：字节；
 	 */
@@ -59,13 +61,13 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 	 * 是否重连客户端；
 	 */
 	private boolean reconectClients = true;
-	
+
 	private int clientCount = 2;
-	
+
 	public void setClientCount(int clientCount) {
 		this.clientCount = clientCount;
 	}
-	
+
 	public int getClientCount() {
 		return clientCount;
 	}
@@ -113,6 +115,27 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 
 	public void setRestartPeersBeforeRunning(boolean restartPeersBeforeRunning) {
 		this.restartPeersBeforeRunning = restartPeersBeforeRunning;
+	}
+
+	/**
+	 * 是否在测试用例运行之后关闭共识节点；
+	 * <p>
+	 * 
+	 * 默认为 false；
+	 * 
+	 * @return
+	 */
+	public boolean isStopPeersAfterRunning() {
+		return stopPeersAfterRunning;
+	}
+
+	/**
+	 * 是否在测试用例运行之后关闭共识节点；
+	 * 
+	 * @param stopPeersAfterRunning
+	 */
+	public void setStopPeersAfterRunning(boolean stopPeersAfterRunning) {
+		this.stopPeersAfterRunning = stopPeersAfterRunning;
 	}
 
 	/**
@@ -205,13 +228,10 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 		} finally {
 			environment.clearMessageHandlers();
 			// 停止环境；
-//			stopEnvironmentAfterRunning(environment);
+			if (stopPeersAfterRunning) {
+				environment.stopNodeServers();
+			}
 		}
-	}
-
-	private void stopEnvironmentAfterRunning(ConsensusEnvironment environment) {
-		environment.closeAllClients();
-		environment.stopNodeServers();
 	}
 
 	/**
@@ -280,7 +300,7 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 				}
 			});
 		}
-		
+
 		try {
 			sendCompletedLatch.await(30000, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {

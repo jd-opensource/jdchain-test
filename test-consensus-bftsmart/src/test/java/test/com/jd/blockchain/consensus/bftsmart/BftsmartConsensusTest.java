@@ -3,6 +3,7 @@ package test.com.jd.blockchain.consensus.bftsmart;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.junit.Test;
 
@@ -59,8 +60,9 @@ public class BftsmartConsensusTest {
 	 * @throws InterruptedException
 	 * @throws ConsensusSecurityException
 	 */
-//	@Test
+	@Test
 	public void testAddNodeAndConsensus() throws IOException, InterruptedException, ConsensusSecurityException {
+		System.out.println("--------- BftsmartConsensusTest.testAddNodeAndConsensus----------");
 		// 新建 4 个节点的共识网络；
 		int N = 4;
 		String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));
@@ -76,13 +78,15 @@ public class BftsmartConsensusTest {
 		messageSendTest.setRestartPeersBeforeRunning(false);
 		messageSendTest.setReconectClients(true);
 		messageSendTest.setClientCount(2);
-		messageSendTest.setMessageConsenusMillis(3000);
-		messageSendTest.setMessageCountPerClient(10);
+		messageSendTest.setMessageCountPerClient(2);
+		messageSendTest.setCleanClientsAfterRunning(false);
 
 		// 执行消息一致性测试；
+		messageSendTest.setMessageConsenusMillis(10000);
 		messageSendTest.run(csEnv);
 
 		// 新增共识节点；
+		System.out.println("--------- join new replica ----------");
 		NetworkAddress newNetworkAddress = new NetworkAddress(host, 11700, false);
 		Replica newReplica = ConsensusEnvironment.createReplicaWithRandom(4, "节点[4]");
 		csEnv.joinReplica(newReplica, newNetworkAddress);
