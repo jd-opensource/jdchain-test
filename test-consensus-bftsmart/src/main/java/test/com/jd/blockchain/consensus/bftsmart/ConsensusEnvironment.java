@@ -55,7 +55,7 @@ public class ConsensusEnvironment {
 
 	private final ConsensusProvider CS_PROVIDER;
 
-	private ConsensusViewSettings csSettings;
+	private ConsensusViewSettings viewSettings;
 
 	private String realmName;
 
@@ -115,7 +115,7 @@ public class ConsensusEnvironment {
 
 		this.realmName = realmName;
 		this.replicas = replicas;
-		this.csSettings = csSettings;
+		this.viewSettings = csSettings;
 
 		this.messageDelegaters = new MessageHandlerDelegater[replicas.length];
 		for (int i = 0; i < messageDelegaters.length; i++) {
@@ -265,7 +265,7 @@ public class ConsensusEnvironment {
 		}
 		NodeServer[] nodeServers = new NodeServer[nodeCount];
 		for (int i = 0; i < nodeServers.length; i++) {
-			nodeServers[i] = createNodeServer(realmName, csSettings, replicas[i], messageDelegaters[i],
+			nodeServers[i] = createNodeServer(realmName, viewSettings, replicas[i], messageDelegaters[i],
 					stateMachineReplicaters[i], CS_PROVIDER);
 		}
 		this.nodeServers = nodeServers;
@@ -372,7 +372,7 @@ public class ConsensusEnvironment {
 
 		// 创建新的共识节点的视图配置信息；
 		BftsmartConsensusSettings nextViewSettings = (BftsmartConsensusSettings) CS_PROVIDER.getSettingsFactory()
-				.getConsensusSettingsBuilder().addReplicaSetting(csSettings, bftsmartReplica);
+				.getConsensusSettingsBuilder().addReplicaSetting(viewSettings, bftsmartReplica);
 
 		// 向现有的共识网络发起“加入节点”的共识请求；
 		AsymmetricKeypair clientKey = Crypto.getSignatureFunction(ClassicAlgorithm.ED25519).generateKeypair();
@@ -396,7 +396,7 @@ public class ConsensusEnvironment {
 		StateMachineReplicate smr = Mockito.mock(StateMachineReplicate.class);
 
 		MessageHandlerDelegater messageDelegater = new MessageHandlerDelegater(messageHandler);
-		NodeServer nodeServer = createNodeServer(realmName, csSettings, bftsmartReplica, messageDelegater, smr,
+		NodeServer nodeServer = createNodeServer(realmName, nextViewSettings, bftsmartReplica, messageDelegater, smr,
 				CS_PROVIDER);
 
 		// 把新节点加入到上下文的节点列表；
@@ -682,9 +682,9 @@ public class ConsensusEnvironment {
 				replicas);
 	}
 
-	private static NodeServer createNodeServer(String realmName, ConsensusViewSettings csSettings, Replica replica,
+	private static NodeServer createNodeServer(String realmName, ConsensusViewSettings viewSettings, Replica replica,
 			MessageHandlerDelegater messageHandler, StateMachineReplicate smr, ConsensusProvider consensusProvider) {
-		ServerSettings serverSettings = consensusProvider.getServerFactory().buildServerSettings(realmName, csSettings,
+		ServerSettings serverSettings = consensusProvider.getServerFactory().buildServerSettings(realmName, viewSettings,
 				replica.getAddress().toBase58());
 		return consensusProvider.getServerFactory().setupServer(serverSettings, messageHandler, smr);
 	}

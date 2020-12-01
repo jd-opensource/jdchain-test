@@ -32,7 +32,7 @@ public class BftsmartConsensusTest {
 	 * @throws InterruptedException
 	 * @throws ConsensusSecurityException
 	 */
-//	@Test
+	@Test
 	public void testMessageConsensus() throws IOException, InterruptedException, ConsensusSecurityException {
 		final int N = 4;
 		final String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));
@@ -53,6 +53,9 @@ public class BftsmartConsensusTest {
 		messageSendTest.setMessageConsenusMillis(3000);
 
 		messageSendTest.run(csEnv);
+		
+		csEnv.closeAllClients();
+		csEnv.stopNodeServers();
 	}
 
 	/**
@@ -62,14 +65,14 @@ public class BftsmartConsensusTest {
 	 * @throws InterruptedException
 	 * @throws ConsensusSecurityException
 	 */
-//	@Test
+	@Test
 	public void testAddNodeAndConsensus() throws IOException, InterruptedException, ConsensusSecurityException {
 		System.out.println("--------- BftsmartConsensusTest.testAddNodeAndConsensus----------");
 		// 新建 4 个节点的共识网络；
 		int N = 4;
 		String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));
 		String host = "127.0.0.1";
-		NetworkAddress[] nodesNetworkAddresses = ConsensusEnvironment.createMultiPortsAddresses(host, N, 11600, 10);
+		NetworkAddress[] nodesNetworkAddresses = ConsensusEnvironment.createMultiPortsAddresses(host, N, 12600, 10);
 
 		ConsensusEnvironment csEnv = ConsensusEnvironment.setup_BFTSMaRT(realmName,
 				"classpath:bftsmart-consensus-test-normal.config", nodesNetworkAddresses);
@@ -89,7 +92,7 @@ public class BftsmartConsensusTest {
 
 		// 新增共识节点；
 		System.out.println("--------- join new replica ----------");
-		NetworkAddress newNetworkAddress = new NetworkAddress(host, 11700, false);
+		NetworkAddress newNetworkAddress = new NetworkAddress(host, 12700, false);
 		Replica newReplica = ConsensusEnvironment.createReplicaWithRandom(4, "节点[4]");
 		csEnv.joinReplica(newReplica, newNetworkAddress);
 
@@ -99,6 +102,10 @@ public class BftsmartConsensusTest {
 		
 		// 执行消息一致性测试；
 		messageSendTest.run(csEnv);
+		
+		
+		csEnv.closeAllClients();
+		csEnv.stopNodeServers();
 	}
 
 }
