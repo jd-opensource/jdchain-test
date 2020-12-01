@@ -22,6 +22,7 @@ import com.jd.blockchain.consensus.client.ConsensusClient;
 import com.jd.blockchain.consensus.service.MessageHandle;
 import com.jd.blockchain.consensus.service.StateSnapshot;
 import com.jd.blockchain.utils.SkippingIterator;
+import com.jd.blockchain.utils.concurrent.AsyncFuture;
 import com.jd.blockchain.utils.security.RandomUtils;
 
 /**
@@ -213,7 +214,7 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 				verifyEnvironmentBeforeRunning(clients, nodeServers, environment);
 
 				// 发送消息；
-				List<byte[]> sendedMessages = sendMessages(clients, environment);
+				List<AsyncFuture<byte[]>> sendedMessages = sendMessages(clients, environment);
 
 				// 等待共识完成；
 				waitForConsensus(environment);
@@ -240,7 +241,7 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 	 * @param clientSendedMessages
 	 * @param environment
 	 */
-	protected void verifyMessageConsistant(List<byte[]> clientSendedMessages, ConsensusEnvironment environment,
+	protected void verifyMessageConsistant(List<AsyncFuture<byte[]>> clientSendedMessages, ConsensusEnvironment environment,
 			MessageSnapshotHandler[] messageHandlers) {
 		int messageCount = clientSendedMessages.size();
 
@@ -280,8 +281,8 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 	 * 
 	 * @param clients
 	 */
-	protected List<byte[]> sendMessages(ConsensusClient[] clients, ConsensusEnvironment environment) {
-		List<byte[]> sendedMessages = Collections.synchronizedList(new LinkedList<byte[]>());
+	protected List<AsyncFuture<byte[]>> sendMessages(ConsensusClient[] clients, ConsensusEnvironment environment) {
+		List<AsyncFuture<byte[]>> sendedMessages = Collections.synchronizedList(new LinkedList<AsyncFuture<byte[]>>());
 
 		CountDownLatch sendCompletedLatch = new CountDownLatch(clients.length);
 
@@ -292,9 +293,9 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 				public void run() {
 					byte[][] messages = prepareClientMessages(messageCountPerClient, messageSize);
 
-					sendMessage(client, messages);
+					AsyncFuture<byte[]>[] futures = sendMessage(client, messages);
 
-					sendedMessages.addAll(Arrays.asList(messages));
+					sendedMessages.addAll(Arrays.asList(futures));
 
 					sendCompletedLatch.countDown();
 				}
@@ -308,10 +309,14 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 		return sendedMessages;
 	}
 
-	private void sendMessage(ConsensusClient client, byte[][] messages) {
+	private AsyncFuture<byte[]>[] sendMessage(ConsensusClient client, byte[][] messages) {
+		@SuppressWarnings("unchecked")
+		AsyncFuture<byte[]>[] futures = new AsyncFuture[messages.length];
 		for (int i = 0; i < messages.length; i++) {
-			client.getMessageService().sendOrdered(messages[i]);
+			futures[i]= client.getMessageService().sendOrdered(messages[i]);
 		}
+		
+		return futures;
 	}
 
 	protected byte[][] prepareClientMessages(int messageCount, int messageSize) {
