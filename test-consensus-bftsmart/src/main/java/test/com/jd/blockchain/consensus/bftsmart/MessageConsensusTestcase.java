@@ -8,6 +8,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -16,6 +17,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jd.blockchain.consensus.ConsensusSecurityException;
 import com.jd.blockchain.consensus.client.ConsensusClient;
@@ -36,6 +40,8 @@ import com.jd.blockchain.utils.security.RandomUtils;
  */
 public class MessageConsensusTestcase implements ConsensusTestcase {
 
+	private static Logger LOGGER = LoggerFactory.getLogger(MessageConsensusTestcase.class);
+
 	private ExecutorService messageSendExecutor = Executors.newCachedThreadPool();
 
 	private boolean reinstallPeersBeforeRunning = false;
@@ -47,6 +53,10 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 	private boolean cleanClientsAfterRunning = true;
 
 	private boolean stopPeersAfterRunning = false;
+
+	private boolean requireTotalRunning = false;
+
+	private int[] authenticationNodeIDs;
 
 	/**
 	 * 消息大小；单位：字节；
@@ -116,6 +126,14 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 
 	public void setRestartPeersBeforeRunning(boolean restartPeersBeforeRunning) {
 		this.restartPeersBeforeRunning = restartPeersBeforeRunning;
+	}
+
+	public int[] getAuthenticationNodeIDs() {
+		return authenticationNodeIDs;
+	}
+
+	public void setAuthenticationNodeIDs(int... authenticationNodeIDs) {
+		this.authenticationNodeIDs = authenticationNodeIDs;
 	}
 
 	/**
@@ -196,6 +214,24 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 	}
 
 	/**
+	 * 是否要求全部节点在测试开始前都保持运行；
+	 * 
+	 * @return
+	 */
+	public boolean isRequireTotalRunning() {
+		return requireTotalRunning;
+	}
+
+	/**
+	 * 设置是否要求全部节点在测试开始前都保持运行；
+	 * 
+	 * @param requireTotalRunning
+	 */
+	public void setRequireTotalRunning(boolean requireTotalRunning) {
+		this.requireTotalRunning = requireTotalRunning;
+	}
+
+	/**
 	 * 
 	 */
 	@Override
@@ -205,6 +241,9 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 
 			// 处理共识节点；
 			ReplicaNodeServer[] nodeServers = preparePeers(environment, messageHandlers);
+
+			// 过滤出运行的节点对应的消息处理器；
+			messageHandlers = getRunningHandlers(nodeServers, messageHandlers);
 
 			// 处理共识客户端；
 			ConsensusClient[] clients = prepareClients(environment);
@@ -219,7 +258,7 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 				// 等待共识完成；
 				waitForConsensus(environment);
 
-				// 验证消息共识的一致性；
+				// 对运行中的节点的消息处理器验证消息共识的一致性；
 				verifyMessageConsistant(sendedMessages, environment, messageHandlers);
 			} finally {
 				if (cleanClientsAfterRunning) {
@@ -236,16 +275,38 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 	}
 
 	/**
+	 * 返回运行中的节点对应的消息处理器；
+	 * 
+	 * @param nodeServers
+	 * @param messageHandlers
+	 * @return
+	 */
+	private MessageSnapshotHandler[] getRunningHandlers(ReplicaNodeServer[] nodeServers,
+			MessageSnapshotHandler[] messageHandlers) {
+		assert nodeServers.length == messageHandlers.length;
+
+		List<MessageSnapshotHandler> runningHandlers = new ArrayList<MessageSnapshotHandler>();
+		for (int i = 0; i < nodeServers.length; i++) {
+			if (nodeServers[i].getNodeServer().isRunning()) {
+				runningHandlers.add(messageHandlers[i]);
+			}
+		}
+
+		return runningHandlers.toArray(new MessageSnapshotHandler[runningHandlers.size()]);
+	}
+
+	/**
 	 * 在完成客户端消息发送之后，验证消息共识的一致性；
 	 * 
 	 * @param clientSendedMessages
 	 * @param environment
 	 */
-	protected void verifyMessageConsistant(List<AsyncFuture<byte[]>> clientSendedMessages, ConsensusEnvironment environment,
-			MessageSnapshotHandler[] messageHandlers) {
+	protected void verifyMessageConsistant(List<AsyncFuture<byte[]>> clientSendedMessages,
+			ConsensusEnvironment environment, MessageSnapshotHandler[] messageHandlers) {
 		int messageCount = clientSendedMessages.size();
 
 		// 验证每一个消息处理器处理的消息数量是否与总的发送消息数量一致；
+		LOGGER.debug("verify message consistant in all message handlers! -- handler count=" + messageHandlers.length);
 		for (MessageHandle messageHandle : messageHandlers) {
 			verify(messageHandle, times(messageCount)).processOrdered(anyInt(), any(), any());
 		}
@@ -313,9 +374,9 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 		@SuppressWarnings("unchecked")
 		AsyncFuture<byte[]>[] futures = new AsyncFuture[messages.length];
 		for (int i = 0; i < messages.length; i++) {
-			futures[i]= client.getMessageService().sendOrdered(messages[i]);
+			futures[i] = client.getMessageService().sendOrdered(messages[i]);
 		}
-		
+
 		return futures;
 	}
 
@@ -343,7 +404,17 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 	protected ConsensusClient[] prepareClients(ConsensusEnvironment environment) {
 		if (reconectClients && clientCount > 0) {
 			try {
-				return environment.resetupClients(clientCount);
+				int[] authNodeIds = null;
+				if (authenticationNodeIDs == null) {
+					ReplicaNodeServer[] runningNodes = environment.getRunningNodes();
+					authNodeIds = new int[runningNodes.length];
+					for (int i = 0; i < runningNodes.length; i++) {
+						authNodeIds[i] = runningNodes[i].getReplica().getId();
+					}
+				} else {
+					authNodeIds = authenticationNodeIDs.clone();
+				}
+				return environment.resetupClients(clientCount, authNodeIds);
 			} catch (ConsensusSecurityException e) {
 				throw new IllegalStateException("Error occurred while reseting clients" + e.getMessage(), e);
 			}
@@ -374,15 +445,16 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 		if (isRestartPeersBeforeRunning()) {
 			// 重启节点；
 			environment.stopNodeServers();
+			environment.startNodeServers();
 		}
 
 		environment.delegateMessageHandlers(handlers);
 
-		if (!environment.isRunning()) {
+		if (requireTotalRunning && (!environment.isTotalRunning())) {
 			environment.startNodeServers();
 		}
 
-		SkippingIterator<ReplicaNodeServer> nodes = environment.getNodes();
+		SkippingIterator<ReplicaNodeServer> nodes = environment.getNodesIterator();
 		ReplicaNodeServer[] servers = new ReplicaNodeServer[(int) nodes.getTotalCount()];
 		nodes.next(servers);
 		return servers;
@@ -396,5 +468,4 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 		}
 		return spyHandlers;
 	}
-
 }

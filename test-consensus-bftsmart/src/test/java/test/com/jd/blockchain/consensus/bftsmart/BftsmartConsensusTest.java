@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import com.jd.blockchain.consensus.ConsensusSecurityException;
 import com.jd.blockchain.consensus.Replica;
+import com.jd.blockchain.consensus.service.NodeServer;
 import com.jd.blockchain.utils.codec.Base58Utils;
 import com.jd.blockchain.utils.net.NetworkAddress;
 import com.jd.blockchain.utils.security.RandomUtils;
@@ -43,17 +44,35 @@ public class BftsmartConsensusTest {
 		ConsensusEnvironment csEnv = ConsensusEnvironment.setup_BFTSMaRT(realmName,
 				"classpath:bftsmart-consensus-test-normal.config", nodesNetworkAddresses);
 
-		// 执行消息消息共识一致性测试；
+		// 配置用例；
 		MessageConsensusTestcase messageSendTest = new MessageConsensusTestcase();
 		messageSendTest.setReinstallPeersBeforeRunning(false);
 		messageSendTest.setRestartPeersBeforeRunning(false);
+		messageSendTest.setRequireTotalRunning(false);
 		messageSendTest.setReconectClients(true);
 		messageSendTest.setClientCount(2);
 		messageSendTest.setMessageCountPerClient(2);
 		messageSendTest.setMessageConsenusMillis(3000);
 
+		// 启动 4 个共识节点；
+		csEnv.startNodeServers();
+
+		// 执行 4 个共识节点的消息消息共识一致性测试；
 		messageSendTest.run(csEnv);
 		
+		// 停止 1 个共识节点后验证剩余 3 个节点的共识一致性；
+		ReplicaNodeServer[] nodes = csEnv.getNodes();
+		nodes[3].getNodeServer().stop();
+		Thread.sleep(1000);
+		messageSendTest.run(csEnv);
+		
+		//重启节点之后；
+		nodes[3] = csEnv.reinstallNodeServer(nodes[3].getReplica().getId());
+		nodes[3].getNodeServer().start();
+		Thread.sleep(1000);
+		messageSendTest.run(csEnv);
+		
+		// 退出测试前关闭；
 		csEnv.closeAllClients();
 		csEnv.stopNodeServers();
 	}
@@ -99,11 +118,9 @@ public class BftsmartConsensusTest {
 		// 验证共识节点的数量；
 		assertEquals(5, csEnv.getReplicaCount());
 
-		
 		// 执行消息一致性测试；
 		messageSendTest.run(csEnv);
-		
-		
+
 		csEnv.closeAllClients();
 		csEnv.stopNodeServers();
 	}
