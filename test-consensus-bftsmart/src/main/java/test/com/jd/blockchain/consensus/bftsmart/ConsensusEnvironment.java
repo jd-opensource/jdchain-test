@@ -55,7 +55,7 @@ public class ConsensusEnvironment {
 
 	private final ConsensusProvider CS_PROVIDER;
 
-	private ConsensusViewSettings viewSettings;
+	private volatile ConsensusViewSettings viewSettings;
 
 	private String realmName;
 
@@ -437,6 +437,7 @@ public class ConsensusEnvironment {
 				throw new IllegalStateException(
 						"The next view id from remote consensus network is not equal to the next view id from local settings!");
 			}
+			this.viewSettings = nextViewSettings;
 		}
 
 		// 创建并启动新加入的节点；

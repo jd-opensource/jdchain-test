@@ -59,19 +59,19 @@ public class BftsmartConsensusTest {
 
 		// 执行 4 个共识节点的消息消息共识一致性测试；
 		messageSendTest.run(csEnv);
-		
+
 		// 停止 1 个共识节点后验证剩余 3 个节点的共识一致性；
 		ReplicaNodeServer[] nodes = csEnv.getNodes();
 		nodes[3].getNodeServer().stop();
 		Thread.sleep(1000);
 		messageSendTest.run(csEnv);
-		
-		//重启节点之后；
+
+		// 重启节点之后；
 		nodes[3] = csEnv.reinstallNodeServer(nodes[3].getReplica().getId());
 		nodes[3].getNodeServer().start();
 		Thread.sleep(1000);
 		messageSendTest.run(csEnv);
-		
+
 		// 退出测试前关闭；
 		csEnv.closeAllClients();
 		csEnv.stopNodeServers();
@@ -121,8 +121,80 @@ public class BftsmartConsensusTest {
 		assertEquals(5, csEnv.getReplicaCount());
 
 		// 执行消息一致性测试；
+		messageSendTest.setClientCount(15);
+		messageSendTest.setMessageCountPerClient(4);
 		messageSendTest.run(csEnv);
 
+		// 再次新增共识节点；
+		System.out.println("--------- join new replica ----------");
+		NetworkAddress newNetworkAddress2 = new NetworkAddress(host, 12800, false);
+		Replica newReplica2 = ConsensusEnvironment.createReplicaWithRandom(5, "节点[5]");
+		csEnv.joinReplica(newReplica2, newNetworkAddress2);
+
+		// 验证共识节点的数量；
+		assertEquals(6, csEnv.getReplicaCount());
+
+		// 执行消息一致性测试；
+		messageSendTest.setClientCount(15);
+		messageSendTest.setMessageCountPerClient(4);
+		messageSendTest.run(csEnv);
+
+		csEnv.closeAllClients();
+		csEnv.stopNodeServers();
+	}
+
+	/**
+	 * 标准测试用例：建立4个副本节点的共识网络，可以正常地达成进行共识；
+	 * <p>
+	 * 1. 建立 4 个副本节点的共识网络，启动全部的节点；<br>
+	 * 2. 建立不少于 1 个共识客户端连接到共识网络；<br>
+	 * 3. 共识客户端并发地提交共识消息，每个副本节点都能得到一致的消息队列；<br>
+	 * 4. 副本节点对每一条消息都返回相同的响应，共识客户端能够得到正确的回复结果；<br>
+	 * 
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws ConsensusSecurityException
+	 */
+	@Test
+	public void testClientViewUpdating() throws IOException, InterruptedException, ConsensusSecurityException {
+		final int N = 4;
+		final String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));
+
+		NetworkAddress[] nodesNetworkAddresses = ConsensusEnvironment.createMultiPortsAddresses("127.0.0.1", N, 11600,
+				10);
+
+		ConsensusEnvironment csEnv = ConsensusEnvironment.setup_BFTSMaRT(realmName,
+				"classpath:bftsmart-consensus-test-normal.config", nodesNetworkAddresses);
+
+		// 配置用例；
+		MessageConsensusTestcase messageSendTest = new MessageConsensusTestcase();
+		messageSendTest.setReinstallPeersBeforeRunning(false);
+		messageSendTest.setRestartPeersBeforeRunning(false);
+		messageSendTest.setRequireTotalRunning(false);
+		messageSendTest.setReconectClients(true);
+		messageSendTest.setClientCount(2);
+		messageSendTest.setMessageCountPerClient(2);
+		messageSendTest.setMessageConsenusMillis(3000);
+
+		// 启动 4 个共识节点；
+		csEnv.startNodeServers();
+
+		// 执行 4 个共识节点的消息消息共识一致性测试；
+		messageSendTest.run(csEnv);
+
+		// 停止 1 个共识节点后验证剩余 3 个节点的共识一致性；
+		ReplicaNodeServer[] nodes = csEnv.getNodes();
+		nodes[3].getNodeServer().stop();
+		Thread.sleep(1000);
+		messageSendTest.run(csEnv);
+
+		// 重启节点之后；
+		nodes[3] = csEnv.reinstallNodeServer(nodes[3].getReplica().getId());
+		nodes[3].getNodeServer().start();
+		Thread.sleep(1000);
+		messageSendTest.run(csEnv);
+
+		// 退出测试前关闭；
 		csEnv.closeAllClients();
 		csEnv.stopNodeServers();
 	}
