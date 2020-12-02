@@ -128,10 +128,26 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 		this.restartPeersBeforeRunning = restartPeersBeforeRunning;
 	}
 
+	/**
+	 * 获取用于认证的节点服务器 ID 列表；
+	 * <p>
+	 * 
+	 * 如果列表为空，则会以所有的共识节点作为客户端认证服务器节点；
+	 * 
+	 * @return
+	 */
 	public int[] getAuthenticationNodeIDs() {
 		return authenticationNodeIDs;
 	}
 
+	/**
+	 * 设置用于认证的节点服务器 ID 列表；
+	 * <p>
+	 * 
+	 * 如果列表为空，则会以所有的共识节点作为客户端认证服务器节点；
+	 * 
+	 * @param authenticationNodeIDs
+	 */
 	public void setAuthenticationNodeIDs(int... authenticationNodeIDs) {
 		this.authenticationNodeIDs = authenticationNodeIDs;
 	}
@@ -407,6 +423,9 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 				int[] authNodeIds = null;
 				if (authenticationNodeIDs == null) {
 					ReplicaNodeServer[] runningNodes = environment.getRunningNodes();
+					if (runningNodes.length == 0) {
+						throw new IllegalStateException("No running nodes in the specified consensus environment!");
+					}
 					authNodeIds = new int[runningNodes.length];
 					for (int i = 0; i < runningNodes.length; i++) {
 						authNodeIds[i] = runningNodes[i].getReplica().getId();

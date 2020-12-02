@@ -100,13 +100,15 @@ public class BftsmartConsensusTest {
 		MessageConsensusTestcase messageSendTest = new MessageConsensusTestcase();
 		messageSendTest.setReinstallPeersBeforeRunning(false);
 		messageSendTest.setRestartPeersBeforeRunning(false);
+		messageSendTest.setRequireTotalRunning(false);
 		messageSendTest.setReconectClients(true);
 		messageSendTest.setClientCount(2);
 		messageSendTest.setMessageCountPerClient(2);
 		messageSendTest.setCleanClientsAfterRunning(false);
+		messageSendTest.setMessageConsenusMillis(3000);
 
 		// 执行消息一致性测试；
-		messageSendTest.setMessageConsenusMillis(3000);
+		csEnv.startNodeServers();
 		messageSendTest.run(csEnv);
 
 		// 新增共识节点；
