@@ -155,7 +155,7 @@ public class BftsmartConsensusTest {
 	 * @throws InterruptedException
 	 * @throws ConsensusSecurityException
 	 */
-	@Test
+//	@Test
 	public void testClientViewUpdating() throws IOException, InterruptedException, ConsensusSecurityException {
 		final int N = 4;
 		final String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));

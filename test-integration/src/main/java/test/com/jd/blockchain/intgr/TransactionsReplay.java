@@ -241,7 +241,7 @@ public class TransactionsReplay {
 							txContentBlob.addOperation(ClientResolveUtil.read(operation));
 						}
 
-						TxRequestBuilder txRequestBuilder = new TxRequestBuilder(ledgerTransaction.getTransactionHash(),
+						TxRequestBuilder txRequestBuilder = new TxRequestBuilder(ledgerTransaction.getRequest().getTransactionHash(),
 								txContentBlob);
 						txRequestBuilder.addNodeSignature(ledgerTransaction.getRequest().getNodeSignatures());
 						txRequestBuilder.addEndpointSignature(ledgerTransaction.getRequest().getEndpointSignatures());
