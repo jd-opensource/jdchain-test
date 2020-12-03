@@ -619,7 +619,7 @@ public class ConsensusEnvironment {
 					public void run() {
 						nodeServer.start();
 						ConsoleUtils.info("Replica Node [%s : %s] started! ", id,
-								nodeServer.getSettings().getReplicaSettings().getAddress());
+								nodeServer.getServerSettings().getReplicaSettings().getAddress());
 						startupLatch.countDown();
 					}
 				});
