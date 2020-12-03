@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -44,17 +45,15 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 
 	private ExecutorService messageSendExecutor = Executors.newCachedThreadPool();
 
-	private boolean reinstallPeersBeforeRunning = false;
+	private boolean reinstallAllNodesBeforeRunning = false;
 
-	private boolean restartPeersBeforeRunning = false;
+	private boolean restartAllNodesBeforeRunning = false;
 
 	private long messageConsenusMillis;
 
-	private boolean cleanClientsAfterRunning = true;
-
 	private boolean stopPeersAfterRunning = false;
 
-	private boolean requireTotalRunning = false;
+	private boolean requireAllNodesRunning = false;
 
 	private int[] authenticationNodeIDs;
 
@@ -69,18 +68,68 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 	private int messageCountPerClient = 10;
 
 	/**
-	 * 是否重连客户端；
+	 * 是否重置客户端；
 	 */
-	private boolean reconectClients = true;
+	private boolean resetupClients = true;
 
-	private int clientCount = 2;
+	/**
+	 * 是否要求全部的客户端实例在测试开始前都处于连接状态；
+	 * <p>
+	 * 
+	 * 未连接的客户端在测试中不参与消息发送；
+	 */
+	private boolean requireAllClientConnected = false;
 
-	public void setClientCount(int clientCount) {
-		this.clientCount = clientCount;
+	private int totalClients = 2;
+
+	/**
+	 * 设置总的客户端数；
+	 * <p>
+	 * 
+	 * 如果在测试发起之前，已连接的客户端数量不足指定的数量，则自动建立新的客户端以便维持设置的客户端总数；
+	 * 
+	 * @param totalClients
+	 */
+	public void setTotalClients(int totalClients) {
+		this.totalClients = totalClients;
 	}
 
-	public int getClientCount() {
-		return clientCount;
+	/**
+	 * 客户端总数；
+	 * <p>
+	 * 
+	 * 如果在测试发起之前，已连接的客户端数量不足指定的数量，则自动建立新的客户端以便维持设置的客户端总数；
+	 * 
+	 * @return
+	 */
+	public int getTotalClients() {
+		return totalClients;
+	}
+
+	/**
+	 * 是否要求全部的客户端实例在测试开始前都处于连接状态；
+	 * <p>
+	 * 
+	 * 未连接的客户端在测试中不参与消息发送；
+	 * 
+	 * @return
+	 */
+	public boolean isRequireAllClientConnected() {
+		return requireAllClientConnected;
+	}
+
+	/**
+	 * 是否要求全部的客户端实例在测试开始前都处于连接状态；
+	 * <p>
+	 * 默认为 false；
+	 * <p>
+	 * 
+	 * 未连接的客户端在测试中不参与消息发送；
+	 * 
+	 * @param requireAllClientConnected
+	 */
+	public void setRequireAllClientConnected(boolean requireAllClientConnected) {
+		this.requireAllClientConnected = requireAllClientConnected;
 	}
 
 	/**
@@ -104,12 +153,12 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 		this.messageCountPerClient = messageCountPerClient;
 	}
 
-	public boolean isReconectClients() {
-		return reconectClients;
+	public boolean isResetupClients() {
+		return resetupClients;
 	}
 
-	public void setReconectClients(boolean reconectClients) {
-		this.reconectClients = reconectClients;
+	public void setResetupClients(boolean resetupClients) {
+		this.resetupClients = resetupClients;
 	}
 
 	/**
@@ -120,12 +169,12 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 	 * 
 	 * @return
 	 */
-	public boolean isRestartPeersBeforeRunning() {
-		return restartPeersBeforeRunning;
+	public boolean isRestartAllNodesBeforeRunning() {
+		return restartAllNodesBeforeRunning;
 	}
 
-	public void setRestartPeersBeforeRunning(boolean restartPeersBeforeRunning) {
-		this.restartPeersBeforeRunning = restartPeersBeforeRunning;
+	public void setRestartAllNodesBeforeRunning(boolean restartAllNodesBeforeRunning) {
+		this.restartAllNodesBeforeRunning = restartAllNodesBeforeRunning;
 	}
 
 	/**
@@ -181,28 +230,12 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 	 * 
 	 * @return
 	 */
-	public boolean isReinstallPeersBeforeRunning() {
-		return reinstallPeersBeforeRunning;
+	public boolean isReinstallNodesBeforeRunning() {
+		return reinstallAllNodesBeforeRunning;
 	}
 
-	public void setReinstallPeersBeforeRunning(boolean reinstallPeersBeforeRunning) {
-		this.reinstallPeersBeforeRunning = reinstallPeersBeforeRunning;
-	}
-
-	/**
-	 * 执行完成测试之后是否清理客户端；
-	 * <p>
-	 * 
-	 * 默认为 true；
-	 * 
-	 * @return
-	 */
-	public boolean isCleanClientsAfterRunning() {
-		return cleanClientsAfterRunning;
-	}
-
-	public void setCleanClientsAfterRunning(boolean cleanClientsAfterRunning) {
-		this.cleanClientsAfterRunning = cleanClientsAfterRunning;
+	public void setReinstallAllNodesBeforeRunning(boolean reinstallAllNodesBeforeRunning) {
+		this.reinstallAllNodesBeforeRunning = reinstallAllNodesBeforeRunning;
 	}
 
 	/**
@@ -234,17 +267,17 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 	 * 
 	 * @return
 	 */
-	public boolean isRequireTotalRunning() {
-		return requireTotalRunning;
+	public boolean isRequireAllNodesRunning() {
+		return requireAllNodesRunning;
 	}
 
 	/**
 	 * 设置是否要求全部节点在测试开始前都保持运行；
 	 * 
-	 * @param requireTotalRunning
+	 * @param requireAllNodesRunning
 	 */
-	public void setRequireTotalRunning(boolean requireTotalRunning) {
-		this.requireTotalRunning = requireTotalRunning;
+	public void setRequireAllNodesRunning(boolean requireAllNodesRunning) {
+		this.requireAllNodesRunning = requireAllNodesRunning;
 	}
 
 	/**
@@ -256,31 +289,31 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 			MessageSnapshotHandler[] messageHandlers = prepareMessageSnapshotHandlers(environment.getReplicaCount());
 
 			// 处理共识节点；
-			ReplicaNodeServer[] nodeServers = preparePeers(environment, messageHandlers);
+			ReplicaNodeServer[] nodeServers = prepareNodes(environment, messageHandlers);
 
 			// 过滤出运行的节点对应的消息处理器；
-			messageHandlers = getRunningHandlers(nodeServers, messageHandlers);
+			messageHandlers = filterOutRunningHandlers(nodeServers, messageHandlers);
 
 			// 处理共识客户端；
 			ConsensusClient[] clients = prepareClients(environment);
-
-			try {
-				// 验证环境；
-				verifyEnvironmentBeforeRunning(clients, nodeServers, environment);
-
-				// 发送消息；
-				List<AsyncFuture<byte[]>> sendedMessages = sendMessages(clients, environment);
-
-				// 等待共识完成；
-				waitForConsensus(environment);
-
-				// 对运行中的节点的消息处理器验证消息共识的一致性；
-				verifyMessageConsistant(sendedMessages, environment, messageHandlers);
-			} finally {
-				if (cleanClientsAfterRunning) {
-					environment.closeAllClients();
-				}
+			
+			// 过滤出已连接的客户端列表；
+			ConsensusClient[] connectedClients = filterOutConnectedClients(clients);
+			if (connectedClients.length == 0) {
+				throw new IllegalStateException("No connected clients!");
 			}
+
+			// 验证环境；
+			verifyEnvironmentBeforeRunning(connectedClients, nodeServers, environment);
+
+			// 发送消息；
+			List<AsyncFuture<byte[]>> sendedMessages = sendMessages(connectedClients, environment);
+
+			// 等待共识完成；
+			waitForConsensus(environment);
+
+			// 对运行中的节点的消息处理器验证消息共识的一致性；
+			verifyMessageConsistant(sendedMessages, environment, messageHandlers);
 		} finally {
 			environment.clearMessageHandlers();
 			// 停止环境；
@@ -297,7 +330,7 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 	 * @param messageHandlers
 	 * @return
 	 */
-	private MessageSnapshotHandler[] getRunningHandlers(ReplicaNodeServer[] nodeServers,
+	private MessageSnapshotHandler[] filterOutRunningHandlers(ReplicaNodeServer[] nodeServers,
 			MessageSnapshotHandler[] messageHandlers) {
 		assert nodeServers.length == messageHandlers.length;
 
@@ -417,29 +450,99 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 			ConsensusEnvironment environment) {
 	}
 
+	/**
+	 * 过滤出处于连接状态的客户端；
+	 * 
+	 * @param clients
+	 * @return
+	 */
+	private ConsensusClient[] filterOutConnectedClients(ConsensusClient[] clients) {
+		List<ConsensusClient> connectedClients = new ArrayList<>();
+		for (int i = 0; i < clients.length; i++) {
+			if (clients[i].isConnected()) {
+				connectedClients.add(clients[i]);
+			}
+		}
+		return connectedClients.toArray(new ConsensusClient[connectedClients.size()]);
+	}
+
+	/**
+	 * 准备客户端；
+	 * <p>
+	 * 
+	 * 此方法将按照配置的方式从共识环境建立客户端连接，维持配置指定的客户端数量；
+	 * <p>
+	 * 
+	 * @param environment 共识环境；
+	 * @return 返回数量等于 {@link #getTotalClients()} 的客户端列表；受配置
+	 *         {@link #requireAllClientConnected} 影响，返回的客户端不一定都处于连接状态；
+	 */
 	protected ConsensusClient[] prepareClients(ConsensusEnvironment environment) {
-		if (reconectClients && clientCount > 0) {
+		if (totalClients <= 0) {
+			throw new IllegalArgumentException("The total client is negative or zero!");
+		}
+		if (resetupClients) {
+			environment.closeAllClients();
+		}
+
+		int[] authNodeIds = prepareAuthenticationNodeIDs(environment);
+
+		// 维持指定的客户端数量；
+		ConsensusClient[] clients = environment.getClients();
+		if (clients.length < totalClients) {
 			try {
-				int[] authNodeIds = null;
-				if (authenticationNodeIDs == null) {
-					ReplicaNodeServer[] runningNodes = environment.getRunningNodes();
-					if (runningNodes.length == 0) {
-						throw new IllegalStateException("No running nodes in the specified consensus environment!");
-					}
-					authNodeIds = new int[runningNodes.length];
-					for (int i = 0; i < runningNodes.length; i++) {
-						authNodeIds[i] = runningNodes[i].getReplica().getId();
-					}
-				} else {
-					authNodeIds = authenticationNodeIDs.clone();
-				}
-				return environment.resetupClients(clientCount, authNodeIds);
+				environment.setupNewClients(totalClients - clients.length, authNodeIds);
 			} catch (ConsensusSecurityException e) {
-				throw new IllegalStateException("Error occurred while reseting clients" + e.getMessage(), e);
+				throw new IllegalStateException(e.getMessage(), e);
+			}
+		} else if (clients.length > totalClients) {
+			// 关闭超出数量的客户端，优先清理已关闭的客户端；
+			int closingNumber = clients.length - totalClients;
+
+			// 重新排序客户端列表，把已经关闭连接的客户端排列在前面；
+			Arrays.sort(clients, new Comparator<ConsensusClient>() {
+				@Override
+				public int compare(ConsensusClient o1, ConsensusClient o2) {
+					int v1 = o1.isConnected() ? 1 : 0;
+					int v2 = o2.isConnected() ? 1 : 0;
+					return v1 - v2;
+				}
+			});
+			//
+			for (int i = 0; i < closingNumber; i++) {
+				environment.closeClient(clients[i]);
+			}
+		}
+		clients = environment.getClients();
+
+		// 确保客户端处于连接状态；
+		if (requireAllClientConnected) {
+			for (int i = 0; i < clients.length; i++) {
+				if (!clients[i].isConnected()) {
+					clients[i].connect();
+				}
 			}
 		}
 
-		return environment.getClients();
+		return clients;
+	}
+
+	protected int[] prepareAuthenticationNodeIDs(ConsensusEnvironment environment) {
+		int[] authNodeIds = null;
+		if (authenticationNodeIDs == null) {
+			ReplicaNodeServer[] runningNodes = environment.getRunningNodes();
+			if (runningNodes.length == 0) {
+				throw new IllegalStateException("No running nodes in the specified consensus environment!");
+			}
+			authNodeIds = new int[runningNodes.length];
+			for (int i = 0; i < runningNodes.length; i++) {
+				authNodeIds[i] = runningNodes[i].getReplica().getId();
+			}
+		} else {
+			authNodeIds = authenticationNodeIDs.clone();
+		}
+
+		return authNodeIds;
 	}
 
 	protected MessageSnapshotHandler[] prepareMessageSnapshotHandlers(int replicaCount) {
@@ -454,14 +557,14 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 
 	}
 
-	protected ReplicaNodeServer[] preparePeers(ConsensusEnvironment environment, MessageSnapshotHandler[] handlers) {
-		if (isReinstallPeersBeforeRunning()) {
+	protected ReplicaNodeServer[] prepareNodes(ConsensusEnvironment environment, MessageSnapshotHandler[] handlers) {
+		if (isReinstallNodesBeforeRunning()) {
 			// 重装节点；
 			environment.stopNodeServers();
 			environment.reinstallNodeServers();
 		}
 
-		if (isRestartPeersBeforeRunning()) {
+		if (isRestartAllNodesBeforeRunning()) {
 			// 重启节点；
 			environment.stopNodeServers();
 			environment.startNodeServers();
@@ -469,7 +572,7 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 
 		environment.delegateMessageHandlers(handlers);
 
-		if (requireTotalRunning && (!environment.isTotalRunning())) {
+		if (requireAllNodesRunning && (!environment.isTotalRunning())) {
 			environment.startNodeServers();
 		}
 

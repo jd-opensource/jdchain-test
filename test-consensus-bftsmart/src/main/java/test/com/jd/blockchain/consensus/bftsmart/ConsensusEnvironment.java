@@ -3,8 +3,10 @@ package test.com.jd.blockchain.consensus.bftsmart;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -63,7 +65,7 @@ public class ConsensusEnvironment {
 
 	private volatile NodeServer[] nodeServers;
 
-	private List<ConsensusClient> clients = new LinkedList<ConsensusClient>();
+	private Map<Integer, ConsensusClient> clients = new LinkedHashMap<>();
 
 	private volatile MessageHandlerDelegater[] messageDelegaters;
 	private StateMachineReplicate[] stateMachineReplicaters;
@@ -482,7 +484,7 @@ public class ConsensusEnvironment {
 	}
 
 	public ConsensusClient[] getClients() {
-		return clients.toArray(new ConsensusClient[clients.size()]);
+		return clients.values().toArray(new ConsensusClient[clients.size()]);
 	}
 
 	/**
@@ -528,7 +530,9 @@ public class ConsensusEnvironment {
 
 		ConsensusClient[] newClients = setupConsensusClients(clientSettings, CS_PROVIDER);
 		for (int i = 0; i < newClients.length; i++) {
-			this.clients.add(newClients[i]);
+			newClients[i].connect();
+			
+			this.clients.put(newClients[i].getSettings().getClientId(), newClients[i]);
 		}
 
 		return newClients;
@@ -554,40 +558,24 @@ public class ConsensusEnvironment {
 	}
 
 	public void closeAllClients() {
-		for (ConsensusClient cli : clients) {
+		ConsensusClient[] clientArray = clients.values().toArray(new ConsensusClient[clients.size()]);
+		clients.clear();
+		
+		for (ConsensusClient cli : clientArray) {
 			cli.close();
 		}
-		clients.clear();
 	}
-
-//	/**
-//	 * 从指定节点服务器中认证客户端，返回客户端接入配置；
-//	 * 
-//	 * <p>
-//	 * 
-//	 * 对于参数中的每一个客户端密钥，从服务器列表中随机挑选一个进行认证；
-//	 * 
-//	 * <p>
-//	 * 
-//	 * 返回的客户端接入配置的数量和密钥的数量一致；
-//	 * 
-//	 * @param nodeServers
-//	 * @param clientKeys
-//	 * @return
-//	 * @throws ConsensusSecurityException
-//	 */
-//	private static ClientIncomingSettings[] authClientsRandomFrom(NodeServer[] nodeServers, AsymmetricKeypair[] clientKeys,
-//			ConsensusProvider consensusProvider) throws ConsensusSecurityException {
-//		ClientIncomingSettings[] incomingSettings = new ClientIncomingSettings[clientKeys.length];
-//
-//		Random rand = new Random();
-//		for (int i = 0; i < clientKeys.length; i++) {
-//			incomingSettings[i] = authClientsFrom(nodeServers[rand.nextInt(nodeServers.length)], clientKeys[i],
-//					consensusProvider);
-//		}
-//
-//		return incomingSettings;
-//	}
+	
+	public void closeClient(ConsensusClient client) {
+		closeClient(client.getSettings().getClientId());
+	}
+	
+	public void closeClient(int clientId) {
+		ConsensusClient cli = clients.remove(clientId);
+		if (cli != null && cli.isConnected()) {
+			cli.close();
+		}
+	}
 
 	private static ClientIncomingSettings authClientsFrom(NodeServer authNodeServer, AsymmetricKeypair clientKeys,
 			ConsensusProvider consensusProvider) {
@@ -611,8 +599,6 @@ public class ConsensusEnvironment {
 			ClientSettings clientSettings = consensusProvider.getClientFactory()
 					.buildClientSettings(clientIncomingSettings[i]);
 			clients[i] = consensusProvider.getClientFactory().setupClient(clientSettings);
-
-			clients[i].connect();
 		}
 
 		return clients;

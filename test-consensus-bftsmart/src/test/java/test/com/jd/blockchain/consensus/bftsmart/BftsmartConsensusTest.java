@@ -46,12 +46,15 @@ public class BftsmartConsensusTest {
 
 		// 配置用例；
 		MessageConsensusTestcase messageSendTest = new MessageConsensusTestcase();
-		messageSendTest.setReinstallPeersBeforeRunning(false);
-		messageSendTest.setRestartPeersBeforeRunning(false);
-		messageSendTest.setRequireTotalRunning(false);
-		messageSendTest.setReconectClients(true);
-		messageSendTest.setClientCount(2);
+		messageSendTest.setReinstallAllNodesBeforeRunning(false);
+		messageSendTest.setRestartAllNodesBeforeRunning(false);
+		messageSendTest.setRequireAllNodesRunning(false);
+		
+		messageSendTest.setResetupClients(false);
+		messageSendTest.setRequireAllClientConnected(true);
+		messageSendTest.setTotalClients(2);
 		messageSendTest.setMessageCountPerClient(2);
+		
 		messageSendTest.setMessageConsenusMillis(3000);
 
 		// 启动 4 个共识节点；
@@ -64,6 +67,7 @@ public class BftsmartConsensusTest {
 		ReplicaNodeServer[] nodes = csEnv.getNodes();
 		nodes[3].getNodeServer().stop();
 		Thread.sleep(1000);
+		
 		messageSendTest.run(csEnv);
 
 		// 重启节点之后；
@@ -98,13 +102,15 @@ public class BftsmartConsensusTest {
 
 		// 在新建的共识网络上先执行消息共识一致性测试；
 		MessageConsensusTestcase messageSendTest = new MessageConsensusTestcase();
-		messageSendTest.setReinstallPeersBeforeRunning(false);
-		messageSendTest.setRestartPeersBeforeRunning(false);
-		messageSendTest.setRequireTotalRunning(false);
-		messageSendTest.setReconectClients(true);
-		messageSendTest.setClientCount(2);
+		messageSendTest.setReinstallAllNodesBeforeRunning(false);
+		messageSendTest.setRestartAllNodesBeforeRunning(false);
+		messageSendTest.setRequireAllNodesRunning(false);
+		
+		messageSendTest.setResetupClients(false);
+		messageSendTest.setRequireAllClientConnected(true);
+		messageSendTest.setTotalClients(2);
 		messageSendTest.setMessageCountPerClient(2);
-		messageSendTest.setCleanClientsAfterRunning(false);
+		
 		messageSendTest.setMessageConsenusMillis(3000);
 
 		// 执行消息一致性测试；
@@ -121,7 +127,7 @@ public class BftsmartConsensusTest {
 		assertEquals(5, csEnv.getReplicaCount());
 
 		// 执行消息一致性测试；
-		messageSendTest.setClientCount(15);
+		messageSendTest.setTotalClients(15);
 		messageSendTest.setMessageCountPerClient(4);
 		messageSendTest.run(csEnv);
 
@@ -135,7 +141,6 @@ public class BftsmartConsensusTest {
 		assertEquals(6, csEnv.getReplicaCount());
 
 		// 执行消息一致性测试；
-		messageSendTest.setClientCount(15);
 		messageSendTest.setMessageCountPerClient(4);
 		messageSendTest.run(csEnv);
 
@@ -168,12 +173,15 @@ public class BftsmartConsensusTest {
 
 		// 配置用例；
 		MessageConsensusTestcase messageSendTest = new MessageConsensusTestcase();
-		messageSendTest.setReinstallPeersBeforeRunning(false);
-		messageSendTest.setRestartPeersBeforeRunning(false);
-		messageSendTest.setRequireTotalRunning(false);
-		messageSendTest.setReconectClients(true);
-		messageSendTest.setClientCount(2);
+		messageSendTest.setReinstallAllNodesBeforeRunning(false);
+		messageSendTest.setRestartAllNodesBeforeRunning(false);
+		messageSendTest.setRequireAllNodesRunning(false);
+		
+		messageSendTest.setResetupClients(true);
+		messageSendTest.setRequireAllClientConnected(true);
+		messageSendTest.setTotalClients(2);
 		messageSendTest.setMessageCountPerClient(2);
+		
 		messageSendTest.setMessageConsenusMillis(3000);
 
 		// 启动 4 个共识节点；
