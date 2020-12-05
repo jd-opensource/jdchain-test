@@ -112,10 +112,6 @@ public class ConsensusEnvironment {
 		return serverList.toArray(new ReplicaNodeServer[serverList.size()]);
 	}
 
-//	public MessageHandle[] getMessageHandlers() {
-//		return messageHandlers == null ? null : messageHandlers.clone();
-//	}
-
 	public List<StateMachineReplicate> getStateMachineReplicaters() {
 		return Arrays.asList(stateMachineReplicaters);
 	}

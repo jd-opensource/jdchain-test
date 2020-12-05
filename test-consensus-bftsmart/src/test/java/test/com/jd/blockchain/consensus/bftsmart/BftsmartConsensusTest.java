@@ -8,10 +8,14 @@ import org.junit.Test;
 
 import com.jd.blockchain.consensus.ConsensusSecurityException;
 import com.jd.blockchain.consensus.Replica;
+import com.jd.blockchain.consensus.bftsmart.service.BftsmartNodeState;
+import com.jd.blockchain.consensus.service.NodeState;
 import com.jd.blockchain.utils.codec.Base58Utils;
 import com.jd.blockchain.utils.net.NetworkAddress;
 import com.jd.blockchain.utils.security.RandomUtils;
 import com.jd.blockchain.utils.serialize.json.JSONSerializeUtils;
+
+import test.com.jd.blockchain.consensus.bftsmart.NodeStateTestcase.StateVerifier;
 
 /**
  * 消息共识测试；
@@ -162,6 +166,69 @@ public class BftsmartConsensusTest {
 
 		csEnv.closeAllClients();
 		csEnv.stopNodeServers();
+	}
+
+	/**
+	 * 测试不同数量规模的节点下，领导者选举切换的正确性；
+	 * 
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	@Test
+	public void testLeaderChange() throws IOException, InterruptedException {
+		final int N = 4;
+		final String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));
+
+		NetworkAddress[] nodesNetworkAddresses = ConsensusEnvironment.createMultiPortsAddresses("127.0.0.1", N, 11600,
+				10);
+
+		ConsensusEnvironment csEnv = ConsensusEnvironment.setup_BFTSMaRT(realmName,
+				"classpath:bftsmart-consensus-test-normal.config", nodesNetworkAddresses);
+
+		csEnv.startNodeServers();
+		Thread.sleep(3000);
+
+		// 配置节点状态测试用例；
+		NodeStateTestcase stateTest = new NodeStateTestcase();
+		stateTest.setRequireVerifier(true);
+
+		BftsmartNodeStateVerifier verifier = new BftsmartNodeStateVerifier();
+		verifier.setCheckingConsensusQuorum(false);// 暂时不校验“法定数量”属性；
+		verifier.setCheckingNextRegency(false);// 暂时不校验“下一个执政ID”属性；
+		
+		stateTest.setStateVerifier(verifier);
+		stateTest.setConsistantComparators(new BftsmartNodeStateComparator());
+		stateTest.run(csEnv);
+
+		// 配置消息共识测试用例；
+		MessageConsensusTestcase messageSendTest = new MessageConsensusTestcase();
+		messageSendTest.setReinstallAllNodesBeforeRunning(false);
+		messageSendTest.setRestartAllNodesBeforeRunning(false);
+		messageSendTest.setRequireAllNodesRunning(false);
+
+		messageSendTest.setResetupClients(false);
+		messageSendTest.setRequireAllClientConnected(true);
+		messageSendTest.setTotalClients(2);
+		messageSendTest.setMessageCountPerClient(2);
+
+		messageSendTest.setMessageConsenusMillis(3000);
+
+		// 启动 4 个共识节点；
+		csEnv.startNodeServers();
+
+		// 执行 4 个共识节点的消息消息共识一致性测试；
+		messageSendTest.run(csEnv);
+		
+		//停止领导者节点；
+		ReplicaNodeServer[] runningNodes = csEnv.getRunningNodes();
+		for (int i = 0; i < runningNodes.length; i++) {
+			BftsmartNodeState bftstate = (BftsmartNodeState) runningNodes[i].getNodeServer().getState();
+			if (bftstate.isLeader()) {
+				runningNodes[i].getNodeServer().stop();
+			}
+		}
+		// 等待10秒；
+		
 	}
 
 }
