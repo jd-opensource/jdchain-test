@@ -52,6 +52,8 @@
     <loggers>
         <!--过滤掉spring的一些DEBUG信息-->
         <logger name="org.springframework" level="ERROR"/>
+        <logger name="bftsmart" level="ERROR"/>
+        <logger name="com.jd.blockchain.consensus.bftsmart.service" level="ERROR"/>
         <root level="all">
             <appender-ref ref="Console"/>
             <appender-ref ref="PeerRollingInfo"/>

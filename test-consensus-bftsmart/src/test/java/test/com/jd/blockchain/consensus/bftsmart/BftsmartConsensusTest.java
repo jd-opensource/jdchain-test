@@ -9,6 +9,7 @@ import org.junit.Test;
 import com.jd.blockchain.consensus.ConsensusSecurityException;
 import com.jd.blockchain.consensus.Replica;
 import com.jd.blockchain.consensus.bftsmart.service.BftsmartNodeState;
+import com.jd.blockchain.consensus.service.NodeServer;
 import com.jd.blockchain.consensus.service.NodeState;
 import com.jd.blockchain.utils.codec.Base58Utils;
 import com.jd.blockchain.utils.net.NetworkAddress;
@@ -24,6 +25,37 @@ import test.com.jd.blockchain.consensus.bftsmart.NodeStateTestcase.StateVerifier
  *
  */
 public class BftsmartConsensusTest {
+	
+	@Test
+	public void testtestMessageConsensus() throws IOException, InterruptedException, ConsensusSecurityException {
+		final int N = 4;
+		final String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));
+
+		NetworkAddress[] nodesNetworkAddresses = ConsensusEnvironment.createMultiPortsAddresses("127.0.0.1", N, 10600,
+				10);
+
+		ConsensusEnvironment csEnv = ConsensusEnvironment.setup_BFTSMaRT(realmName,
+				"classpath:bftsmart-consensus-test-normal.config", nodesNetworkAddresses);
+
+		// 配置用例；
+		MessageConsensusTestcase messageSendTest = new MessageConsensusTestcase();
+		messageSendTest.setReinstallAllNodesBeforeRunning(false);
+		messageSendTest.setRestartAllNodesBeforeRunning(false);
+		messageSendTest.setRequireAllNodesRunning(false);
+
+		messageSendTest.setResetupClients(false);
+		messageSendTest.setRequireAllClientConnected(true);
+		messageSendTest.setTotalClients(10);
+		messageSendTest.setMessageCountPerClient(2);
+
+		messageSendTest.setMessageConsenusMillis(3000);
+
+		// 启动 4 个共识节点；
+		csEnv.startNodeServers();
+
+		// 执行 4 个共识节点的消息消息共识一致性测试；
+		messageSendTest.run(csEnv);
+	}
 
 	/**
 	 * 标准测试用例：建立4个副本节点的共识网络，可以正常地达成进行共识；
@@ -38,7 +70,7 @@ public class BftsmartConsensusTest {
 	 * @throws ConsensusSecurityException
 	 */
 	@Test
-	public void testMessageConsensus() throws IOException, InterruptedException, ConsensusSecurityException {
+	public void testMessageConsensusWithNodeRestart() throws IOException, InterruptedException, ConsensusSecurityException {
 		final int N = 4;
 		final String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));
 
@@ -56,7 +88,7 @@ public class BftsmartConsensusTest {
 
 		messageSendTest.setResetupClients(false);
 		messageSendTest.setRequireAllClientConnected(true);
-		messageSendTest.setTotalClients(2);
+		messageSendTest.setTotalClients(10);
 		messageSendTest.setMessageCountPerClient(2);
 
 		messageSendTest.setMessageConsenusMillis(3000);
@@ -150,7 +182,7 @@ public class BftsmartConsensusTest {
 	 * @throws InterruptedException
 	 * @throws ConsensusSecurityException
 	 */
-	@Test
+//	@Test
 	public void testAddNodeAndConsensus() throws IOException, InterruptedException, ConsensusSecurityException {
 		System.out.println("--------- BftsmartConsensusTest.testAddNodeAndConsensus----------");
 		// 新建 4 个节点的共识网络；
@@ -187,10 +219,13 @@ public class BftsmartConsensusTest {
 
 		// 验证共识节点的数量；
 		assertEquals(5, csEnv.getReplicaCount());
+		assertEquals(5, csEnv.getRunningNodes().length);
 
 		// 执行消息一致性测试；
-		messageSendTest.setTotalClients(15);
+		messageSendTest.setTotalClients(10);
 		messageSendTest.setMessageCountPerClient(4);
+		messageSendTest.setMessageConsenusMillis(30000);
+		messageSendTest.setConcurrentSending(false);
 		messageSendTest.run(csEnv);
 
 		// 再次新增共识节点；
@@ -201,9 +236,9 @@ public class BftsmartConsensusTest {
 
 		// 验证共识节点的数量；
 		assertEquals(6, csEnv.getReplicaCount());
+		assertEquals(6, csEnv.getRunningNodes().length);
 
 		// 执行消息一致性测试；
-		messageSendTest.setMessageCountPerClient(4);
 		messageSendTest.run(csEnv);
 
 		csEnv.closeAllClients();
@@ -216,7 +251,7 @@ public class BftsmartConsensusTest {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	@Test
+//	@Test
 	public void testLeaderChange() throws IOException, InterruptedException {
 		final int N = 4;
 		final String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));

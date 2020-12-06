@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.spy;
@@ -18,10 +19,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +36,7 @@ import com.jd.blockchain.consensus.service.StateSnapshot;
 import com.jd.blockchain.utils.SkippingIterator;
 import com.jd.blockchain.utils.concurrent.AsyncFuture;
 import com.jd.blockchain.utils.concurrent.AsyncHandle;
+import com.jd.blockchain.utils.concurrent.CompletableAsyncFuture;
 
 /**
  * 消息共识的测试；
@@ -372,16 +376,16 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 			verifyEnvironmentBeforeRunning(connectedClients, nodeServers, environment);
 
 			// 发送消息；
-			List<MessageRequest> sendedMessages = sendMessages(connectedClients, environment);
+			List<MessageRequest> messageRequests = sendMessages(connectedClients, environment);
 
 			// 等待共识完成；
-			waitForConsensus(environment);
+			waitForConsensus(messageRequests, environment);
 
 			// 对运行中的节点的消息处理器验证消息共识的一致性；
-			verifyMessageConsistant(sendedMessages, environment, messageHandlers);
+			verifyMessageConsistant(messageRequests, environment, messageHandlers);
 
 			// 验证消息回复；
-			verifyMessageResponse(sendedMessages, environment);
+			verifyMessageResponse(messageRequests, environment);
 		} finally {
 			environment.clearMessageHandlers();
 			// 停止环境；
@@ -476,10 +480,28 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 	 * 
 	 * 默认等待 10 秒；
 	 */
-	protected void waitForConsensus(ConsensusEnvironment environment) {
+	protected void waitForConsensus(List<MessageRequest> messageRequests, ConsensusEnvironment environment) {
+		AtomicInteger counter = new AtomicInteger(messageRequests.size());
+		CountDownLatch responseLatch = new CountDownLatch(messageRequests.size());
+		AsyncHandle<byte[]> responseCountdownHandle = new AsyncHandle<byte[]>() {
+			@Override
+			public void complete(byte[] returnValue, Throwable error) {
+				counter.decrementAndGet();
+				responseLatch.countDown();
+			}
+		};
+
+		for (MessageRequest messageRequest : messageRequests) {
+			messageRequest.onCompleted(responseCountdownHandle);
+		}
+
 		try {
-			Thread.sleep(getMessageConsenusMillis());
-		} catch (InterruptedException e) {
+			long timeout = getMessageConsenusMillis();
+			boolean ok = responseLatch.await(timeout, TimeUnit.MILLISECONDS);
+			if ((!ok) && counter.get() > 0) {
+				//fail("Consensus timeout[" + timeout + "ms] ! There some requests have no reponse! ");
+			}
+		} catch (InterruptedException e1) {
 			throw new IllegalStateException(
 					"Thread has been iterrupted while waiting consensus finish after message sending!");
 		}
@@ -677,13 +699,15 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 
 	private static class MessageRequestLog implements MessageRequest {
 
-		private volatile AsyncFuture<byte[]> retnFuture;
+		private CompletableAsyncFuture<byte[]> retnFuture = new CompletableAsyncFuture<>();
 
 		private byte[] messageBytes;
 
 		private ConsensusClient client;
 
 		private int messageId;
+
+		private volatile boolean sended = false;
 
 		public MessageRequestLog(int messageId, byte[] messageBytes, ConsensusClient client) {
 			this.messageId = messageId;
@@ -729,18 +753,29 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 			execute(null);
 		}
 
-		public void execute(AsyncHandle<byte[]> handle) {
-			AsyncFuture<byte[]> future = client.getMessageService().sendOrdered(messageBytes);
-			this.retnFuture = future;
-			if (handle != null) {
-				future.whenComplete(handle);
+		public synchronized void execute(AsyncHandle<byte[]> handle) {
+			if (sended) {
+				throw new IllegalStateException("Request cann't send repeatedly!");
 			}
+			if (handle != null) {
+				retnFuture.whenComplete(handle);
+			}
+
+			AsyncFuture<byte[]> future = client.getMessageService().sendOrdered(messageBytes);
+			sended = true;
+			future.whenComplete(new AsyncHandle<byte[]>() {
+				@Override
+				public void complete(byte[] returnValue, Throwable error) {
+					if (error == null) {
+						retnFuture.complete(returnValue);
+					}else {
+						retnFuture.error(error);
+					}
+				}
+			});
 		}
 
 		public void onCompleted(AsyncHandle<byte[]> handle) {
-			if (retnFuture == null) {
-				throw new IllegalStateException("Sending has not been executed!");
-			}
 			retnFuture.whenComplete(handle);
 		}
 	}
