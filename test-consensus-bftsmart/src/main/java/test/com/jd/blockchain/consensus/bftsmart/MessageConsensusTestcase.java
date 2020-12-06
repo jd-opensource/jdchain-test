@@ -2,19 +2,23 @@ package test.com.jd.blockchain.consensus.bftsmart;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -28,7 +32,7 @@ import com.jd.blockchain.consensus.service.MessageHandle;
 import com.jd.blockchain.consensus.service.StateSnapshot;
 import com.jd.blockchain.utils.SkippingIterator;
 import com.jd.blockchain.utils.concurrent.AsyncFuture;
-import com.jd.blockchain.utils.security.RandomUtils;
+import com.jd.blockchain.utils.concurrent.AsyncHandle;
 
 /**
  * 消息共识的测试；
@@ -80,7 +84,68 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 	 */
 	private boolean requireAllClientConnected = false;
 
+	/**
+	 * 客户端总数；
+	 */
 	private int totalClients = 2;
+
+	/**
+	 * 是否采用并发的方式发送同一个客户端的多条消息； 默认为 true；
+	 */
+	private boolean concurrentSending = true;
+
+	/**
+	 * 客户端等待回复结果的最大超时时长；单位：毫秒；
+	 * 
+	 * <p>
+	 * 
+	 * 默认值 10000 毫秒（10秒）；
+	 */
+	private long clientReponseAwaitTimeout = 10000;
+
+	/**
+	 * 是否采用并发的方式发送同一个客户端的多条消息； 默认为 true；
+	 * 
+	 * @return
+	 */
+	public boolean isConcurrentSending() {
+		return concurrentSending;
+	}
+
+	/**
+	 * 设置是否采用并发的方式发送同一个客户端的多条消息； 默认为 true；
+	 * 
+	 * @param concurrentSending
+	 */
+	public void setConcurrentSending(boolean concurrentSending) {
+		this.concurrentSending = concurrentSending;
+	}
+
+	/**
+	 * 客户端等待回复结果的最大超时时长；单位：毫秒；
+	 * 
+	 * <p>
+	 * 
+	 * 默认值 10000 毫秒（10秒）；
+	 * 
+	 * @return
+	 */
+	public long getClientReponseAwaitTimeout() {
+		return clientReponseAwaitTimeout;
+	}
+
+	/**
+	 * 设置客户端等待回复结果的最大超时时长；单位：毫秒；
+	 * 
+	 * <p>
+	 * 
+	 * 默认值 10000 毫秒（10秒）；
+	 * 
+	 * @param clientReponseAwaitTimeout
+	 */
+	public void setClientReponseAwaitTimeout(long clientReponseAwaitTimeout) {
+		this.clientReponseAwaitTimeout = clientReponseAwaitTimeout;
+	}
 
 	/**
 	 * 设置总的客户端数；
@@ -296,7 +361,7 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 
 			// 处理共识客户端；
 			ConsensusClient[] clients = prepareClients(environment);
-			
+
 			// 过滤出已连接的客户端列表；
 			ConsensusClient[] connectedClients = filterOutConnectedClients(clients);
 			if (connectedClients.length == 0) {
@@ -307,13 +372,16 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 			verifyEnvironmentBeforeRunning(connectedClients, nodeServers, environment);
 
 			// 发送消息；
-			List<AsyncFuture<byte[]>> sendedMessages = sendMessages(connectedClients, environment);
+			List<MessageRequest> sendedMessages = sendMessages(connectedClients, environment);
 
 			// 等待共识完成；
 			waitForConsensus(environment);
 
 			// 对运行中的节点的消息处理器验证消息共识的一致性；
 			verifyMessageConsistant(sendedMessages, environment, messageHandlers);
+
+			// 验证消息回复；
+			verifyMessageResponse(sendedMessages, environment);
 		} finally {
 			environment.clearMessageHandlers();
 			// 停止环境；
@@ -345,14 +413,14 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 	}
 
 	/**
-	 * 在完成客户端消息发送之后，验证消息共识的一致性；
+	 * 在完成客户端消息发送之后，验证共识服务端的消息共识处理一致性；
 	 * 
-	 * @param clientSendedMessages
+	 * @param messageRequests
 	 * @param environment
 	 */
-	protected void verifyMessageConsistant(List<AsyncFuture<byte[]>> clientSendedMessages,
-			ConsensusEnvironment environment, MessageSnapshotHandler[] messageHandlers) {
-		int messageCount = clientSendedMessages.size();
+	protected void verifyMessageConsistant(List<MessageRequest> messageRequests, ConsensusEnvironment environment,
+			MessageSnapshotHandler[] messageHandlers) {
+		int messageCount = messageRequests.size();
 
 		// 验证每一个消息处理器处理的消息数量是否与总的发送消息数量一致；
 		LOGGER.debug("verify message consistant in all message handlers! -- handler count=" + messageHandlers.length);
@@ -367,6 +435,37 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 			StateSnapshot snapshot2 = messageHandlers[i].getLastSnapshot();
 			assertEquals(snapshot.getId(), snapshot2.getId());
 			assertArrayEquals(snapshot.getSnapshot(), snapshot2.getSnapshot());
+		}
+	}
+
+	/**
+	 * 验证消息回复；
+	 * 
+	 * <p>
+	 * 
+	 * 验证是否每一个消息都已经收到回复，以及回复数据的正确性；
+	 * 
+	 * @param messageRequests
+	 * @param environment
+	 */
+	protected void verifyMessageResponse(List<MessageRequest> messageRequests, ConsensusEnvironment environment) {
+		// 预期所有的请求都已经收到回复，且没有异常，且回复消息与发送消息一致；
+		for (MessageRequest messageRequest : messageRequests) {
+			assertTrue(
+					String.format("Message request[%s] of client[%s] has not received response!",
+							messageRequest.getMessageId(), messageRequest.getClient().getSettings().getClientId()),
+					messageRequest.isCompleted());
+			assertFalse(
+					String.format("Message request[%s] of client[%s] has not received response!",
+							messageRequest.getMessageId(), messageRequest.getClient().getSettings().getClientId()),
+					messageRequest.isExceptionally());
+
+			byte[] reponseBytes = messageRequest.getResponse(clientReponseAwaitTimeout);
+			assertNotNull(reponseBytes);
+			assertArrayEquals(
+					String.format("Reponse bytes of message [%s] of client[%s] don's match the request bytes!",
+							messageRequest.getMessageId(), messageRequest.getClient().getSettings().getClientId()),
+					messageRequest.getMessage(), reponseBytes);
 		}
 	}
 
@@ -391,48 +490,33 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 	 * 
 	 * @param clients
 	 */
-	protected List<AsyncFuture<byte[]>> sendMessages(ConsensusClient[] clients, ConsensusEnvironment environment) {
-		List<AsyncFuture<byte[]>> sendedMessages = Collections.synchronizedList(new LinkedList<AsyncFuture<byte[]>>());
+	protected List<MessageRequest> sendMessages(ConsensusClient[] clients, ConsensusEnvironment environment) {
+		List<MessageRequest> sendedMessages = Collections.synchronizedList(new LinkedList<MessageRequest>());
 
-		CountDownLatch sendCompletedLatch = new CountDownLatch(clients.length);
-
+		List<MessageSender> senders = new LinkedList<MessageConsensusTestcase.MessageSender>();
 		for (int i = 0; i < clients.length; i++) {
 			ConsensusClient client = clients[i];
-			messageSendExecutor.execute(new Runnable() {
-				@Override
-				public void run() {
-					byte[][] messages = prepareClientMessages(messageCountPerClient, messageSize);
+			MessageRequestLog[] requests = prepareClientMessages(client, messageCountPerClient);
+			sendedMessages.addAll(Arrays.asList(requests));
 
-					AsyncFuture<byte[]>[] futures = sendMessage(client, messages);
-
-					sendedMessages.addAll(Arrays.asList(futures));
-
-					sendCompletedLatch.countDown();
-				}
-			});
+			senders.add(new MessageSender(requests, concurrentSending, client, messageSendExecutor));
 		}
 
-		try {
-			sendCompletedLatch.await(30000, TimeUnit.MILLISECONDS);
-		} catch (InterruptedException e) {
+		for (MessageSender sender : senders) {
+			sender.send();
 		}
 		return sendedMessages;
 	}
 
-	private AsyncFuture<byte[]>[] sendMessage(ConsensusClient client, byte[][] messages) {
-		@SuppressWarnings("unchecked")
-		AsyncFuture<byte[]>[] futures = new AsyncFuture[messages.length];
-		for (int i = 0; i < messages.length; i++) {
-			futures[i] = client.getMessageService().sendOrdered(messages[i]);
-		}
+	protected MessageRequestLog[] prepareClientMessages(ConsensusClient client, int messageCount) {
+		MessageRequestLog[] messages = new MessageRequestLog[messageCount];
 
-		return futures;
-	}
+		SecureRandom random = new SecureRandom();
 
-	protected byte[][] prepareClientMessages(int messageCount, int messageSize) {
-		byte[][] messages = new byte[messageCount][];
 		for (int i = 0; i < messages.length; i++) {
-			messages[i] = RandomUtils.generateRandomBytes(messageSize);
+			byte[] messageBytes = new byte[messageSize];
+			random.nextBytes(messageBytes);
+			messages[i] = new MessageRequestLog(i, messageBytes, client);
 		}
 		return messages;
 	}
@@ -590,4 +674,135 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 		}
 		return spyHandlers;
 	}
+
+	private static class MessageRequestLog implements MessageRequest {
+
+		private volatile AsyncFuture<byte[]> retnFuture;
+
+		private byte[] messageBytes;
+
+		private ConsensusClient client;
+
+		private int messageId;
+
+		public MessageRequestLog(int messageId, byte[] messageBytes, ConsensusClient client) {
+			this.messageId = messageId;
+			this.messageBytes = messageBytes;
+			this.client = client;
+		}
+
+		@Override
+		public byte[] getMessage() {
+			return messageBytes;
+		}
+
+		@Override
+		public boolean isCompleted() {
+			return retnFuture.isDone();
+		}
+
+		@Override
+		public boolean isExceptionally() {
+			return retnFuture.isExceptionally();
+		}
+
+		@Override
+		public byte[] getResponse(long timeOut) {
+			return retnFuture.get(timeOut, TimeUnit.MILLISECONDS);
+		}
+
+		@Override
+		public ConsensusClient getClient() {
+			return client;
+		}
+
+		@Override
+		public boolean isSended() {
+			return retnFuture != null;
+		}
+
+		public int getMessageId() {
+			return messageId;
+		}
+
+		public void execute() {
+			execute(null);
+		}
+
+		public void execute(AsyncHandle<byte[]> handle) {
+			AsyncFuture<byte[]> future = client.getMessageService().sendOrdered(messageBytes);
+			this.retnFuture = future;
+			if (handle != null) {
+				future.whenComplete(handle);
+			}
+		}
+
+		public void onCompleted(AsyncHandle<byte[]> handle) {
+			if (retnFuture == null) {
+				throw new IllegalStateException("Sending has not been executed!");
+			}
+			retnFuture.whenComplete(handle);
+		}
+	}
+
+	private static class MessageSender {
+
+		private MessageRequestLog[] messeageRequests;
+
+		private ConsensusClient client;
+
+		private Executor executor;
+
+		private boolean concurrent = false;
+
+		public MessageSender(MessageRequestLog[] messeageRequests, boolean concurrent, ConsensusClient client,
+				Executor executor) {
+			this.messeageRequests = messeageRequests;
+			this.concurrent = concurrent;
+			this.client = client;
+			this.executor = executor;
+		}
+
+		public void send() {
+			if (concurrent) {
+				for (MessageRequestLog request : messeageRequests) {
+					executor.execute(new Runnable() {
+						@Override
+						public void run() {
+							request.execute();
+						}
+					});
+				}
+			} else {
+				executor.execute(new Runnable() {
+					@Override
+					public void run() {
+						for (MessageRequestLog request : messeageRequests) {
+							request.execute();
+						}
+					}
+				});
+			}
+		}
+
+		/**
+		 * 是否并发发送；
+		 * 
+		 * @return
+		 */
+		public boolean isConcurrent() {
+			return concurrent;
+		}
+
+		/**
+		 * 设置是否并发发送；
+		 * 
+		 * @param concurrent
+		 */
+		public void setConcurrent(boolean concurrent) {
+			this.concurrent = concurrent;
+		}
+
+	}
+
 }

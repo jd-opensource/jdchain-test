@@ -102,6 +102,48 @@ public class BftsmartConsensusTest {
 	}
 
 	/**
+	 * 验证共识服务端节点的 ID 和客户端的 ID 出现冲突时引发消息共识失败的情形；
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testProcessIDConflict() throws IOException {
+		// 目前的 ProcessID 分配方式下，预期从 ID 为 0 的共识服务端节点认证客户端时会出现 ID 冲突；
+		final int N = 4;
+		final String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));
+
+		NetworkAddress[] nodesNetworkAddresses = ConsensusEnvironment.createMultiPortsAddresses("127.0.0.1", N, 11200,
+				10);
+
+		ConsensusEnvironment csEnv = ConsensusEnvironment.setup_BFTSMaRT(realmName,
+				"classpath:bftsmart-consensus-test-normal.config", nodesNetworkAddresses);
+		// 启动 4 个共识节点；
+		csEnv.startNodeServers();
+		
+
+		// 配置用例；
+		MessageConsensusTestcase messageSendTest = new MessageConsensusTestcase();
+		messageSendTest.setReinstallAllNodesBeforeRunning(false);
+		messageSendTest.setRestartAllNodesBeforeRunning(false);
+		messageSendTest.setRequireAllNodesRunning(false);
+
+		messageSendTest.setResetupClients(false);
+		messageSendTest.setRequireAllClientConnected(true);
+		messageSendTest.setTotalClients(4);
+		messageSendTest.setMessageCountPerClient(10);
+		
+		messageSendTest.setAuthenticationNodeIDs(0);
+
+
+		// 执行 4 个共识节点的消息消息共识一致性测试；
+		messageSendTest.setConcurrentSending(true);
+		messageSendTest.setMessageConsenusMillis(10000);
+		messageSendTest.run(csEnv);
+		
+		
+	}
+
+	/**
 	 * 测试在建立共识网络之后，可以动态增加节点，并且新节点也能正常参与共识；
 	 * 
 	 * @throws IOException
@@ -179,7 +221,7 @@ public class BftsmartConsensusTest {
 		final int N = 4;
 		final String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));
 
-		NetworkAddress[] nodesNetworkAddresses = ConsensusEnvironment.createMultiPortsAddresses("127.0.0.1", N, 11600,
+		NetworkAddress[] nodesNetworkAddresses = ConsensusEnvironment.createMultiPortsAddresses("127.0.0.1", N, 13000,
 				10);
 
 		ConsensusEnvironment csEnv = ConsensusEnvironment.setup_BFTSMaRT(realmName,
@@ -195,7 +237,7 @@ public class BftsmartConsensusTest {
 		BftsmartNodeStateVerifier verifier = new BftsmartNodeStateVerifier();
 		verifier.setCheckingConsensusQuorum(false);// 暂时不校验“法定数量”属性；
 		verifier.setCheckingNextRegency(false);// 暂时不校验“下一个执政ID”属性；
-		
+
 		stateTest.setStateVerifier(verifier);
 		stateTest.setConsistantComparators(new BftsmartNodeStateComparator());
 		stateTest.run(csEnv);
@@ -218,17 +260,17 @@ public class BftsmartConsensusTest {
 
 		// 执行 4 个共识节点的消息消息共识一致性测试；
 		messageSendTest.run(csEnv);
-		
-		//停止领导者节点；
-		ReplicaNodeServer[] runningNodes = csEnv.getRunningNodes();
-		for (int i = 0; i < runningNodes.length; i++) {
-			BftsmartNodeState bftstate = (BftsmartNodeState) runningNodes[i].getNodeServer().getState();
-			if (bftstate.isLeader()) {
-				runningNodes[i].getNodeServer().stop();
-			}
-		}
-		// 等待10秒；
-		
+
+//		//停止领导者节点；
+//		ReplicaNodeServer[] runningNodes = csEnv.getRunningNodes();
+//		for (int i = 0; i < runningNodes.length; i++) {
+//			BftsmartNodeState bftstate = (BftsmartNodeState) runningNodes[i].getNodeServer().getState();
+//			if (bftstate.isLeader()) {
+//				runningNodes[i].getNodeServer().stop();
+//			}
+//		}
+//		// 等待10秒；
+
 	}
 
 }
