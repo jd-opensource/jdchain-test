@@ -3,6 +3,7 @@ package test.com.jd.blockchain.consensus.bftsmart;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -100,6 +101,11 @@ public class ConsensusEnvironment {
 		return servers;
 	}
 
+	/**
+	 * 返回运行中的节点；
+	 * 
+	 * @return 节点服务器列表；按照 ID 大小升序排列；
+	 */
 	public ReplicaNodeServer[] getRunningNodes() {
 		SkippingIterator<ReplicaNodeServer> nodesIterator = this.getNodesIterator();
 		List<ReplicaNodeServer> serverList = new ArrayList<>();
@@ -109,6 +115,12 @@ public class ConsensusEnvironment {
 				serverList.add(replicaNodeServer);
 			}
 		}
+		serverList.sort(new Comparator<ReplicaNodeServer>() {
+			@Override
+			public int compare(ReplicaNodeServer o1, ReplicaNodeServer o2) {
+				return o1.getReplica().getId() - o2.getReplica().getId();
+			}
+		});
 		return serverList.toArray(new ReplicaNodeServer[serverList.size()]);
 	}
 
@@ -291,17 +303,17 @@ public class ConsensusEnvironment {
 		for (int i = 0; i < nodeServers.length; i++) {
 			if (replicas[i].getId() == replicaId) {
 				replica = replicas[i];
-				
+
 				nodeServer = createNodeServer(realmName, viewSettings, replica, messageDelegaters[i],
 						stateMachineReplicaters[i], CS_PROVIDER);
 
 				NodeServer oldNodeServer = this.nodeServers[i];
 				this.nodeServers[i] = nodeServer;
-				
+
 				if (oldNodeServer != null && oldNodeServer.isRunning()) {
 					oldNodeServer.stop();
 				}
-				
+
 				break;
 			}
 		}
@@ -527,7 +539,7 @@ public class ConsensusEnvironment {
 		ConsensusClient[] newClients = setupConsensusClients(clientSettings, CS_PROVIDER);
 		for (int i = 0; i < newClients.length; i++) {
 			newClients[i].connect();
-			
+
 			this.clients.put(newClients[i].getSettings().getClientId(), newClients[i]);
 		}
 
@@ -556,16 +568,16 @@ public class ConsensusEnvironment {
 	public void closeAllClients() {
 		ConsensusClient[] clientArray = clients.values().toArray(new ConsensusClient[clients.size()]);
 		clients.clear();
-		
+
 		for (ConsensusClient cli : clientArray) {
 			cli.close();
 		}
 	}
-	
+
 	public void closeClient(ConsensusClient client) {
 		closeClient(client.getSettings().getClientId());
 	}
-	
+
 	public void closeClient(int clientId) {
 		ConsensusClient cli = clients.remove(clientId);
 		if (cli != null && cli.isConnected()) {

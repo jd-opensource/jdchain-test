@@ -1,8 +1,11 @@
 package test.com.jd.blockchain.consensus.bftsmart;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import org.junit.Test;
 
@@ -25,9 +28,9 @@ import test.com.jd.blockchain.consensus.bftsmart.NodeStateTestcase.StateVerifier
  *
  */
 public class BftsmartConsensusTest {
-	
+
 	@Test
-	public void testtestMessageConsensus() throws IOException, InterruptedException, ConsensusSecurityException {
+	public void testMessageConsensus() throws IOException, InterruptedException, ConsensusSecurityException {
 		final int N = 4;
 		final String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));
 
@@ -70,7 +73,8 @@ public class BftsmartConsensusTest {
 	 * @throws ConsensusSecurityException
 	 */
 	@Test
-	public void testMessageConsensusWithNodeRestart() throws IOException, InterruptedException, ConsensusSecurityException {
+	public void testMessageConsensusWithNodeRestart()
+			throws IOException, InterruptedException, ConsensusSecurityException {
 		final int N = 4;
 		final String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));
 
@@ -151,7 +155,6 @@ public class BftsmartConsensusTest {
 				"classpath:bftsmart-consensus-test-normal.config", nodesNetworkAddresses);
 		// 启动 4 个共识节点；
 		csEnv.startNodeServers();
-		
 
 		// 配置用例；
 		MessageConsensusTestcase messageSendTest = new MessageConsensusTestcase();
@@ -163,16 +166,14 @@ public class BftsmartConsensusTest {
 		messageSendTest.setRequireAllClientConnected(true);
 		messageSendTest.setTotalClients(4);
 		messageSendTest.setMessageCountPerClient(10);
-		
-		messageSendTest.setAuthenticationNodeIDs(0);
 
+		messageSendTest.setAuthenticationNodeIDs(0);
 
 		// 执行 4 个共识节点的消息消息共识一致性测试；
 		messageSendTest.setConcurrentSending(true);
 		messageSendTest.setMessageConsenusMillis(10000);
 		messageSendTest.run(csEnv);
-		
-		
+
 	}
 
 	/**
@@ -290,22 +291,27 @@ public class BftsmartConsensusTest {
 
 		messageSendTest.setMessageConsenusMillis(3000);
 
-		// 启动 4 个共识节点；
-		csEnv.startNodeServers();
-
 		// 执行 4 个共识节点的消息消息共识一致性测试；
 		messageSendTest.run(csEnv);
 
-//		//停止领导者节点；
-//		ReplicaNodeServer[] runningNodes = csEnv.getRunningNodes();
-//		for (int i = 0; i < runningNodes.length; i++) {
-//			BftsmartNodeState bftstate = (BftsmartNodeState) runningNodes[i].getNodeServer().getState();
-//			if (bftstate.isLeader()) {
-//				runningNodes[i].getNodeServer().stop();
-//			}
-//		}
-//		// 等待10秒；
+		ReplicaNodeServer[] runningNodes = csEnv.getRunningNodes();
 
+		assertEquals(4, runningNodes.length);
+		assertEquals(0, runningNodes[0].getReplica().getId());
+
+		BftsmartNodeState state0 = (BftsmartNodeState) runningNodes[0].getNodeServer().getState();
+		assertEquals(0, state0.getLeaderState().getLeaderID());
+
+		// 把节点 0 停止，预计将进行领导者选举；选择出节点 1 为新的领导者；
+		runningNodes[0].getNodeServer().stop();
+		Thread.sleep(10000);
+		runningNodes = csEnv.getRunningNodes();
+		
+		assertEquals(3, runningNodes.length);
+		assertEquals(1, runningNodes[0].getReplica().getId());
+		
+		BftsmartNodeState state1 = (BftsmartNodeState) runningNodes[0].getNodeServer().getState();
+		assertEquals(1, state1.getLeaderState().getLeaderID());
 	}
 
 }
