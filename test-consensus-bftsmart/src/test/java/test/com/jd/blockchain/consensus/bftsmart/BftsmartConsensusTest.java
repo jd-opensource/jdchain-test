@@ -7,7 +7,13 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.spi.LoggerContext;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.spi.LoggerFactoryBinder;
 
 import com.jd.blockchain.consensus.ConsensusSecurityException;
 import com.jd.blockchain.consensus.Replica;
@@ -19,6 +25,7 @@ import com.jd.blockchain.utils.net.NetworkAddress;
 import com.jd.blockchain.utils.security.RandomUtils;
 import com.jd.blockchain.utils.serialize.json.JSONSerializeUtils;
 
+import io.netty.util.internal.logging.Log4J2LoggerFactory;
 import test.com.jd.blockchain.consensus.bftsmart.NodeStateTestcase.StateVerifier;
 
 /**
@@ -31,6 +38,8 @@ public class BftsmartConsensusTest {
 
 	@Test
 	public void testMessageConsensus() throws IOException, InterruptedException, ConsensusSecurityException {
+		Configurator.setLevel("bftsmart", Level.ERROR);
+		
 		final int N = 4;
 		final String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));
 
