@@ -24,7 +24,7 @@ import com.jd.blockchain.consensus.ConsensusSecurityException;
 import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.consensus.Replica;
 import com.jd.blockchain.consensus.bftsmart.BftsmartConsensusProvider;
-import com.jd.blockchain.consensus.bftsmart.BftsmartConsensusSettings;
+import com.jd.blockchain.consensus.bftsmart.BftsmartConsensusViewSettings;
 import com.jd.blockchain.consensus.bftsmart.BftsmartNodeSettings;
 import com.jd.blockchain.consensus.bftsmart.BftsmartReplica;
 import com.jd.blockchain.consensus.client.ClientSettings;
@@ -209,7 +209,7 @@ public class ConsensusEnvironment {
 
 		// 创建副本信息；
 		Replica[] replicas = createReplicaWithRandom(nodeCount);
-		BftsmartConsensusSettings csSettings = buildConsensusSettings_BFTSMaRT(consensusProperties, replicas);
+		BftsmartConsensusViewSettings csSettings = buildConsensusSettings_BFTSMaRT(consensusProperties, replicas);
 		csSettings = stubNetworkAddress(csSettings, nodesNetworkAddresses);
 
 		return setup(realmName, csSettings, replicas, messageHandler, smr, BftsmartConsensusProvider.INSTANCE);
@@ -222,7 +222,7 @@ public class ConsensusEnvironment {
 
 		// 创建副本信息；
 		Replica[] replicas = createReplicaWithRandom(nodeCount);
-		BftsmartConsensusSettings csSettings = buildConsensusSettings_BFTSMaRT(consensusProperties, replicas);
+		BftsmartConsensusViewSettings csSettings = buildConsensusSettings_BFTSMaRT(consensusProperties, replicas);
 		csSettings = stubNetworkAddress(csSettings, nodesNetworkAddresses);
 
 		return setup(realmName, csSettings, replicas, smr, BftsmartConsensusProvider.INSTANCE);
@@ -428,7 +428,7 @@ public class ConsensusEnvironment {
 				replica.getPubKey());
 
 		// 创建新的共识节点的视图配置信息；
-		BftsmartConsensusSettings nextViewSettings = (BftsmartConsensusSettings) CS_PROVIDER.getSettingsFactory()
+		BftsmartConsensusViewSettings nextViewSettings = (BftsmartConsensusViewSettings) CS_PROVIDER.getSettingsFactory()
 				.getConsensusSettingsBuilder().addReplicaSetting(viewSettings, bftsmartReplica);
 
 		// 向现有的共识网络发起“加入节点”的共识请求；
@@ -726,9 +726,9 @@ public class ConsensusEnvironment {
 	 * @param networkAddresses
 	 * @return
 	 */
-	private static BftsmartConsensusSettings stubNetworkAddress(BftsmartConsensusSettings csSettings,
+	private static BftsmartConsensusViewSettings stubNetworkAddress(BftsmartConsensusViewSettings csSettings,
 			NetworkAddress[] networkAddresses) {
-		BftsmartConsensusSettings csSettingStub = Mockito.spy(csSettings);
+		BftsmartConsensusViewSettings csSettingStub = Mockito.spy(csSettings);
 
 		BftsmartNodeSettings[] nodeSettings = (BftsmartNodeSettings[]) csSettingStub.getNodes();
 		nodeSettings = stubNetworkAddresses(nodeSettings, networkAddresses);
@@ -761,16 +761,16 @@ public class ConsensusEnvironment {
 		return nodeSettingStubs;
 	}
 
-	public static BftsmartConsensusSettings buildConsensusSettings_BFTSMaRT(String configFile, Replica[] replicas)
+	public static BftsmartConsensusViewSettings buildConsensusSettings_BFTSMaRT(String configFile, Replica[] replicas)
 			throws IOException {
 		Properties csProperties = PropertiesUtils.loadProperties(configFile, "UTF-8");
-		return (BftsmartConsensusSettings) buildConsensusSettings(csProperties, replicas,
+		return (BftsmartConsensusViewSettings) buildConsensusSettings(csProperties, replicas,
 				BftsmartConsensusProvider.INSTANCE);
 	}
 
-	public static BftsmartConsensusSettings buildConsensusSettings_BFTSMaRT(Properties csProperties,
+	public static BftsmartConsensusViewSettings buildConsensusSettings_BFTSMaRT(Properties csProperties,
 			Replica[] replicas) {
-		return (BftsmartConsensusSettings) buildConsensusSettings(csProperties, replicas,
+		return (BftsmartConsensusViewSettings) buildConsensusSettings(csProperties, replicas,
 				BftsmartConsensusProvider.INSTANCE);
 	}
 

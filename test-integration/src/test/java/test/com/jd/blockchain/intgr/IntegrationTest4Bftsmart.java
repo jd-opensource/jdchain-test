@@ -14,7 +14,7 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.Test;
 
 import com.jd.blockchain.consensus.ConsensusProviders;
-import com.jd.blockchain.consensus.bftsmart.BftsmartConsensusSettings;
+import com.jd.blockchain.consensus.bftsmart.BftsmartConsensusViewSettings;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.crypto.KeyGenUtils;
@@ -202,7 +202,7 @@ public class IntegrationTest4Bftsmart {
 		System.out.printf("after add participant: participantCount = %d, userCount = %d\r\n", (int) participantCount,
 				(int) userCount);
 
-		BftsmartConsensusSettings consensusSettings = (BftsmartConsensusSettings) ConsensusProviders
+		BftsmartConsensusViewSettings consensusSettings = (BftsmartConsensusViewSettings) ConsensusProviders
 				.getProvider(BFTSMART_PROVIDER).getSettingsFactory().getConsensusSettingsEncoder()
 				.decode(ledgerRepository.getAdminInfo().getSettings().getConsensusSetting().toBytes());
 		System.out.printf("update participant state before ,old consensus env node num = %d\r\n",
@@ -221,7 +221,7 @@ public class IntegrationTest4Bftsmart {
 					ledgerHash, blockchainService);
 		}
 
-		BftsmartConsensusSettings consensusSettingsNew = (BftsmartConsensusSettings) ConsensusProviders
+		BftsmartConsensusViewSettings consensusSettingsNew = (BftsmartConsensusViewSettings) ConsensusProviders
 				.getProvider(BFTSMART_PROVIDER).getSettingsFactory().getConsensusSettingsEncoder()
 				.decode(ledgerRepository.getAdminInfo(ledgerRepository.retrieveLatestBlock()).getSettings()
 						.getConsensusSetting().toBytes());
@@ -235,7 +235,7 @@ public class IntegrationTest4Bftsmart {
 		}
 
 		if (isConsensusSettingUpdate) {
-			BftsmartConsensusSettings consensusSettings2 = (BftsmartConsensusSettings) ConsensusProviders
+			BftsmartConsensusViewSettings consensusSettings2 = (BftsmartConsensusViewSettings) ConsensusProviders
 					.getProvider(providers[0]).getSettingsFactory().getConsensusSettingsEncoder()
 					.decode(ledgerRepository.getAdminInfo().getSettings().getConsensusSetting().toBytes());
 			for (Property property : consensusSettings2.getSystemConfigs()) {
@@ -245,7 +245,7 @@ public class IntegrationTest4Bftsmart {
 
 			IntegrationBase.testSDK_Update_Consensus_Settings(adminKey, ledgerHash, blockchainService);
 
-			BftsmartConsensusSettings consensusSettings3 = (BftsmartConsensusSettings) ConsensusProviders
+			BftsmartConsensusViewSettings consensusSettings3 = (BftsmartConsensusViewSettings) ConsensusProviders
 					.getProvider(providers[0]).getSettingsFactory().getConsensusSettingsEncoder()
 					.decode(ledgerRepository.getAdminInfo(ledgerRepository.retrieveLatestBlock()).getSettings()
 							.getConsensusSetting().toBytes());
