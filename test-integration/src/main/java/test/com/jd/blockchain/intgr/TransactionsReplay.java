@@ -166,7 +166,7 @@ public class TransactionsReplay {
 	private static WebResponse checkLedgerDiff(LedgerRepository ledgerRepository, AsymmetricKeypair localKeyPair,
 			String remoteManageHost, String remoteManagePort) {
 
-		List<String> providers = new ArrayList<String>();
+//		List<String> providers = new ArrayList<String>();
 
 		long localLatestBlockHeight = ledgerRepository.getLatestBlockHeight();
 
@@ -183,10 +183,11 @@ public class TransactionsReplay {
 		OperationHandleRegisteration opReg = new DefaultOperationHandleRegisteration();
 
 		try {
-			providers.add(LedgerInitConsensusConfig.bftsmartProvider[0]);
+//			providers.add(LedgerInitConsensusConfig.bftsmartProvider[0]);
 
 			PeerBlockchainServiceFactory blockchainServiceFactory = PeerBlockchainServiceFactory.connect(localKeyPair,
-					new NetworkAddress(remoteManageHost, Integer.parseInt(remoteManagePort)), providers);
+					new NetworkAddress(remoteManageHost, Integer.parseInt(remoteManagePort)),
+					EmptySessionCredentialProvider.INSTANCE);
 
 			remoteLatestBlockHeight = blockchainServiceFactory.getBlockchainService().getLedger(ledgerHash)
 					.getLatestBlockHeight();
@@ -241,8 +242,8 @@ public class TransactionsReplay {
 							txContentBlob.addOperation(ClientResolveUtil.read(operation));
 						}
 
-						TxRequestBuilder txRequestBuilder = new TxRequestBuilder(ledgerTransaction.getRequest().getTransactionHash(),
-								txContentBlob);
+						TxRequestBuilder txRequestBuilder = new TxRequestBuilder(
+								ledgerTransaction.getRequest().getTransactionHash(), txContentBlob);
 						txRequestBuilder.addNodeSignature(ledgerTransaction.getRequest().getNodeSignatures());
 						txRequestBuilder.addEndpointSignature(ledgerTransaction.getRequest().getEndpointSignatures());
 						TransactionRequest transactionRequest = txRequestBuilder.buildRequest();
@@ -292,8 +293,8 @@ public class TransactionsReplay {
 		Properties props = LedgerInitializeWebTest
 				.loadConsensusSetting(LedgerInitConsensusConfig.bftsmartConfig.getConfigPath());
 		ConsensusProvider csProvider = getConsensusProvider(LedgerInitConsensusConfig.bftsmartConfig.getProvider());
-		ConsensusViewSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
-				Utils.loadParticipantNodes());
+		ConsensusViewSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder()
+				.createSettings(props, Utils.loadParticipantNodes());
 
 		// 启动服务器；
 		NetworkAddress initAddr0 = initSetting.getConsensusParticipant(0).getInitializerAddress();

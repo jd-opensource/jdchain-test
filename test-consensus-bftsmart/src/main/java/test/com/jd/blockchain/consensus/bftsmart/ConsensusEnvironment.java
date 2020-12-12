@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.mockito.Mockito;
 
-import com.jd.blockchain.consensus.ClientIdentification;
+import com.jd.blockchain.consensus.ClientCredential;
 import com.jd.blockchain.consensus.ClientIncomingSettings;
 import com.jd.blockchain.consensus.ConsensusProvider;
 import com.jd.blockchain.consensus.ConsensusSecurityException;
@@ -428,8 +428,8 @@ public class ConsensusEnvironment {
 				replica.getPubKey());
 
 		// 创建新的共识节点的视图配置信息；
-		BftsmartConsensusViewSettings nextViewSettings = (BftsmartConsensusViewSettings) CS_PROVIDER.getSettingsFactory()
-				.getConsensusSettingsBuilder().addReplicaSetting(viewSettings, bftsmartReplica);
+		BftsmartConsensusViewSettings nextViewSettings = (BftsmartConsensusViewSettings) CS_PROVIDER
+				.getSettingsFactory().getConsensusSettingsBuilder().addReplicaSetting(viewSettings, bftsmartReplica);
 
 		// 向现有的共识网络发起“加入节点”的共识请求；
 		AsymmetricKeypair clientKey = Crypto.getSignatureFunction(ClassicAlgorithm.ED25519).generateKeypair();
@@ -590,7 +590,7 @@ public class ConsensusEnvironment {
 		if (!authNodeServer.isRunning()) {
 			throw new IllegalStateException("The authencated node server is not running!");
 		}
-		ClientIdentification clientIdentification = consensusProvider.getClientFactory().buildAuthId(clientKeys);
+		ClientCredential clientIdentification = consensusProvider.getClientFactory().buildCredential(null, clientKeys);
 
 		try {
 			return authNodeServer.getClientAuthencationService().authencateIncoming(clientIdentification);
