@@ -44,6 +44,7 @@ import com.jd.blockchain.utils.ConsoleUtils;
 import com.jd.blockchain.utils.PropertiesUtils;
 import com.jd.blockchain.utils.SkippingIterator;
 import com.jd.blockchain.utils.concurrent.AsyncFuture;
+import com.jd.blockchain.utils.io.MemoryStorage;
 import com.jd.blockchain.utils.net.NetworkAddress;
 
 /**
@@ -784,7 +785,8 @@ public class ConsensusEnvironment {
 			MessageHandlerDelegater messageHandler, StateMachineReplicate smr, ConsensusProvider consensusProvider) {
 		ServerSettings serverSettings = consensusProvider.getServerFactory().buildServerSettings(realmName,
 				viewSettings, replica.getAddress().toBase58());
-		return consensusProvider.getServerFactory().setupServer(serverSettings, messageHandler, smr);
+		return consensusProvider.getServerFactory().setupServer(serverSettings, messageHandler, smr,
+				new MemoryStorage("NODE-" + replica.getId()));
 	}
 
 	private static class ReplicaNodeServerWrapper implements ReplicaNodeServer {

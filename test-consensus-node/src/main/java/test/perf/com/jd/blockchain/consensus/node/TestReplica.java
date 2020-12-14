@@ -11,13 +11,15 @@ import com.jd.blockchain.consensus.bftsmart.service.BftsmartServerSettings;
 import com.jd.blockchain.consensus.service.MessageHandle;
 import com.jd.blockchain.peer.consensus.ConsensusMessageDispatcher;
 import com.jd.blockchain.utils.ConsoleUtils;
+import com.jd.blockchain.utils.io.MemoryStorage;
 
 public class TestReplica extends BftsmartNodeServer {
 
-	private byte[] retnOK = {1};
+	private byte[] retnOK = { 1 };
 
 	public TestReplica(int id, Properties systemsConfig, HostsConfig hostConfig) {
-		super(new BftsmartServerSettingConfig(), new ConsensusMessageDispatcher(), null);
+		super(new BftsmartServerSettingConfig(), new ConsensusMessageDispatcher(), null,
+				new MemoryStorage("TestReplica"));
 	}
 
 //	@Override
@@ -25,11 +27,11 @@ public class TestReplica extends BftsmartNodeServer {
 //		ConsoleUtils.info("Receive request ...");
 //		return new SimpleResponse(retnOK);
 //	}
-	
-	private static class SimpleResponse implements AsyncActionResponse{
-		
+
+	private static class SimpleResponse implements AsyncActionResponse {
+
 		private byte[] data;
-		
+
 		public SimpleResponse(byte[] data) {
 			this.data = data;
 		}
@@ -38,13 +40,13 @@ public class TestReplica extends BftsmartNodeServer {
 		public byte[] process() {
 			return data;
 		}
-		
+
 	}
 
 	@Override
 	public void installSnapshot(byte[] state) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
