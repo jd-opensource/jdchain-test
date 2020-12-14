@@ -60,7 +60,7 @@ public class BftsmartConsensusTest {
 		messageSendTest.setTotalClients(10);
 		messageSendTest.setMessageCountPerClient(2);
 
-		messageSendTest.setMessageConsenusMillis(3000);
+		messageSendTest.setMessageConsenusMillis(5000);
 
 		// 启动 4 个共识节点；
 		csEnv.startNodeServers();
@@ -104,7 +104,7 @@ public class BftsmartConsensusTest {
 		messageSendTest.setTotalClients(10);
 		messageSendTest.setMessageCountPerClient(2);
 
-		messageSendTest.setMessageConsenusMillis(3000);
+		messageSendTest.setMessageConsenusMillis(5000);
 
 		// 启动 4 个共识节点；
 		csEnv.startNodeServers();
