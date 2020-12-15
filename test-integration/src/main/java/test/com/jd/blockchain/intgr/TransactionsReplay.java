@@ -24,6 +24,7 @@ import com.jd.blockchain.ledger.core.OperationHandleRegisteration;
 import com.jd.blockchain.ledger.core.TransactionBatchProcessor;
 import com.jd.blockchain.sdk.converters.ClientResolveUtil;
 import com.jd.blockchain.sdk.service.PeerBlockchainServiceFactory;
+import com.jd.blockchain.sdk.service.SimpleConsensusClientManager;
 import com.jd.blockchain.service.TransactionBatchResultHandle;
 import com.jd.blockchain.storage.service.impl.composite.CompositeConnectionFactory;
 import com.jd.blockchain.test.PeerServer;
@@ -184,10 +185,10 @@ public class TransactionsReplay {
 
 		try {
 //			providers.add(LedgerInitConsensusConfig.bftsmartProvider[0]);
-
+			SimpleConsensusClientManager clientManager = new SimpleConsensusClientManager();
 			PeerBlockchainServiceFactory blockchainServiceFactory = PeerBlockchainServiceFactory.connect(localKeyPair,
 					new NetworkAddress(remoteManageHost, Integer.parseInt(remoteManagePort)),
-					EmptySessionCredentialProvider.INSTANCE);
+					EmptySessionCredentialProvider.INSTANCE, clientManager);
 
 			remoteLatestBlockHeight = blockchainServiceFactory.getBlockchainService().getLedger(ledgerHash)
 					.getLatestBlockHeight();
