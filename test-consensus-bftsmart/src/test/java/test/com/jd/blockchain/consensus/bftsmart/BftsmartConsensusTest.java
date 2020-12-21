@@ -261,7 +261,7 @@ public class BftsmartConsensusTest {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-//	@Test
+	@Test
 	public void testLeaderChange() throws IOException, InterruptedException {
 		final int N = 4;
 		final String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));
@@ -313,13 +313,14 @@ public class BftsmartConsensusTest {
 
 		// 把节点 0 停止，预计将进行领导者选举；选择出节点 1 为新的领导者；
 		runningNodes[0].getNodeServer().stop();
-		Thread.sleep(10000);
+		Thread.sleep(5000);
 		runningNodes = csEnv.getRunningNodes();
 		
 		assertEquals(3, runningNodes.length);
 		assertEquals(1, runningNodes[0].getReplica().getId());
 		
 		BftsmartNodeState state1 = (BftsmartNodeState) runningNodes[0].getNodeServer().getState();
+		assertEquals(1, state1.getConsensusState().getLeaderID());
 		assertEquals(1, state1.getLeaderState().getLeaderID());
 	}
 
