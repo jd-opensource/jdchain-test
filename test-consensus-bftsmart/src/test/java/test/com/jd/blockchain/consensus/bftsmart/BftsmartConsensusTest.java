@@ -1,32 +1,20 @@
 package test.com.jd.blockchain.consensus.bftsmart;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Comparator;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
-import org.apache.logging.log4j.spi.LoggerContext;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.spi.LoggerFactoryBinder;
 
 import com.jd.blockchain.consensus.ConsensusSecurityException;
 import com.jd.blockchain.consensus.Replica;
 import com.jd.blockchain.consensus.bftsmart.service.BftsmartNodeState;
-import com.jd.blockchain.consensus.service.NodeServer;
-import com.jd.blockchain.consensus.service.NodeState;
 import com.jd.blockchain.utils.codec.Base58Utils;
 import com.jd.blockchain.utils.net.NetworkAddress;
 import com.jd.blockchain.utils.security.RandomUtils;
 import com.jd.blockchain.utils.serialize.json.JSONSerializeUtils;
-
-import io.netty.util.internal.logging.Log4J2LoggerFactory;
-import test.com.jd.blockchain.consensus.bftsmart.NodeStateTestcase.StateVerifier;
 
 /**
  * 消息共识测试；
@@ -39,7 +27,7 @@ public class BftsmartConsensusTest {
 	@Test
 	public void testMessageConsensus() throws IOException, InterruptedException, ConsensusSecurityException {
 		Configurator.setLevel("bftsmart", Level.ERROR);
-		
+
 		final int N = 4;
 		final String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));
 
@@ -308,20 +296,69 @@ public class BftsmartConsensusTest {
 		assertEquals(4, runningNodes.length);
 		assertEquals(0, runningNodes[0].getReplica().getId());
 
-		BftsmartNodeState state0 = (BftsmartNodeState) runningNodes[0].getNodeServer().getState();
-		assertEquals(0, state0.getLeaderState().getLeaderID());
+		// 验证所有节点的 regencyId 升级为 1， leader 都切换为 1 ；
+		for (int i = 0; i < runningNodes.length; i++) {
+			BftsmartNodeState state = (BftsmartNodeState) runningNodes[i].getNodeServer().getState();
+			assertEquals(0, state.getConsensusState().getLeaderID());
+			assertEquals(0, state.getLeaderState().getLeaderID());
+			assertEquals(0, state.getLeaderState().getLastRegency());
+			assertEquals(0, state.getLeaderState().getNextRegency());
+		}
 
 		// 把节点 0 停止，预计将进行领导者选举；选择出节点 1 为新的领导者；
 		runningNodes[0].getNodeServer().stop();
-		Thread.sleep(5000);
+		Thread.sleep(3000);
 		runningNodes = csEnv.getRunningNodes();
-		
+
 		assertEquals(3, runningNodes.length);
 		assertEquals(1, runningNodes[0].getReplica().getId());
+
+		// 验证所有节点的 regencyId 升级为 1， leader 都切换为 1 ；
+		for (int i = 0; i < runningNodes.length; i++) {
+			BftsmartNodeState state = (BftsmartNodeState) runningNodes[i].getNodeServer().getState();
+			assertEquals(1, state.getConsensusState().getLeaderID());
+			assertEquals(1, state.getLeaderState().getLeaderID());
+			assertEquals(1, state.getLeaderState().getLastRegency());
+			assertEquals(1, state.getLeaderState().getNextRegency());
+		}
+
+		// 验证在 3 个节点的情况下进行共识；
+		messageSendTest.run(csEnv);
+
+//		csEnv.reinstallNodeServer(0).getNodeServer().start();
+		csEnv.getNode(0).getNodeServer().start();
+
+		Thread.sleep(3000);
+		runningNodes = csEnv.getRunningNodes();
+		assertEquals(4, runningNodes.length);
+		assertEquals(0, runningNodes[0].getReplica().getId());
+		// 验证节点 0 重启后经过和其它节点同步最新的 regency ；
+		// 最终所有节点的 regencyId 升级为 1， leader 都切换为 1 ；
+		for (int i = 0; i < runningNodes.length; i++) {
+			BftsmartNodeState state = (BftsmartNodeState) runningNodes[i].getNodeServer().getState();
+			assertEquals(1, state.getConsensusState().getLeaderID());
+			assertEquals(1, state.getLeaderState().getLeaderID());
+			assertEquals(1, state.getLeaderState().getLastRegency());
+			assertEquals(1, state.getLeaderState().getNextRegency());
+		}
+
+		// 停止0, 1，然后重启；
+		csEnv.getNode(0).getNodeServer().stop();
+		// 党羽当前节点为 1 ，预计领导者的停止会主动触发选举；
+		// 按照当前算法，退出的领导者仍然参与几票，因此剩余 2 个节点仍然会选举出新的领导者 2；
+		csEnv.getNode(1).getNodeServer().stop();
+		Thread.sleep(3000);
+		ReplicaNodeServer[] nodes = csEnv.getNodes();
+		// 验证余下的 2 个节点[2, 3]新的执政期为 2 ，新的领导者为 2；
+		for (int i = 2; i < nodes.length; i++) {
+			BftsmartNodeState state = (BftsmartNodeState) runningNodes[i].getNodeServer().getState();
+			assertEquals(2, state.getConsensusState().getLeaderID());
+			assertEquals(2, state.getLeaderState().getLeaderID());
+			assertEquals(2, state.getLeaderState().getLastRegency());
+			assertEquals(2, state.getLeaderState().getNextRegency());
+		}
 		
-		BftsmartNodeState state1 = (BftsmartNodeState) runningNodes[0].getNodeServer().getState();
-		assertEquals(1, state1.getConsensusState().getLeaderID());
-		assertEquals(1, state1.getLeaderState().getLeaderID());
+		
 	}
 
 }

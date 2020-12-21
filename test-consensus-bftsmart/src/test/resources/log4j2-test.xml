@@ -6,9 +6,15 @@
     <!--先定义所有的appender-->
     <appenders>
         <!--这个输出控制台的配置-->
-        <console name="Console" target="SYSTEM_OUT">
+        <console name="ConsoleInfo" target="SYSTEM_OUT">
             <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
-            <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            <!--输出日志的格式-->
+            <PatternLayout pattern="%date{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %class{36} %L %M - %msg%xEx%n"/>
+        </console>
+        <console name="ConsoleError" target="SYSTEM_ERR">
+            <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
             <!--输出日志的格式-->
             <PatternLayout pattern="%date{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %class{36} %L %M - %msg%xEx%n"/>
         </console>
@@ -52,21 +58,21 @@
     <loggers>
         <!--过滤掉spring的一些DEBUG信息-->
         <logger name="org.springframework" level="ERROR"/>
-        
         <logger name="bftsmart" level="ERROR"/>
-        <logger name="bftsmart.tom.core.Synchronizer" level="DEBUG"/>
+        <!-- <logger name="bftsmart.tom.core.Synchronizer" level="DEBUG"/>
         <logger name="bftsmart.tom.leaderchange.LCManager" level="DEBUG"/>
         <logger name="bftsmart.tom.leaderchange.LeaderConfirmationTask" level="DEBUG"/>
-        <logger name="bftsmart.tom.leaderchange.LeaderTimeoutTask" level="DEBUG"/>
+        <logger name="bftsmart.tom.leaderchange.LeaderTimeoutTask" level="DEBUG"/> -->
+        
+        <logger name="bftsmart.communication.server.ServersCommunicationLayer" level="DEBUG"/>
         
         <logger name="bftsmart.communication.server.ServerConnection" level="OFF"/>
-        
-        
         
         <logger name="com.jd.blockchain" level="ERROR"/>
         
         <root level="DEBUG">
-            <appender-ref ref="Console"/>
+            <appender-ref ref="ConsoleInfo"/>
+            <appender-ref ref="ConsoleError"/>
             <appender-ref ref="PeerRollingInfo"/>
             <appender-ref ref="PeerRollingWarn"/>
             <appender-ref ref="PeerRollingError"/>
