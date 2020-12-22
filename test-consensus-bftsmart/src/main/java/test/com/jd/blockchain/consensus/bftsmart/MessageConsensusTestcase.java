@@ -112,9 +112,9 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 	}
 	
 	/**
-	 * 创建一个手动重置的测试；
+	 * 创建一个需要手动重置共识环境的测试；
 	 * <p>
-	 * 该测试不会对测试的共识环境 {@link ConsensusEnvironment} 的节点服务器进行重置、重启；
+	 * 该测试不会自动对测试的共识环境 {@link ConsensusEnvironment} 的节点服务器进行重置、重启；
 	 * 
 	 * @param clientCount
 	 * @param clientMessagePerRound

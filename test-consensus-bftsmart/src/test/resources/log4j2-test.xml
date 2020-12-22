@@ -8,7 +8,7 @@
         <!--这个输出控制台的配置-->
         <console name="ConsoleInfo" target="SYSTEM_OUT">
             <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
-            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
             <!--输出日志的格式-->
             <PatternLayout pattern="%date{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %class{36} %L %M - %msg%xEx%n"/>
         </console>
@@ -57,6 +57,7 @@
     <!--然后定义logger，只有定义了logger并引入的appender，appender才会生效-->
     <loggers>
         <!--过滤掉spring的一些DEBUG信息-->
+        <logger name="io.netty" level="ERROR"/>
         <logger name="org.springframework" level="ERROR"/>
         <logger name="bftsmart" level="ERROR"/>
         <logger name="com.jd.blockchain" level="ERROR"/>
