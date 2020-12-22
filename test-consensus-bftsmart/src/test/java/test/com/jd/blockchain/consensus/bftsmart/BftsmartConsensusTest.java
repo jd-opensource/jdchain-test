@@ -270,7 +270,6 @@ public class BftsmartConsensusTest {
 				"classpath:bftsmart-consensus-test-normal.config", nodesNetworkAddresses);
 
 		csEnv.startNodeServers();
-		Thread.sleep(3000);
 
 		// 配置节点状态测试用例；
 		NodeStateTestcase stateTest = NodeStateTestcase.createNormalConsistantTest();
@@ -284,7 +283,7 @@ public class BftsmartConsensusTest {
 		ReplicaNodeServer[] nodes = csEnv.getNodes();
 		assertEquals(4, nodes.length);
 
-		// 验证所有节点的 regencyId 升级为 1， leader 都切换为 1 ；
+		// 初始状态，验证所有节点的 regencyId 为 0， leader 为 0 ；
 		for (int i = 0; i < nodes.length; i++) {
 			BftsmartNodeState state = (BftsmartNodeState) nodes[i].getNodeServer().getState();
 			assertEquals(0, state.getConsensusState().getLeaderID());
@@ -309,7 +308,8 @@ public class BftsmartConsensusTest {
 		// 验证在 3 个节点的情况下进行共识；
 		messageSendTest.run(csEnv);
 
-		csEnv.getNode(0).getNodeServer().start();
+		AsyncFuture<?> future0 = csEnv.getNode(0).getNodeServer().start();
+		future0.get();
 		Thread.sleep(3000);
 
 		// 验证节点 0 重启后经过和其它节点同步最新的 regency ；
@@ -340,11 +340,23 @@ public class BftsmartConsensusTest {
 		System.out.println("\r\n\r\n-------- restart node 1 ---------\r\n");
 
 		// 重新启动节点 1 ，验证是否能够恢复正常；
-		nodes[1].getNodeServer().start();
-		Thread.sleep(5000);
-		// 验证余下的 3 个节点[1, 2, 3]仍然保持执政期为 2 ，领导者为 2；
-		for (int i = 1; i < nodes.length; i++) {
+		// 先清空所有向 1 发送消息的连接；
+		csEnv.resetNodeSessionsToTarget(1);
+		AsyncFuture<?> future1 = nodes[1].getNodeServer().start();
+		future1.get();
+		System.out.println("\r\n\r\n-------- node 1 started ---------\r\n");
+		Thread.sleep(2000);
+		// 验证余下的 2 个节点[1, 2, 3]仍然保持执政期为 2 ，领导者为 2；
+		for (int i = 2; i < nodes.length; i++) {
 			BftsmartNodeState state = (BftsmartNodeState) nodes[i].getNodeServer().getState();
+			assertEquals(2, state.getConsensusState().getLeaderID());
+			assertEquals(2, state.getLeaderState().getLeaderID());
+			assertEquals(2, state.getLeaderState().getLastRegency());
+			assertEquals(2, state.getLeaderState().getNextRegency());
+		}
+		{
+			// 验证重新启动的 Node 1 执政期为 2 ，领导者为 2；
+			BftsmartNodeState state = (BftsmartNodeState) nodes[1].getNodeServer().getState();
 			assertEquals(2, state.getConsensusState().getLeaderID());
 			assertEquals(2, state.getLeaderState().getLeaderID());
 			assertEquals(2, state.getLeaderState().getLastRegency());
@@ -376,15 +388,15 @@ public class BftsmartConsensusTest {
 
 		// 启动节点 0 - 3 ，节点 4 未启动；
 		AsyncFuture<?>[] futures = new AsyncFuture[N];
-		for (int i = 0; i < N-1; i++) {
+		for (int i = 0; i < N - 1; i++) {
 			futures[i] = nodes[i].getNodeServer().start();
 		}
-		for (int i = 0; i < N-1; i++) {
+		for (int i = 0; i < N - 1; i++) {
 			futures[i].get();
 		}
-		
+
 		// 验证全部节点[0,1,2,3]执政期为 0 ，领导者为 0；
-		for (int i = 0; i < N-1; i++) {
+		for (int i = 0; i < N - 1; i++) {
 			BftsmartNodeState state = (BftsmartNodeState) nodes[i].getNodeServer().getState();
 			assertEquals(0, state.getConsensusState().getLeaderID());
 			assertEquals(0, state.getLeaderState().getLeaderID());
@@ -392,7 +404,7 @@ public class BftsmartConsensusTest {
 			assertEquals(0, state.getLeaderState().getNextRegency());
 		}
 
-		futures[N-1] = nodes[N - 1].getNodeServer().start();
+		futures[N - 1] = nodes[N - 1].getNodeServer().start();
 		Thread.sleep(5000);
 
 		// 验证全部节点[0,1,2,3,4]执政期为 0 ，领导者为 0；
@@ -427,7 +439,7 @@ public class BftsmartConsensusTest {
 			assertEquals(1, state.getLeaderState().getLastRegency());
 			assertEquals(1, state.getLeaderState().getNextRegency());
 		}
-		
+
 		// 配置节点状态测试用例；
 		NodeStateTestcase stateTest = NodeStateTestcase.createNormalConsistantTest();
 		stateTest.run(csEnv);

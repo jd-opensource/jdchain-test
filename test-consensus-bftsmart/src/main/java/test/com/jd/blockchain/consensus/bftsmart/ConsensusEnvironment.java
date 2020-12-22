@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -34,8 +35,10 @@ import com.jd.blockchain.consensus.client.ClientSettings;
 import com.jd.blockchain.consensus.client.ConsensusClient;
 import com.jd.blockchain.consensus.manage.ConsensusManageClient;
 import com.jd.blockchain.consensus.manage.ConsensusView;
+import com.jd.blockchain.consensus.service.Communication;
 import com.jd.blockchain.consensus.service.MessageHandle;
 import com.jd.blockchain.consensus.service.NodeServer;
+import com.jd.blockchain.consensus.service.NodeSession;
 import com.jd.blockchain.consensus.service.NodeState;
 import com.jd.blockchain.consensus.service.ServerSettings;
 import com.jd.blockchain.consensus.service.StateMachineReplicate;
@@ -48,7 +51,6 @@ import com.jd.blockchain.utils.ConsoleUtils;
 import com.jd.blockchain.utils.PropertiesUtils;
 import com.jd.blockchain.utils.SkippingIterator;
 import com.jd.blockchain.utils.concurrent.AsyncFuture;
-import com.jd.blockchain.utils.concurrent.AsyncHandle;
 import com.jd.blockchain.utils.concurrent.CompletableAsyncFuture;
 import com.jd.blockchain.utils.io.MemoryStorage;
 import com.jd.blockchain.utils.net.NetworkAddress;
@@ -353,6 +355,26 @@ public class ConsensusEnvironment {
 		}
 		return new ReplicaNodeServerWrapper(replica, nodeServer);
 	}
+	
+
+	public void resetNodeSessionsToTarget(int replicaId) {
+		String target = null;
+		for (int i = 0; i < replicas.length; i++) {
+			if (replicas[i].getId() == replicaId) {
+				target = replicas[i].getAddress().toBase58();
+			}
+		}
+		if (target == null) {
+			return;
+		}
+		for (int i = 0; i < nodeServers.length; i++) {
+			if (!nodeServers[i].isRunning()) {
+				continue;
+			}
+			NodeSession session = nodeServers[i].getCommunication().getSession(target);
+			session.reset();
+		}
+	}
 
 	/**
 	 * 是否全部节点都在运行中；
@@ -644,6 +666,7 @@ public class ConsensusEnvironment {
 
 	private static void startNodeServers(NodeServer[] nodeServers) {
 		CountDownLatch startupLatch = new CountDownLatch(nodeServers.length);
+		List<AsyncFuture<?>> futures = new LinkedList<>();
 		for (int i = 0; i < nodeServers.length; i++) {
 			int id = i;
 			NodeServer nodeServer = nodeServers[i];
@@ -652,22 +675,28 @@ public class ConsensusEnvironment {
 				startupLatch.countDown();
 			} else {
 				// 未运行；
-				EXECUTOR_SERVICE.execute(new Runnable() {
-					@Override
-					public void run() {
-						nodeServer.start();
-						ConsoleUtils.info("Replica Node [%s : %s] started! ", id,
-								nodeServer.getServerSettings().getReplicaSettings().getAddress());
-						startupLatch.countDown();
-					}
-				});
+				AsyncFuture<?> future =nodeServer.start();
+				futures.add(future);
+				
+//				EXECUTOR_SERVICE.execute(new Runnable() {
+//					@Override
+//					public void run() {
+//						nodeServer.start();
+//						ConsoleUtils.info("Replica Node [%s : %s] started! ", id,
+//								nodeServer.getServerSettings().getReplicaSettings().getAddress());
+//						startupLatch.countDown();
+//					}
+//				});
 			}
 		}
 
-		try {
-			startupLatch.await(30, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			throw new IllegalStateException("Timeout occurred while waiting to complete the startup of all nodes!", e);
+//		try {
+//			startupLatch.await(30, TimeUnit.SECONDS);
+//		} catch (InterruptedException e) {
+//			throw new IllegalStateException("Timeout occurred while waiting to complete the startup of all nodes!", e);
+//		}
+		for (AsyncFuture<?> future : futures) {
+			future.get();
 		}
 		ConsoleUtils.info("All replicas start success!");
 	}
@@ -867,14 +896,18 @@ public class ConsensusEnvironment {
 		public NodeState getState() {
 			return nodeServer.getState();
 		}
+		
+		@Override
+		public Communication getCommunication() {
+			return nodeServer.getCommunication();
+		}
 
 		@Override
 		public synchronized AsyncFuture<?> start() {
 			if (nodeServer.isRunning()) {
 				return CompletableAsyncFuture.completeFuture(null);
 			}
-			LOGGER.debug("Node server[{}] is starting... --[nodeserver.state={}]", replica.getId(),
-					nodeServer.getState());
+			LOGGER.debug("Node server[{}] is starting...", replica.getId());
 			
 			nodeServer = createInstance();
 			AsyncFuture<?> future = nodeServer.start();
@@ -882,8 +915,7 @@ public class ConsensusEnvironment {
 			future.thenRun(new Runnable() {
 				@Override
 				public void run() {
-					LOGGER.debug("Node server[{}] started. --[nodeserver.state={}]", replica.getId(),
-							nodeServer.getState());
+					LOGGER.debug("Node server[{}] started.", replica.getId());
 				}
 			});
 			return future;
@@ -927,4 +959,5 @@ public class ConsensusEnvironment {
 		}
 
 	}
+
 }
