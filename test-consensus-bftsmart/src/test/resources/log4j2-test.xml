@@ -59,15 +59,6 @@
         <!--过滤掉spring的一些DEBUG信息-->
         <logger name="org.springframework" level="ERROR"/>
         <logger name="bftsmart" level="ERROR"/>
-        <!-- <logger name="bftsmart.tom.core.Synchronizer" level="DEBUG"/>
-        <logger name="bftsmart.tom.leaderchange.LCManager" level="DEBUG"/>
-        <logger name="bftsmart.tom.leaderchange.LeaderConfirmationTask" level="DEBUG"/>
-        <logger name="bftsmart.tom.leaderchange.LeaderTimeoutTask" level="DEBUG"/> -->
-        
-        <logger name="bftsmart.communication.server.ServersCommunicationLayer" level="DEBUG"/>
-        
-        <logger name="bftsmart.communication.server.ServerConnection" level="OFF"/>
-        
         <logger name="com.jd.blockchain" level="ERROR"/>
         
         <root level="DEBUG">

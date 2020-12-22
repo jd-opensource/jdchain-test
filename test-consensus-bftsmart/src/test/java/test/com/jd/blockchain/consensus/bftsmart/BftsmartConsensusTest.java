@@ -253,6 +253,8 @@ public class BftsmartConsensusTest {
 	 */
 	@Test
 	public void testLeaderChange() throws IOException, InterruptedException {
+		Configurator.setLevel("bftsmart.communication.server.ServersCommunicationLayer", Level.DEBUG);
+		
 		final int N = 4;
 		final String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));
 
