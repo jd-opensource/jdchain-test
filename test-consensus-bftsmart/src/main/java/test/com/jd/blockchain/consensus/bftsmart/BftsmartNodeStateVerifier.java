@@ -1,6 +1,7 @@
 package test.com.jd.blockchain.consensus.bftsmart;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -16,9 +17,33 @@ import test.com.jd.blockchain.consensus.bftsmart.NodeStateTestcase.StateVerifier
 
 public class BftsmartNodeStateVerifier implements StateVerifier {
 
+	/**
+	 * 领导者选举状态的检测选项；
+	 * 
+	 * @author huanghaiquan
+	 *
+	 */
+	public static enum LCStatusOption {
+
+		/**
+		 * 选举中；
+		 */
+		IN_PROGRESS,
+
+		/**
+		 * 未选举；
+		 */
+		NORMAL,
+
+		/**
+		 * 忽略；
+		 */
+		IGNORE
+	}
+
 	private boolean checkingConsensusQuorum = true;
 
-	private boolean checkingNextRegency = true;
+	private LCStatusOption lcStatusOption = LCStatusOption.IGNORE;
 
 	public BftsmartNodeStateVerifier() {
 	}
@@ -64,11 +89,23 @@ public class BftsmartNodeStateVerifier implements StateVerifier {
 				bftState.getLeaderState().getLastRegency() > -1);
 
 		// 检查领导者状态的下一个执政ID是否有效；
-		if (checkingNextRegency) {
-			assertEquals(
-					"The next-regency-id is not equal to the last-regency-id plus 1 in node[" + bftState.getNodeID()
-							+ "]!",
-					bftState.getLeaderState().getLastRegency() + 1, bftState.getLeaderState().getNextRegency());
+		if (lcStatusOption != LCStatusOption.IGNORE) {
+			assertFalse("The LC Status of node[" + bftState.getNodeID() + "] is illegal!",
+					bftState.getLeaderState().getLastRegency() > bftState.getLeaderState().getNextRegency());
+
+			switch (lcStatusOption) {
+			case IN_PROGRESS:
+				assertTrue("Expected the LC Status of node[" + bftState.getNodeID() + "] is in progress, but not!",
+						bftState.getLeaderState().getLastRegency() < bftState.getLeaderState().getNextRegency());
+				break;
+			case NORMAL:
+				assertTrue(
+						"Expected the LC Status of node[" + bftState.getNodeID() + "] is not in progress, but it is!",
+						bftState.getLeaderState().getLastRegency() == bftState.getLeaderState().getNextRegency());
+				break;
+			default:
+				throw new IllegalStateException("Unsupported LCStatusOption [" + lcStatusOption + "]!");
+			}
 		}
 
 		// 检查领导者状态和共识状态的领导者 ID 是否一致；
@@ -150,13 +187,13 @@ public class BftsmartNodeStateVerifier implements StateVerifier {
 	public void setCheckingConsensusQuorum(boolean checkingConsensusQuorum) {
 		this.checkingConsensusQuorum = checkingConsensusQuorum;
 	}
-
-	public boolean isCheckingNextRegency() {
-		return checkingNextRegency;
+	
+	public LCStatusOption getLCStatusOption() {
+		return lcStatusOption;
 	}
-
-	public void setCheckingNextRegency(boolean checkingNextRegency) {
-		this.checkingNextRegency = checkingNextRegency;
+	
+	public void setLCStatusOption(LCStatusOption lcStatusOption) {
+		this.lcStatusOption = lcStatusOption;
 	}
 
 	/**

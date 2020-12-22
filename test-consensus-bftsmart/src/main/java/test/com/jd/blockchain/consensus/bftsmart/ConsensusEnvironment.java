@@ -105,6 +105,13 @@ public class ConsensusEnvironment {
 		return null;
 	}
 
+	/**
+	 * 返回所有节点的列表；
+	 * <p>
+	 * 
+	 * 返回的列表是有序的，按照节点的 Id 进行升序排列；
+	 * @return
+	 */
 	public ReplicaNodeServer[] getNodes() {
 		SkippingIterator<ReplicaNodeServer> nodesIterator = this.getNodesIterator();
 		ReplicaNodeServer[] servers = new ReplicaNodeServer[(int) nodesIterator.getTotalCount()];
@@ -121,7 +128,7 @@ public class ConsensusEnvironment {
 	/**
 	 * 返回运行中的节点；
 	 * 
-	 * @return 节点服务器列表；按照 ID 大小升序排列；
+	 * @return 节点服务器列表；按照 ID 升序排列；
 	 */
 	public ReplicaNodeServer[] getRunningNodes() {
 		SkippingIterator<ReplicaNodeServer> nodesIterator = this.getNodesIterator();
