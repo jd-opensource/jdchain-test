@@ -801,6 +801,84 @@ public class IntegrationTest4NewNodeDel {
         }
     }
 
+    // 测试用例顺序：激活节点peer4, 移除节点peer4, 更新节点peer1, 更新节点peer1
+    @Test
+    public void testCase11() throws Exception {
+
+        try {
+
+            //账本初始化
+            ledgerHash = initLedger4Nodes(rocksdbConnectionStrings);
+
+            // 启动4个Peer节点
+            PeerServer[] peerNodes = peerNodeStart4(ledgerHash, DB_TYPE_ROCKSDB);
+
+            // 创建连接peer0的网关
+            BlockchainService blockchainService = createBlockChainService(LedgerInitConsensusConfig.bftsmartProvider, peerNodes, GATEWAY_MANAGER_PORT1);
+
+            // 注册新的参与方
+            registParticipantByGateway0(blockchainService, newParticipant1, ledgerHash);
+
+            Thread.sleep(5000);
+            System.out.println("---------- Ledger Init And Regist Participant Completed ----------");
+
+            // 手动复制账本
+            copyRocksdbToNewNode(0, 4);
+            System.out.println("---------- DataBase Copy To New Node Completed ----------");
+
+            Thread.sleep(5000);
+            startNewPeerAndActive(ledgerHash, DB_TYPE_ROCKSDB, newParticipant1, 4);
+            System.out.println("---------- Start And Active New Peer4 Node Completed ----------");
+
+            Thread.sleep(5000);
+            registUserByExistGatewayWrapper(blockchainService);
+
+            Thread.sleep(5000);
+            deActivePartiNode(newParticipant1, ledgerHash);
+            System.out.println("---------- Deactive Peer4 Node Completed ----------");
+
+            Thread.sleep(5000);
+            registUserByExistGatewayWrapper(blockchainService);
+
+            System.out.println("start update participant node!");
+            Thread.sleep(8000);
+            updatePartiNode(peer1, ledgerHash, NEW_NODE_HOST, "40000",  NEW_NODE_HOST, "12000");
+
+            Thread.sleep(5000);
+            registUserByExistGatewayWrapper(blockchainService);
+
+            System.out.println("start update participant node second!");
+            Thread.sleep(8000);
+            updatePartiNode(peer1, ledgerHash, NEW_NODE_HOST, "50000",  NEW_NODE_HOST, "12000");
+
+            Thread.sleep(5000);
+            registUserByExistGatewayWrapper(blockchainService);
+
+            System.out.println("start update participant node third!");
+            Thread.sleep(8000);
+            updatePartiNode(peer1, ledgerHash, NEW_NODE_HOST, "60000",  NEW_NODE_HOST, "12000");
+
+            Thread.sleep(5000);
+            registUserByExistGatewayWrapper(blockchainService);
+            // 通过老的网关0，发送交易，由于网关没有重新接入，获得的视图ID是0，没有更新，此时发送的交易到了共识节点一定会被特殊处理
+//            registUserByExistGatewayWrapper(blockchainService);
+
+//            Thread.sleep(5000);
+//            registUserByExistGatewayWrapper(blockchainService);
+//            registUserByExistGatewayWrapper(blockchainService);
+//            registUserByExistGatewayWrapper(blockchainService);
+
+            System.out.println("---------- testCase11 ----------");
+
+            Thread.sleep(Integer.MAX_VALUE);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Thread.sleep(Integer.MAX_VALUE);
+        }
+
+    }
+
     private void registUserByExistGatewayWrapper(BlockchainService blockchainService) {
 
         TransactionResponse txResp = registUserByExistGateway(blockchainService);
@@ -922,12 +1000,63 @@ public class IntegrationTest4NewNodeDel {
         BasicNameValuePair manageHost = new BasicNameValuePair("remoteManageHost",  remoteManageHost);
         BasicNameValuePair managePort = new BasicNameValuePair("remoteManagePort", remoteManagePort);
 
+        BasicNameValuePair shutdown = new BasicNameValuePair("shutdown", false +"");
 
         para.add(base58LedgerHash);
         para.add(host);
         para.add(port);
         para.add(manageHost);
         para.add(managePort);
+        para.add(shutdown);
+
+        try {
+            httpPost.setEntity(new UrlEncodedFormEntity(para,"UTF-8"));
+            HttpClient httpClient = HttpClients.createDefault();
+
+            HttpResponse response = httpClient.execute(httpPost);
+
+            JsonResponseConverter jsonConverter = new JsonResponseConverter(WebResponse.class);
+
+            WebResponse webResponse = (WebResponse) jsonConverter.getResponse(null, response.getEntity().getContent(), null);
+
+            return webResponse;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Active participant post request error!");
+        }
+
+        return null;
+    }
+
+    private WebResponse updatePartiNode(NewParticipant existParticipant, HashDigest ledgerHash, String newHost, String newPort, String remoteManageHost, String remoteManagePort) {
+
+        System.out.println("Address = " + AddressEncoding.generateAddress(existParticipant.getPubKey()));
+
+        String url = "http://" + existParticipant.httpSetting.getHost() + ":" + existParticipant.httpSetting.getPort() + "/management/delegate/activeparticipant";
+
+        System.out.println("url = " + url);
+
+        HttpPost httpPost = new HttpPost(url);
+
+        List<BasicNameValuePair> para=new ArrayList<BasicNameValuePair>();
+
+        BasicNameValuePair base58LedgerHash = new BasicNameValuePair("ledgerHash", ledgerHash.toBase58());
+        BasicNameValuePair host = new BasicNameValuePair("consensusHost",  newHost);
+        BasicNameValuePair port = new BasicNameValuePair("consensusPort",  newPort);
+
+        // 指定已经启动的其他共识节点的HTTP管理端口
+        BasicNameValuePair manageHost = new BasicNameValuePair("remoteManageHost",  remoteManageHost);
+        BasicNameValuePair managePort = new BasicNameValuePair("remoteManagePort", remoteManagePort);
+
+        BasicNameValuePair shutdown = new BasicNameValuePair("shutdown", false +"");
+
+        para.add(base58LedgerHash);
+        para.add(host);
+        para.add(port);
+        para.add(manageHost);
+        para.add(managePort);
+        para.add(shutdown);
 
         try {
             httpPost.setEntity(new UrlEncodedFormEntity(para,"UTF-8"));

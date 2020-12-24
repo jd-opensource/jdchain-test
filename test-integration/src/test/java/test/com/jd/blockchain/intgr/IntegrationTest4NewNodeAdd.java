@@ -423,6 +423,13 @@ public class IntegrationTest4NewNodeAdd {
             // 启动4个Peer节点
             PeerServer[] peerNodes = peerNodeStart4(ledgerHash, DB_TYPE_ROCKSDB);
 
+            try {
+                // 休眠20秒，保证Peer节点启动成功
+                Thread.sleep(20000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             // 创建连接peer0的网关
             BlockchainService blockchainService = createBlockChainService(LedgerInitConsensusConfig.bftsmartProvider, peerNodes, GATEWAY_MANAGER_PORT1);
 
@@ -988,12 +995,15 @@ public class IntegrationTest4NewNodeAdd {
         BasicNameValuePair manageHost = new BasicNameValuePair("remoteManageHost",  "127.0.0.1");
         BasicNameValuePair managePort = new BasicNameValuePair("remoteManagePort", "12000");
 
+        BasicNameValuePair shutdown = new BasicNameValuePair("shutdown", false +"");
+
 
         para.add(base58LedgerHash);
         para.add(host);
         para.add(port);
         para.add(manageHost);
         para.add(managePort);
+        para.add(shutdown);
 
         try {
             httpPost.setEntity(new UrlEncodedFormEntity(para,"UTF-8"));
