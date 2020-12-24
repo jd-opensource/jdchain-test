@@ -106,6 +106,36 @@ public class MessageConsensusTestcase implements ConsensusTestcase {
 	 * 默认值 10000 毫秒（10秒）；
 	 */
 	private long clientReponseAwaitTimeout = 10000;
+	
+	
+	public MessageConsensusTestcase() {
+	}
+	
+	/**
+	 * 创建一个需要手动重置共识环境的测试；
+	 * <p>
+	 * 该测试不会自动对测试的共识环境 {@link ConsensusEnvironment} 的节点服务器进行重置、重启；
+	 * 
+	 * @param clientCount
+	 * @param clientMessagePerRound
+	 * @param consensusWaitingMilliseconds
+	 * @return
+	 */
+	public static MessageConsensusTestcase createManualResetTest(int clientCount, int clientMessagePerRound, long consensusWaitingMilliseconds) {
+		MessageConsensusTestcase messageSendTest = new MessageConsensusTestcase();
+		messageSendTest.setReinstallAllNodesBeforeRunning(false);
+		messageSendTest.setRestartAllNodesBeforeRunning(false);
+		messageSendTest.setRequireAllNodesRunning(false);
+
+		messageSendTest.setResetupClients(false);
+		messageSendTest.setRequireAllClientConnected(true);
+		messageSendTest.setTotalClients(clientCount);
+		messageSendTest.setMessageCountPerClient(clientMessagePerRound);
+
+		messageSendTest.setMessageConsenusMillis(consensusWaitingMilliseconds);
+		
+		return messageSendTest;
+	}
 
 	/**
 	 * 是否采用并发的方式发送同一个客户端的多条消息； 默认为 true；

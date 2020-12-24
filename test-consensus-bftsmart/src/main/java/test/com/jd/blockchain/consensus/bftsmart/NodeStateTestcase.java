@@ -9,6 +9,8 @@ import java.util.List;
 
 import com.jd.blockchain.consensus.service.NodeState;
 
+import test.com.jd.blockchain.consensus.bftsmart.BftsmartNodeStateVerifier.LCStatusOption;
+
 /**
  * 节点状态测试；
  * <p>
@@ -25,6 +27,25 @@ public class NodeStateTestcase implements ConsensusTestcase {
 	private boolean requireVerifier = false;
 
 	private StateVerifier stateVerifier;
+	
+	
+	public NodeStateTestcase() {
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static NodeStateTestcase createNormalConsistantTest() {
+		NodeStateTestcase stateTest = new NodeStateTestcase();
+		
+		BftsmartNodeStateVerifier verifier = new BftsmartNodeStateVerifier();
+		verifier.setCheckingConsensusQuorum(false);// 暂时不校验“法定数量”属性；
+		verifier.setLCStatusOption(LCStatusOption.NORMAL);// 暂时不校验“下一个执政ID”属性；
+		stateTest.setStateVerifier(verifier);
+		stateTest.setRequireVerifier(true);
+
+		stateTest.setConsistantComparators(new BftsmartNodeStateComparator());
+		return stateTest;
+	}
+	
 
 	/**
 	 * 运行节点状态测试；
