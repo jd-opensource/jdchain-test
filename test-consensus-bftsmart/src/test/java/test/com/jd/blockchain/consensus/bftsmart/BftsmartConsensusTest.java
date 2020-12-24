@@ -377,7 +377,7 @@ public class BftsmartConsensusTest {
 		final int N = 5;
 		final String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));
 
-		NetworkAddress[] nodesNetworkAddresses = ConsensusEnvironment.createMultiPortsAddresses("127.0.0.1", N, 13000,
+		NetworkAddress[] nodesNetworkAddresses = ConsensusEnvironment.createMultiPortsAddresses("127.0.0.1", N, 15000,
 				10);
 
 		ConsensusEnvironment csEnv = ConsensusEnvironment.setup_BFTSMaRT(realmName,
