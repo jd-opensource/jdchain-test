@@ -3,6 +3,8 @@ package test.com.jd.blockchain.consensus.bftsmart;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -38,24 +40,29 @@ public class BftsmartConsensusTest {
 		ConsensusEnvironment csEnv = ConsensusEnvironment.setup_BFTSMaRT(realmName,
 				"classpath:bftsmart-consensus-test-normal.config", nodesNetworkAddresses);
 
-		// 配置用例；
-		MessageConsensusTestcase messageSendTest = new MessageConsensusTestcase();
-		messageSendTest.setReinstallAllNodesBeforeRunning(false);
-		messageSendTest.setRestartAllNodesBeforeRunning(false);
-		messageSendTest.setRequireAllNodesRunning(false);
+		try {
+			// 配置用例；
+			MessageConsensusTestcase messageSendTest = new MessageConsensusTestcase();
+			messageSendTest.setReinstallAllNodesBeforeRunning(false);
+			messageSendTest.setRestartAllNodesBeforeRunning(false);
+			messageSendTest.setRequireAllNodesRunning(false);
 
-		messageSendTest.setResetupClients(false);
-		messageSendTest.setRequireAllClientConnected(true);
-		messageSendTest.setTotalClients(10);
-		messageSendTest.setMessageCountPerClient(2);
+			messageSendTest.setResetupClients(false);
+			messageSendTest.setRequireAllClientConnected(true);
+			messageSendTest.setTotalClients(10);
+			messageSendTest.setMessageCountPerClient(2);
 
-		messageSendTest.setMessageConsenusMillis(5000);
+			messageSendTest.setMessageConsenusMillis(10000);
 
-		// 启动 4 个共识节点；
-		csEnv.startNodeServers();
+			// 启动 4 个共识节点；
+			csEnv.startNodeServers();
 
-		// 执行 4 个共识节点的消息消息共识一致性测试；
-		messageSendTest.run(csEnv);
+			// 执行 4 个共识节点的消息消息共识一致性测试；
+			messageSendTest.run(csEnv);
+		} finally {
+			// 退出测试前关闭；
+			csEnv.close();
+		}
 	}
 
 	/**
@@ -82,45 +89,46 @@ public class BftsmartConsensusTest {
 		ConsensusEnvironment csEnv = ConsensusEnvironment.setup_BFTSMaRT(realmName,
 				"classpath:bftsmart-consensus-test-normal.config", nodesNetworkAddresses);
 
-		// 配置用例；
-		MessageConsensusTestcase messageSendTest = new MessageConsensusTestcase();
-		messageSendTest.setReinstallAllNodesBeforeRunning(false);
-		messageSendTest.setRestartAllNodesBeforeRunning(false);
-		messageSendTest.setRequireAllNodesRunning(false);
+		try {
+			// 配置用例；
+			MessageConsensusTestcase messageSendTest = new MessageConsensusTestcase();
+			messageSendTest.setReinstallAllNodesBeforeRunning(false);
+			messageSendTest.setRestartAllNodesBeforeRunning(false);
+			messageSendTest.setRequireAllNodesRunning(false);
 
-		messageSendTest.setResetupClients(false);
-		messageSendTest.setRequireAllClientConnected(true);
-		messageSendTest.setTotalClients(10);
-		messageSendTest.setMessageCountPerClient(2);
+			messageSendTest.setResetupClients(false);
+			messageSendTest.setRequireAllClientConnected(true);
+			messageSendTest.setTotalClients(10);
+			messageSendTest.setMessageCountPerClient(2);
 
-		messageSendTest.setMessageConsenusMillis(5000);
+			messageSendTest.setMessageConsenusMillis(10000);
 
-		// 启动 4 个共识节点；
-		csEnv.startNodeServers();
+			// 启动 4 个共识节点；
+			csEnv.startNodeServers();
 
-		// 执行 4 个共识节点的消息消息共识一致性测试；
-		messageSendTest.run(csEnv);
+			// 执行 4 个共识节点的消息消息共识一致性测试；
+			messageSendTest.run(csEnv);
 
-		// 停止 1 个共识节点后验证剩余 3 个节点的共识一致性；
-		ReplicaNodeServer[] nodes = csEnv.getNodes();
+			// 停止 1 个共识节点后验证剩余 3 个节点的共识一致性；
+			ReplicaNodeServer[] nodes = csEnv.getNodes();
 
-		nodes[3].getNodeServer().stop();
-		Thread.sleep(1000);
+			nodes[3].getNodeServer().stop();
+			Thread.sleep(1000);
 
-		messageSendTest.run(csEnv);
+			messageSendTest.run(csEnv);
 
-		// 重启节点之后；
-		nodes[3] = csEnv.reinstallNodeServer(nodes[3].getReplica().getId());
-		nodes[3].getNodeServer().start();
-		Thread.sleep(1000);
-		messageSendTest.run(csEnv);
+			// 重启节点之后；
+			nodes[3] = csEnv.reinstallNodeServer(nodes[3].getReplica().getId());
+			nodes[3].getNodeServer().start();
+			Thread.sleep(1000);
+			messageSendTest.run(csEnv);
 
-		nodes = csEnv.getNodes();
-		printNodeStates(nodes);
-
-		// 退出测试前关闭；
-		csEnv.closeAllClients();
-		csEnv.stopNodeServers();
+			nodes = csEnv.getNodes();
+			printNodeStates(nodes);
+		} finally {
+			// 退出测试前关闭；
+			csEnv.close();
+		}
 	}
 
 	private void printNodeStates(ReplicaNodeServer[] nodes) {
@@ -151,26 +159,30 @@ public class BftsmartConsensusTest {
 
 		ConsensusEnvironment csEnv = ConsensusEnvironment.setup_BFTSMaRT(realmName,
 				"classpath:bftsmart-consensus-test-normal.config", nodesNetworkAddresses);
-		// 启动 4 个共识节点；
-		csEnv.startNodeServers();
+		try {
+			// 启动 4 个共识节点；
+			csEnv.startNodeServers();
 
-		// 配置用例；
-		MessageConsensusTestcase messageSendTest = new MessageConsensusTestcase();
-		messageSendTest.setReinstallAllNodesBeforeRunning(false);
-		messageSendTest.setRestartAllNodesBeforeRunning(false);
-		messageSendTest.setRequireAllNodesRunning(false);
+			// 配置用例；
+			MessageConsensusTestcase messageSendTest = new MessageConsensusTestcase();
+			messageSendTest.setReinstallAllNodesBeforeRunning(false);
+			messageSendTest.setRestartAllNodesBeforeRunning(false);
+			messageSendTest.setRequireAllNodesRunning(false);
 
-		messageSendTest.setResetupClients(false);
-		messageSendTest.setRequireAllClientConnected(true);
-		messageSendTest.setTotalClients(4);
-		messageSendTest.setMessageCountPerClient(10);
+			messageSendTest.setResetupClients(false);
+			messageSendTest.setRequireAllClientConnected(true);
+			messageSendTest.setTotalClients(4);
+			messageSendTest.setMessageCountPerClient(10);
 
-		messageSendTest.setAuthenticationNodeIDs(0);
+			messageSendTest.setAuthenticationNodeIDs(0);
 
-		// 执行 4 个共识节点的消息消息共识一致性测试；
-		messageSendTest.setConcurrentSending(true);
-		messageSendTest.setMessageConsenusMillis(10000);
-		messageSendTest.run(csEnv);
+			// 执行 4 个共识节点的消息消息共识一致性测试；
+			messageSendTest.setConcurrentSending(true);
+			messageSendTest.setMessageConsenusMillis(10000);
+			messageSendTest.run(csEnv);
+		} finally {
+			csEnv.close();
+		}
 
 	}
 
@@ -269,110 +281,114 @@ public class BftsmartConsensusTest {
 		ConsensusEnvironment csEnv = ConsensusEnvironment.setup_BFTSMaRT(realmName,
 				"classpath:bftsmart-consensus-test-normal.config", nodesNetworkAddresses);
 
-		csEnv.startNodeServers();
+		try {
+			csEnv.startNodeServers();
 
-		// 配置节点状态测试用例；
-		NodeStateTestcase stateTest = NodeStateTestcase.createNormalConsistantTest();
-		stateTest.run(csEnv);
+			// 配置节点状态测试用例；
+			NodeStateTestcase stateTest = NodeStateTestcase.createNormalConsistantTest();
+			stateTest.run(csEnv);
 
-		// 配置消息共识测试用例；
-		MessageConsensusTestcase messageSendTest = MessageConsensusTestcase.createManualResetTest(2, 2, 3000L);
-		// 执行 4 个共识节点的消息消息共识一致性测试；
-		messageSendTest.run(csEnv);
+			// 配置消息共识测试用例；
+			MessageConsensusTestcase messageSendTest = MessageConsensusTestcase.createManualResetTest(2, 2, 3000L);
+			// 执行 4 个共识节点的消息消息共识一致性测试；
+			messageSendTest.run(csEnv);
 
-		ReplicaNodeServer[] nodes = csEnv.getNodes();
-		assertEquals(4, nodes.length);
+			ReplicaNodeServer[] nodes = csEnv.getNodes();
+			assertEquals(4, nodes.length);
 
-		// 初始状态，验证所有节点的 regencyId 为 0， leader 为 0 ；
-		for (int i = 0; i < nodes.length; i++) {
-			BftsmartNodeState state = (BftsmartNodeState) nodes[i].getNodeServer().getState();
-			assertEquals(0, state.getConsensusState().getLeaderID());
-			assertEquals(0, state.getLeaderState().getLeaderID());
-			assertEquals(0, state.getLeaderState().getLastRegency());
-			assertEquals(0, state.getLeaderState().getNextRegency());
-		}
+			// 初始状态，验证所有节点的 regencyId 为 0， leader 为 0 ；
+			for (int i = 0; i < nodes.length; i++) {
+				BftsmartNodeState state = (BftsmartNodeState) nodes[i].getNodeServer().getState();
+				assertEquals(0, state.getConsensusState().getLeaderID());
+				assertEquals(0, state.getLeaderState().getLeaderID());
+				assertEquals(0, state.getLeaderState().getLastRegency());
+				assertEquals(0, state.getLeaderState().getNextRegency());
+			}
 
-		// 把节点 0 停止，预计将进行领导者选举；选择出节点 1 为新的领导者；
-		assertEquals(0, nodes[0].getReplica().getId());
-		nodes[0].getNodeServer().stop();
-		Thread.sleep(3000);
-		// 验证剩余的所有节点[1, 2, 3]的 regencyId 升级为 1， leader 都切换为 1 ；
-		for (int i = 1; i < nodes.length; i++) {
-			BftsmartNodeState state = (BftsmartNodeState) nodes[i].getNodeServer().getState();
-			assertEquals(1, state.getConsensusState().getLeaderID());
-			assertEquals(1, state.getLeaderState().getLeaderID());
-			assertEquals(1, state.getLeaderState().getLastRegency());
-			assertEquals(1, state.getLeaderState().getNextRegency());
-		}
+			// 把节点 0 停止，预计将进行领导者选举；选择出节点 1 为新的领导者；
+			assertEquals(0, nodes[0].getReplica().getId());
+			nodes[0].getNodeServer().stop();
+			Thread.sleep(3000);
+			// 验证剩余的所有节点[1, 2, 3]的 regencyId 升级为 1， leader 都切换为 1 ；
+			for (int i = 1; i < nodes.length; i++) {
+				BftsmartNodeState state = (BftsmartNodeState) nodes[i].getNodeServer().getState();
+				assertEquals(1, state.getConsensusState().getLeaderID());
+				assertEquals(1, state.getLeaderState().getLeaderID());
+				assertEquals(1, state.getLeaderState().getLastRegency());
+				assertEquals(1, state.getLeaderState().getNextRegency());
+			}
 
-		// 验证在 3 个节点的情况下进行共识；
-		messageSendTest.run(csEnv);
+			// 验证在 3 个节点的情况下进行共识；
+			messageSendTest.run(csEnv);
 
-		AsyncFuture<?> future0 = csEnv.getNode(0).getNodeServer().start();
-		future0.get();
-		Thread.sleep(6000);
+			AsyncFuture<?> future0 = csEnv.getNode(0).getNodeServer().start();
+			future0.get();
+			Thread.sleep(6000);
 
-		// 验证节点 0 重启后经过和其它节点同步最新的 regency ；
-		// 最终所有节点[0, 1, 2, 3]的 regencyId 升级为 1， leader 都切换为 1 ；
-		for (int i = 0; i < nodes.length; i++) {
-			BftsmartNodeState state = (BftsmartNodeState) nodes[i].getNodeServer().getState();
-			assertEquals(1, state.getConsensusState().getLeaderID());
-			assertEquals(1, state.getLeaderState().getLeaderID());
-			assertEquals(1, state.getLeaderState().getLastRegency());
-			assertEquals(1, state.getLeaderState().getNextRegency());
-		}
+			// 验证节点 0 重启后经过和其它节点同步最新的 regency ；
+			// 最终所有节点[0, 1, 2, 3]的 regencyId 升级为 1， leader 都切换为 1 ；
+			for (int i = 0; i < nodes.length; i++) {
+				BftsmartNodeState state = (BftsmartNodeState) nodes[i].getNodeServer().getState();
+				assertEquals(1, state.getConsensusState().getLeaderID());
+				assertEquals(1, state.getLeaderState().getLeaderID());
+				assertEquals(1, state.getLeaderState().getLastRegency());
+				assertEquals(1, state.getLeaderState().getNextRegency());
+			}
 
-		// 停止0, 1，然后重启；
-		nodes[0].getNodeServer().stop();
-		// 党羽当前节点为 1 ，预计领导者的停止会主动触发选举；
-		// 按照当前算法，退出的领导者仍然参与几票，因此剩余 2 个节点仍然会选举出新的领导者 2；
-		nodes[1].getNodeServer().stop();
-		Thread.sleep(3000);
-		// 验证余下的 2 个节点[2, 3]新的执政期为 2 ，新的领导者为 2；
-		for (int i = 2; i < nodes.length; i++) {
-			BftsmartNodeState state = (BftsmartNodeState) nodes[i].getNodeServer().getState();
-			assertEquals(2, state.getConsensusState().getLeaderID());
-			assertEquals(2, state.getLeaderState().getLeaderID());
-			assertEquals(2, state.getLeaderState().getLastRegency());
-			assertEquals(2, state.getLeaderState().getNextRegency());
-		}
+			// 停止0, 1，然后重启；
+			nodes[0].getNodeServer().stop();
+			// 党羽当前节点为 1 ，预计领导者的停止会主动触发选举；
+			// 按照当前算法，退出的领导者仍然参与几票，因此剩余 2 个节点仍然会选举出新的领导者 2；
+			nodes[1].getNodeServer().stop();
+			Thread.sleep(3000);
+			// 验证余下的 2 个节点[2, 3]新的执政期为 2 ，新的领导者为 2；
+			for (int i = 2; i < nodes.length; i++) {
+				BftsmartNodeState state = (BftsmartNodeState) nodes[i].getNodeServer().getState();
+				assertEquals(2, state.getConsensusState().getLeaderID());
+				assertEquals(2, state.getLeaderState().getLeaderID());
+				assertEquals(2, state.getLeaderState().getLastRegency());
+				assertEquals(2, state.getLeaderState().getNextRegency());
+			}
 
-		System.out.println("\r\n\r\n-------- restart node 1 ---------\r\n");
+			System.out.println("\r\n\r\n-------- restart node 1 ---------\r\n");
 
-		// 重新启动节点 1 ，验证是否能够恢复正常；
-		// 先清空所有向 1 发送消息的连接；
-		csEnv.resetNodeSessionsToTarget(1);
-		AsyncFuture<?> future1 = nodes[1].getNodeServer().start();
-		future1.get();
-		System.out.println("\r\n\r\n-------- node 1 started ---------\r\n");
-		Thread.sleep(2000);
-		// 验证余下的 2 个节点[1, 2, 3]仍然保持执政期为 2 ，领导者为 2；
-		for (int i = 2; i < nodes.length; i++) {
-			BftsmartNodeState state = (BftsmartNodeState) nodes[i].getNodeServer().getState();
-			assertEquals(2, state.getConsensusState().getLeaderID());
-			assertEquals(2, state.getLeaderState().getLeaderID());
-			assertEquals(2, state.getLeaderState().getLastRegency());
-			assertEquals(2, state.getLeaderState().getNextRegency());
-		}
-		{
-			// 验证重新启动的 Node 1 执政期为 2 ，领导者为 2；
-			BftsmartNodeState state = (BftsmartNodeState) nodes[1].getNodeServer().getState();
-			assertEquals(2, state.getConsensusState().getLeaderID());
-			assertEquals(2, state.getLeaderState().getLeaderID());
-			assertEquals(2, state.getLeaderState().getLastRegency());
-			assertEquals(2, state.getLeaderState().getNextRegency());
+			// 重新启动节点 1 ，验证是否能够恢复正常；
+			// 先清空所有向 1 发送消息的连接；
+//		csEnv.resetNodeSessionsToTarget(1);
+			AsyncFuture<?> future1 = nodes[1].getNodeServer().start();
+			future1.get();
+			System.out.println("\r\n\r\n-------- node 1 started ---------\r\n");
+			Thread.sleep(2000);
+			// 验证余下的 2 个节点[1, 2, 3]仍然保持执政期为 2 ，领导者为 2；
+			for (int i = 2; i < nodes.length; i++) {
+				BftsmartNodeState state = (BftsmartNodeState) nodes[i].getNodeServer().getState();
+				assertEquals(2, state.getConsensusState().getLeaderID());
+				assertEquals(2, state.getLeaderState().getLeaderID());
+				assertEquals(2, state.getLeaderState().getLastRegency());
+				assertEquals(2, state.getLeaderState().getNextRegency());
+			}
+			{
+				// 验证重新启动的 Node 1 执政期为 2 ，领导者为 2；
+				BftsmartNodeState state = (BftsmartNodeState) nodes[1].getNodeServer().getState();
+				assertEquals(2, state.getConsensusState().getLeaderID());
+				assertEquals(2, state.getLeaderState().getLeaderID());
+				assertEquals(2, state.getLeaderState().getLastRegency());
+				assertEquals(2, state.getLeaderState().getNextRegency());
+			}
+		} finally {
+			csEnv.close();
 		}
 	}
 
 //	@Test
 	public void testLeaderChange_with_5_nodes() throws IOException, InterruptedException {
-		Configurator.setLevel("bftsmart.communication.server.ServerConnection", Level.OFF);
-		Configurator.setLevel("bftsmart.tom.server.defaultservices.DefaultRecoverable", Level.OFF);
-		Configurator.setLevel("bftsmart.tom.leaderchange.LCManager", Level.DEBUG);
-		Configurator.setLevel("bftsmart.tom.leaderchange.LeaderConfirmationTask", Level.DEBUG);
+		Configurator.setLevel("bftsmart.communication.server.ServersCommunicationLayer", Level.DEBUG);
+		Configurator.setLevel("bftsmart.communication.server.ServerConnection", Level.DEBUG);
+//		Configurator.setLevel("bftsmart.tom.server.defaultservices.DefaultRecoverable", Level.OFF);
+//		Configurator.setLevel("bftsmart.tom.leaderchange.LCManager", Level.DEBUG);
+//		Configurator.setLevel("bftsmart.tom.leaderchange.LeaderConfirmationTask", Level.DEBUG);
 
-		Configurator.setLevel("test.com.jd.blockchain.consensus.bftsmart.ConsensusEnvironment.NodeServerProxy",
-				Level.DEBUG);
+		System.out.println("\r\n\r\n------------ testLeaderChange_with_5_nodes -------------\r\n\r\n");
 
 		final int N = 5;
 		final String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));

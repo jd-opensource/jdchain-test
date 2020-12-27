@@ -636,6 +636,11 @@ public class ConsensusEnvironment {
 			cli.close();
 		}
 	}
+	
+	public void close() {
+		stopNodeServers();
+		closeAllClients();
+	}
 
 	private static ClientIncomingSettings authClientsFrom(NodeServer authNodeServer, AsymmetricKeypair clientKeys,
 			ConsensusProvider consensusProvider) {
