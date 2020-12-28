@@ -262,7 +262,7 @@ public class BftsmartConsensusTest {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-//	@Test
+	@Test
 	public void testLeaderChange() throws IOException, InterruptedException {
 		Configurator.setLevel("bftsmart.communication.server.ServerConnection", Level.OFF);
 		Configurator.setLevel("bftsmart.tom.server.defaultservices.DefaultRecoverable", Level.OFF);
@@ -380,7 +380,7 @@ public class BftsmartConsensusTest {
 		}
 	}
 
-//	@Test
+	@Test
 	public void testLeaderChange_with_5_nodes() throws IOException, InterruptedException {
 		Configurator.setLevel("bftsmart.communication.server.ServersCommunicationLayer", Level.DEBUG);
 		Configurator.setLevel("bftsmart.communication.server.ServerConnection", Level.DEBUG);
