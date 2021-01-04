@@ -25,7 +25,7 @@ import com.jd.blockchain.utils.serialize.json.JSONSerializeUtils;
  * @author huanghaiquan
  *
  */
-public class BftsmartConsensusTest {
+public class BftsmartConsensusTest_ {
 
 	@Test
 	public void testMessageConsensus() throws IOException, InterruptedException, ConsensusSecurityException {
