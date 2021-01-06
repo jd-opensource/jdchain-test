@@ -1093,6 +1093,19 @@ public final class BillProto {
      * <code>optional int32 age = 3;</code>
      */
     int getAge();
+
+    /**
+     * <code>optional .test.com.jd.binary.protocal.perf.protobuf.Location homeAddress = 4;</code>
+     */
+    boolean hasHomeAddress();
+    /**
+     * <code>optional .test.com.jd.binary.protocal.perf.protobuf.Location homeAddress = 4;</code>
+     */
+    test.com.jd.binary.protocal.perf.protobuf.BillProto.Location getHomeAddress();
+    /**
+     * <code>optional .test.com.jd.binary.protocal.perf.protobuf.Location homeAddress = 4;</code>
+     */
+    test.com.jd.binary.protocal.perf.protobuf.BillProto.LocationOrBuilder getHomeAddressOrBuilder();
   }
   /**
    * Protobuf type {@code test.com.jd.binary.protocal.perf.protobuf.People}
@@ -1148,6 +1161,19 @@ public final class BillProto {
             case 24: {
               bitField0_ |= 0x00000004;
               age_ = input.readInt32();
+              break;
+            }
+            case 34: {
+              test.com.jd.binary.protocal.perf.protobuf.BillProto.Location.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000008) != 0)) {
+                subBuilder = homeAddress_.toBuilder();
+              }
+              homeAddress_ = input.readMessage(test.com.jd.binary.protocal.perf.protobuf.BillProto.Location.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(homeAddress_);
+                homeAddress_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000008;
               break;
             }
             default: {
@@ -1255,6 +1281,27 @@ public final class BillProto {
       return age_;
     }
 
+    public static final int HOMEADDRESS_FIELD_NUMBER = 4;
+    private test.com.jd.binary.protocal.perf.protobuf.BillProto.Location homeAddress_;
+    /**
+     * <code>optional .test.com.jd.binary.protocal.perf.protobuf.Location homeAddress = 4;</code>
+     */
+    public boolean hasHomeAddress() {
+      return ((bitField0_ & 0x00000008) != 0);
+    }
+    /**
+     * <code>optional .test.com.jd.binary.protocal.perf.protobuf.Location homeAddress = 4;</code>
+     */
+    public test.com.jd.binary.protocal.perf.protobuf.BillProto.Location getHomeAddress() {
+      return homeAddress_ == null ? test.com.jd.binary.protocal.perf.protobuf.BillProto.Location.getDefaultInstance() : homeAddress_;
+    }
+    /**
+     * <code>optional .test.com.jd.binary.protocal.perf.protobuf.Location homeAddress = 4;</code>
+     */
+    public test.com.jd.binary.protocal.perf.protobuf.BillProto.LocationOrBuilder getHomeAddressOrBuilder() {
+      return homeAddress_ == null ? test.com.jd.binary.protocal.perf.protobuf.BillProto.Location.getDefaultInstance() : homeAddress_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -1278,6 +1325,9 @@ public final class BillProto {
       if (((bitField0_ & 0x00000004) != 0)) {
         output.writeInt32(3, age_);
       }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        output.writeMessage(4, getHomeAddress());
+      }
       unknownFields.writeTo(output);
     }
 
@@ -1297,6 +1347,10 @@ public final class BillProto {
       if (((bitField0_ & 0x00000004) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(3, age_);
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, getHomeAddress());
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -1328,6 +1382,11 @@ public final class BillProto {
         if (getAge()
             != other.getAge()) return false;
       }
+      if (hasHomeAddress() != other.hasHomeAddress()) return false;
+      if (hasHomeAddress()) {
+        if (!getHomeAddress()
+            .equals(other.getHomeAddress())) return false;
+      }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -1350,6 +1409,10 @@ public final class BillProto {
       if (hasAge()) {
         hash = (37 * hash) + AGE_FIELD_NUMBER;
         hash = (53 * hash) + getAge();
+      }
+      if (hasHomeAddress()) {
+        hash = (37 * hash) + HOMEADDRESS_FIELD_NUMBER;
+        hash = (53 * hash) + getHomeAddress().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -1479,6 +1542,7 @@ public final class BillProto {
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessageV3
                 .alwaysUseFieldBuilders) {
+          getHomeAddressFieldBuilder();
         }
       }
       @java.lang.Override
@@ -1490,6 +1554,12 @@ public final class BillProto {
         bitField0_ = (bitField0_ & ~0x00000002);
         age_ = 0;
         bitField0_ = (bitField0_ & ~0x00000004);
+        if (homeAddressBuilder_ == null) {
+          homeAddress_ = null;
+        } else {
+          homeAddressBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -1529,6 +1599,14 @@ public final class BillProto {
         if (((from_bitField0_ & 0x00000004) != 0)) {
           result.age_ = age_;
           to_bitField0_ |= 0x00000004;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          if (homeAddressBuilder_ == null) {
+            result.homeAddress_ = homeAddress_;
+          } else {
+            result.homeAddress_ = homeAddressBuilder_.build();
+          }
+          to_bitField0_ |= 0x00000008;
         }
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -1589,6 +1667,9 @@ public final class BillProto {
         }
         if (other.hasAge()) {
           setAge(other.getAge());
+        }
+        if (other.hasHomeAddress()) {
+          mergeHomeAddress(other.getHomeAddress());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -1759,6 +1840,124 @@ public final class BillProto {
         onChanged();
         return this;
       }
+
+      private test.com.jd.binary.protocal.perf.protobuf.BillProto.Location homeAddress_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          test.com.jd.binary.protocal.perf.protobuf.BillProto.Location, test.com.jd.binary.protocal.perf.protobuf.BillProto.Location.Builder, test.com.jd.binary.protocal.perf.protobuf.BillProto.LocationOrBuilder> homeAddressBuilder_;
+      /**
+       * <code>optional .test.com.jd.binary.protocal.perf.protobuf.Location homeAddress = 4;</code>
+       */
+      public boolean hasHomeAddress() {
+        return ((bitField0_ & 0x00000008) != 0);
+      }
+      /**
+       * <code>optional .test.com.jd.binary.protocal.perf.protobuf.Location homeAddress = 4;</code>
+       */
+      public test.com.jd.binary.protocal.perf.protobuf.BillProto.Location getHomeAddress() {
+        if (homeAddressBuilder_ == null) {
+          return homeAddress_ == null ? test.com.jd.binary.protocal.perf.protobuf.BillProto.Location.getDefaultInstance() : homeAddress_;
+        } else {
+          return homeAddressBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .test.com.jd.binary.protocal.perf.protobuf.Location homeAddress = 4;</code>
+       */
+      public Builder setHomeAddress(test.com.jd.binary.protocal.perf.protobuf.BillProto.Location value) {
+        if (homeAddressBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          homeAddress_ = value;
+          onChanged();
+        } else {
+          homeAddressBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .test.com.jd.binary.protocal.perf.protobuf.Location homeAddress = 4;</code>
+       */
+      public Builder setHomeAddress(
+          test.com.jd.binary.protocal.perf.protobuf.BillProto.Location.Builder builderForValue) {
+        if (homeAddressBuilder_ == null) {
+          homeAddress_ = builderForValue.build();
+          onChanged();
+        } else {
+          homeAddressBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .test.com.jd.binary.protocal.perf.protobuf.Location homeAddress = 4;</code>
+       */
+      public Builder mergeHomeAddress(test.com.jd.binary.protocal.perf.protobuf.BillProto.Location value) {
+        if (homeAddressBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) != 0) &&
+              homeAddress_ != null &&
+              homeAddress_ != test.com.jd.binary.protocal.perf.protobuf.BillProto.Location.getDefaultInstance()) {
+            homeAddress_ =
+              test.com.jd.binary.protocal.perf.protobuf.BillProto.Location.newBuilder(homeAddress_).mergeFrom(value).buildPartial();
+          } else {
+            homeAddress_ = value;
+          }
+          onChanged();
+        } else {
+          homeAddressBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .test.com.jd.binary.protocal.perf.protobuf.Location homeAddress = 4;</code>
+       */
+      public Builder clearHomeAddress() {
+        if (homeAddressBuilder_ == null) {
+          homeAddress_ = null;
+          onChanged();
+        } else {
+          homeAddressBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000008);
+        return this;
+      }
+      /**
+       * <code>optional .test.com.jd.binary.protocal.perf.protobuf.Location homeAddress = 4;</code>
+       */
+      public test.com.jd.binary.protocal.perf.protobuf.BillProto.Location.Builder getHomeAddressBuilder() {
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return getHomeAddressFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .test.com.jd.binary.protocal.perf.protobuf.Location homeAddress = 4;</code>
+       */
+      public test.com.jd.binary.protocal.perf.protobuf.BillProto.LocationOrBuilder getHomeAddressOrBuilder() {
+        if (homeAddressBuilder_ != null) {
+          return homeAddressBuilder_.getMessageOrBuilder();
+        } else {
+          return homeAddress_ == null ?
+              test.com.jd.binary.protocal.perf.protobuf.BillProto.Location.getDefaultInstance() : homeAddress_;
+        }
+      }
+      /**
+       * <code>optional .test.com.jd.binary.protocal.perf.protobuf.Location homeAddress = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          test.com.jd.binary.protocal.perf.protobuf.BillProto.Location, test.com.jd.binary.protocal.perf.protobuf.BillProto.Location.Builder, test.com.jd.binary.protocal.perf.protobuf.BillProto.LocationOrBuilder> 
+          getHomeAddressFieldBuilder() {
+        if (homeAddressBuilder_ == null) {
+          homeAddressBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              test.com.jd.binary.protocal.perf.protobuf.BillProto.Location, test.com.jd.binary.protocal.perf.protobuf.BillProto.Location.Builder, test.com.jd.binary.protocal.perf.protobuf.BillProto.LocationOrBuilder>(
+                  getHomeAddress(),
+                  getParentForChildren(),
+                  isClean());
+          homeAddress_ = null;
+        }
+        return homeAddressBuilder_;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -1812,6 +2011,837 @@ public final class BillProto {
 
   }
 
+  public interface LocationOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:test.com.jd.binary.protocal.perf.protobuf.Location)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>optional int64 code = 1;</code>
+     */
+    boolean hasCode();
+    /**
+     * <code>optional int64 code = 1;</code>
+     */
+    long getCode();
+
+    /**
+     * <code>optional string name = 2;</code>
+     */
+    boolean hasName();
+    /**
+     * <code>optional string name = 2;</code>
+     */
+    java.lang.String getName();
+    /**
+     * <code>optional string name = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+
+    /**
+     * <code>repeated int64 position = 3;</code>
+     */
+    java.util.List<java.lang.Long> getPositionList();
+    /**
+     * <code>repeated int64 position = 3;</code>
+     */
+    int getPositionCount();
+    /**
+     * <code>repeated int64 position = 3;</code>
+     */
+    long getPosition(int index);
+  }
+  /**
+   * Protobuf type {@code test.com.jd.binary.protocal.perf.protobuf.Location}
+   */
+  public  static final class Location extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:test.com.jd.binary.protocal.perf.protobuf.Location)
+      LocationOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use Location.newBuilder() to construct.
+    private Location(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private Location() {
+      name_ = "";
+      position_ = emptyLongList();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private Location(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 8: {
+              bitField0_ |= 0x00000001;
+              code_ = input.readInt64();
+              break;
+            }
+            case 18: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              bitField0_ |= 0x00000002;
+              name_ = bs;
+              break;
+            }
+            case 24: {
+              if (!((mutable_bitField0_ & 0x00000004) != 0)) {
+                position_ = newLongList();
+                mutable_bitField0_ |= 0x00000004;
+              }
+              position_.addLong(input.readInt64());
+              break;
+            }
+            case 26: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000004) != 0) && input.getBytesUntilLimit() > 0) {
+                position_ = newLongList();
+                mutable_bitField0_ |= 0x00000004;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                position_.addLong(input.readInt64());
+              }
+              input.popLimit(limit);
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000004) != 0)) {
+          position_.makeImmutable(); // C
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return test.com.jd.binary.protocal.perf.protobuf.BillProto.internal_static_test_com_jd_binary_protocal_perf_protobuf_Location_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return test.com.jd.binary.protocal.perf.protobuf.BillProto.internal_static_test_com_jd_binary_protocal_perf_protobuf_Location_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              test.com.jd.binary.protocal.perf.protobuf.BillProto.Location.class, test.com.jd.binary.protocal.perf.protobuf.BillProto.Location.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int CODE_FIELD_NUMBER = 1;
+    private long code_;
+    /**
+     * <code>optional int64 code = 1;</code>
+     */
+    public boolean hasCode() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>optional int64 code = 1;</code>
+     */
+    public long getCode() {
+      return code_;
+    }
+
+    public static final int NAME_FIELD_NUMBER = 2;
+    private volatile java.lang.Object name_;
+    /**
+     * <code>optional string name = 2;</code>
+     */
+    public boolean hasName() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <code>optional string name = 2;</code>
+     */
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          name_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string name = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int POSITION_FIELD_NUMBER = 3;
+    private com.google.protobuf.Internal.LongList position_;
+    /**
+     * <code>repeated int64 position = 3;</code>
+     */
+    public java.util.List<java.lang.Long>
+        getPositionList() {
+      return position_;
+    }
+    /**
+     * <code>repeated int64 position = 3;</code>
+     */
+    public int getPositionCount() {
+      return position_.size();
+    }
+    /**
+     * <code>repeated int64 position = 3;</code>
+     */
+    public long getPosition(int index) {
+      return position_.getLong(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeInt64(1, code_);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, name_);
+      }
+      for (int i = 0; i < position_.size(); i++) {
+        output.writeInt64(3, position_.getLong(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(1, code_);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, name_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < position_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeInt64SizeNoTag(position_.getLong(i));
+        }
+        size += dataSize;
+        size += 1 * getPositionList().size();
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof test.com.jd.binary.protocal.perf.protobuf.BillProto.Location)) {
+        return super.equals(obj);
+      }
+      test.com.jd.binary.protocal.perf.protobuf.BillProto.Location other = (test.com.jd.binary.protocal.perf.protobuf.BillProto.Location) obj;
+
+      if (hasCode() != other.hasCode()) return false;
+      if (hasCode()) {
+        if (getCode()
+            != other.getCode()) return false;
+      }
+      if (hasName() != other.hasName()) return false;
+      if (hasName()) {
+        if (!getName()
+            .equals(other.getName())) return false;
+      }
+      if (!getPositionList()
+          .equals(other.getPositionList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasCode()) {
+        hash = (37 * hash) + CODE_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            getCode());
+      }
+      if (hasName()) {
+        hash = (37 * hash) + NAME_FIELD_NUMBER;
+        hash = (53 * hash) + getName().hashCode();
+      }
+      if (getPositionCount() > 0) {
+        hash = (37 * hash) + POSITION_FIELD_NUMBER;
+        hash = (53 * hash) + getPositionList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static test.com.jd.binary.protocal.perf.protobuf.BillProto.Location parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static test.com.jd.binary.protocal.perf.protobuf.BillProto.Location parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static test.com.jd.binary.protocal.perf.protobuf.BillProto.Location parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static test.com.jd.binary.protocal.perf.protobuf.BillProto.Location parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static test.com.jd.binary.protocal.perf.protobuf.BillProto.Location parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static test.com.jd.binary.protocal.perf.protobuf.BillProto.Location parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static test.com.jd.binary.protocal.perf.protobuf.BillProto.Location parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static test.com.jd.binary.protocal.perf.protobuf.BillProto.Location parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static test.com.jd.binary.protocal.perf.protobuf.BillProto.Location parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static test.com.jd.binary.protocal.perf.protobuf.BillProto.Location parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static test.com.jd.binary.protocal.perf.protobuf.BillProto.Location parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static test.com.jd.binary.protocal.perf.protobuf.BillProto.Location parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(test.com.jd.binary.protocal.perf.protobuf.BillProto.Location prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code test.com.jd.binary.protocal.perf.protobuf.Location}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:test.com.jd.binary.protocal.perf.protobuf.Location)
+        test.com.jd.binary.protocal.perf.protobuf.BillProto.LocationOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return test.com.jd.binary.protocal.perf.protobuf.BillProto.internal_static_test_com_jd_binary_protocal_perf_protobuf_Location_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return test.com.jd.binary.protocal.perf.protobuf.BillProto.internal_static_test_com_jd_binary_protocal_perf_protobuf_Location_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                test.com.jd.binary.protocal.perf.protobuf.BillProto.Location.class, test.com.jd.binary.protocal.perf.protobuf.BillProto.Location.Builder.class);
+      }
+
+      // Construct using test.com.jd.binary.protocal.perf.protobuf.BillProto.Location.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        code_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        name_ = "";
+        bitField0_ = (bitField0_ & ~0x00000002);
+        position_ = emptyLongList();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return test.com.jd.binary.protocal.perf.protobuf.BillProto.internal_static_test_com_jd_binary_protocal_perf_protobuf_Location_descriptor;
+      }
+
+      @java.lang.Override
+      public test.com.jd.binary.protocal.perf.protobuf.BillProto.Location getDefaultInstanceForType() {
+        return test.com.jd.binary.protocal.perf.protobuf.BillProto.Location.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public test.com.jd.binary.protocal.perf.protobuf.BillProto.Location build() {
+        test.com.jd.binary.protocal.perf.protobuf.BillProto.Location result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public test.com.jd.binary.protocal.perf.protobuf.BillProto.Location buildPartial() {
+        test.com.jd.binary.protocal.perf.protobuf.BillProto.Location result = new test.com.jd.binary.protocal.perf.protobuf.BillProto.Location(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.code_ = code_;
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.name_ = name_;
+        if (((bitField0_ & 0x00000004) != 0)) {
+          position_.makeImmutable();
+          bitField0_ = (bitField0_ & ~0x00000004);
+        }
+        result.position_ = position_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof test.com.jd.binary.protocal.perf.protobuf.BillProto.Location) {
+          return mergeFrom((test.com.jd.binary.protocal.perf.protobuf.BillProto.Location)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(test.com.jd.binary.protocal.perf.protobuf.BillProto.Location other) {
+        if (other == test.com.jd.binary.protocal.perf.protobuf.BillProto.Location.getDefaultInstance()) return this;
+        if (other.hasCode()) {
+          setCode(other.getCode());
+        }
+        if (other.hasName()) {
+          bitField0_ |= 0x00000002;
+          name_ = other.name_;
+          onChanged();
+        }
+        if (!other.position_.isEmpty()) {
+          if (position_.isEmpty()) {
+            position_ = other.position_;
+            bitField0_ = (bitField0_ & ~0x00000004);
+          } else {
+            ensurePositionIsMutable();
+            position_.addAll(other.position_);
+          }
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        test.com.jd.binary.protocal.perf.protobuf.BillProto.Location parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (test.com.jd.binary.protocal.perf.protobuf.BillProto.Location) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private long code_ ;
+      /**
+       * <code>optional int64 code = 1;</code>
+       */
+      public boolean hasCode() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>optional int64 code = 1;</code>
+       */
+      public long getCode() {
+        return code_;
+      }
+      /**
+       * <code>optional int64 code = 1;</code>
+       */
+      public Builder setCode(long value) {
+        bitField0_ |= 0x00000001;
+        code_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 code = 1;</code>
+       */
+      public Builder clearCode() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        code_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object name_ = "";
+      /**
+       * <code>optional string name = 2;</code>
+       */
+      public boolean hasName() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>optional string name = 2;</code>
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            name_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string name = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string name = 2;</code>
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        name_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string name = 2;</code>
+       */
+      public Builder clearName() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        name_ = getDefaultInstance().getName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string name = 2;</code>
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        name_ = value;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.Internal.LongList position_ = emptyLongList();
+      private void ensurePositionIsMutable() {
+        if (!((bitField0_ & 0x00000004) != 0)) {
+          position_ = mutableCopy(position_);
+          bitField0_ |= 0x00000004;
+         }
+      }
+      /**
+       * <code>repeated int64 position = 3;</code>
+       */
+      public java.util.List<java.lang.Long>
+          getPositionList() {
+        return ((bitField0_ & 0x00000004) != 0) ?
+                 java.util.Collections.unmodifiableList(position_) : position_;
+      }
+      /**
+       * <code>repeated int64 position = 3;</code>
+       */
+      public int getPositionCount() {
+        return position_.size();
+      }
+      /**
+       * <code>repeated int64 position = 3;</code>
+       */
+      public long getPosition(int index) {
+        return position_.getLong(index);
+      }
+      /**
+       * <code>repeated int64 position = 3;</code>
+       */
+      public Builder setPosition(
+          int index, long value) {
+        ensurePositionIsMutable();
+        position_.setLong(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int64 position = 3;</code>
+       */
+      public Builder addPosition(long value) {
+        ensurePositionIsMutable();
+        position_.addLong(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int64 position = 3;</code>
+       */
+      public Builder addAllPosition(
+          java.lang.Iterable<? extends java.lang.Long> values) {
+        ensurePositionIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, position_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int64 position = 3;</code>
+       */
+      public Builder clearPosition() {
+        position_ = emptyLongList();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:test.com.jd.binary.protocal.perf.protobuf.Location)
+    }
+
+    // @@protoc_insertion_point(class_scope:test.com.jd.binary.protocal.perf.protobuf.Location)
+    private static final test.com.jd.binary.protocal.perf.protobuf.BillProto.Location DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new test.com.jd.binary.protocal.perf.protobuf.BillProto.Location();
+    }
+
+    public static test.com.jd.binary.protocal.perf.protobuf.BillProto.Location getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<Location>
+        PARSER = new com.google.protobuf.AbstractParser<Location>() {
+      @java.lang.Override
+      public Location parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new Location(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<Location> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Location> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public test.com.jd.binary.protocal.perf.protobuf.BillProto.Location getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_test_com_jd_binary_protocal_perf_protobuf_Bill_descriptor;
   private static final 
@@ -1822,6 +2852,11 @@ public final class BillProto {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_test_com_jd_binary_protocal_perf_protobuf_People_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_test_com_jd_binary_protocal_perf_protobuf_Location_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_test_com_jd_binary_protocal_perf_protobuf_Location_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -1836,9 +2871,12 @@ public final class BillProto {
       "\030\001 \001(\005\022\r\n\005title\030\002 \001(\t\022\r\n\005value\030\003 \001(\003\022\017\n\007" +
       "content\030\004 \001(\014\022@\n\005owner\030\005 \001(\01321.test.com." +
       "jd.binary.protocal.perf.protobuf.People\"" +
-      "/\n\006People\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\013\n\003a" +
-      "ge\030\003 \001(\005B6\n)test.com.jd.binary.protocal." +
-      "perf.protobufB\tBillProto"
+      "y\n\006People\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\013\n\003a" +
+      "ge\030\003 \001(\005\022H\n\013homeAddress\030\004 \001(\01323.test.com" +
+      ".jd.binary.protocal.perf.protobuf.Locati" +
+      "on\"8\n\010Location\022\014\n\004code\030\001 \001(\003\022\014\n\004name\030\002 \001" +
+      "(\t\022\020\n\010position\030\003 \003(\003B6\n)test.com.jd.bina" +
+      "ry.protocal.perf.protobufB\tBillProto"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -1863,7 +2901,13 @@ public final class BillProto {
     internal_static_test_com_jd_binary_protocal_perf_protobuf_People_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_test_com_jd_binary_protocal_perf_protobuf_People_descriptor,
-        new java.lang.String[] { "Id", "Name", "Age", });
+        new java.lang.String[] { "Id", "Name", "Age", "HomeAddress", });
+    internal_static_test_com_jd_binary_protocal_perf_protobuf_Location_descriptor =
+      getDescriptor().getMessageTypes().get(2);
+    internal_static_test_com_jd_binary_protocal_perf_protobuf_Location_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_test_com_jd_binary_protocal_perf_protobuf_Location_descriptor,
+        new java.lang.String[] { "Code", "Name", "Position", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

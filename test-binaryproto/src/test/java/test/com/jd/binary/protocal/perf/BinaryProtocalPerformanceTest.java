@@ -16,7 +16,10 @@ public class BinaryProtocalPerformanceTest {
 
 	@Test
 	public void test() throws Exception {
-		People owner = new PeopleData(1, "John-[1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ]", 100);
+		Location homeAddress = new LocationData(10010, "ABCDEFGHIJKLMNOPQRSTUVWXYZ-University", new long[] { 10011, 58, 32, 19992 });
+		People owner = new PeopleData(1,
+				"John-[1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ]", 100,
+				homeAddress);
 		byte[] content = RandomUtils.generateRandomBytes(64);
 		Bill bill = new BillData(100, "Bill of Order[1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]",
 				100, content, owner);
@@ -69,13 +72,25 @@ public class BinaryProtocalPerformanceTest {
 		return new Callable<byte[]>() {
 			@Override
 			public byte[] call() throws Exception {
-				BillProto.People ownerProto = BillProto.People.newBuilder().setId(bill.getOwner().getId())
-						.setName(bill.getOwner().getName()).setAge(bill.getOwner().getAge()).build();
-				BillProto.Bill billProto = BillProto.Bill.newBuilder()
-						.setId(bill.getId())
-						.setTitle(bill.getTitle())
-						.setValue(bill.getValue())
-						.setContent(ByteString.copyFrom(bill.getContent()))
+
+				BillProto.Location locationProto;
+				BillProto.Location.Builder locationProtoBuilder = BillProto.Location.newBuilder();
+				locationProtoBuilder.setCode(bill.getOwner().getHomeAddress().getCode())
+						.setName(bill.getOwner().getHomeAddress().getName());
+				long[] posistion = bill.getOwner().getHomeAddress().getPosition();
+				for (long l : posistion) {
+					locationProtoBuilder.addPosition(l);
+				}
+				locationProto = locationProtoBuilder.build();
+
+				BillProto.People ownerProto = BillProto.People.newBuilder()//
+						.setId(bill.getOwner().getId())//
+						.setName(bill.getOwner().getName())//
+						.setAge(bill.getOwner().getAge())//
+						.setHomeAddress(locationProto)//
+						.build();
+				BillProto.Bill billProto = BillProto.Bill.newBuilder().setId(bill.getId()).setTitle(bill.getTitle())
+						.setValue(bill.getValue()).setContent(ByteString.copyFrom(bill.getContent()))
 						.setOwner(ownerProto).build();
 				return billProto.toByteArray();
 			}
@@ -105,10 +120,16 @@ public class BinaryProtocalPerformanceTest {
 			@Override
 			public Bill call() throws Exception {
 				BillProto.Bill billProto = BillProto.Bill.parseFrom(billBytes);
+				BillProto.Location homeAddress = billProto.getOwner().getHomeAddress();
+				long[] posistions = new long[homeAddress.getPositionCount()];
+				for (int i = 0; i < posistions.length; i++) {
+					posistions[i] = homeAddress.getPosition(i);
+				}
 				BillData bill = new BillData(billProto.getId(), billProto.getTitle(), billProto.getValue(),
-						billProto.getContent().toByteArray(), new PeopleData(billProto.getOwner().getId(),
-								billProto.getOwner().getName(), billProto.getOwner().getAge()));
-
+						billProto.getContent().toByteArray(),
+						new PeopleData(billProto.getOwner().getId(), billProto.getOwner().getName(),
+								billProto.getOwner().getAge(),
+								new LocationData(homeAddress.getCode(), homeAddress.getName(), posistions)));
 				return bill;
 			}
 		};

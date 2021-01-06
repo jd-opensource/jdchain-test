@@ -17,4 +17,11 @@ message People {
   optional int32 id=1;
   optional string name=2;
   optional int32 age=3;
+  optional Location homeAddress=4;
+}
+
+message Location {
+  optional int64 code=1;
+  optional string name=2;
+  repeated int64 position=3;
 }

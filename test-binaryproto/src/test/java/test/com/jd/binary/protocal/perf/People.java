@@ -16,4 +16,6 @@ public interface People {
 	@DataField(order = 2, primitiveType = PrimitiveType.INT32)
 	int getAge();
 	
+	@DataField(order = 3, refContract = true)
+	Location getHomeAddress();
 }
