@@ -3,8 +3,11 @@ package test.com.jd.blockchain.consensus.bftsmart;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -13,23 +16,30 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.jd.blockchain.consensus.ClientIdentification;
+import com.jd.blockchain.consensus.ClientAuthencationService;
+import com.jd.blockchain.consensus.ClientCredential;
 import com.jd.blockchain.consensus.ClientIncomingSettings;
 import com.jd.blockchain.consensus.ConsensusProvider;
 import com.jd.blockchain.consensus.ConsensusSecurityException;
 import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.consensus.Replica;
 import com.jd.blockchain.consensus.bftsmart.BftsmartConsensusProvider;
-import com.jd.blockchain.consensus.bftsmart.BftsmartConsensusSettings;
+import com.jd.blockchain.consensus.bftsmart.BftsmartConsensusSettingsBuilder;
+import com.jd.blockchain.consensus.bftsmart.BftsmartConsensusViewSettings;
 import com.jd.blockchain.consensus.bftsmart.BftsmartNodeSettings;
 import com.jd.blockchain.consensus.bftsmart.BftsmartReplica;
 import com.jd.blockchain.consensus.client.ClientSettings;
 import com.jd.blockchain.consensus.client.ConsensusClient;
 import com.jd.blockchain.consensus.manage.ConsensusManageClient;
 import com.jd.blockchain.consensus.manage.ConsensusView;
+import com.jd.blockchain.consensus.service.Communication;
 import com.jd.blockchain.consensus.service.MessageHandle;
 import com.jd.blockchain.consensus.service.NodeServer;
+import com.jd.blockchain.consensus.service.NodeSession;
+import com.jd.blockchain.consensus.service.NodeState;
 import com.jd.blockchain.consensus.service.ServerSettings;
 import com.jd.blockchain.consensus.service.StateMachineReplicate;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
@@ -41,6 +51,8 @@ import com.jd.blockchain.utils.ConsoleUtils;
 import com.jd.blockchain.utils.PropertiesUtils;
 import com.jd.blockchain.utils.SkippingIterator;
 import com.jd.blockchain.utils.concurrent.AsyncFuture;
+import com.jd.blockchain.utils.concurrent.CompletableAsyncFuture;
+import com.jd.blockchain.utils.io.MemoryStorage;
 import com.jd.blockchain.utils.net.NetworkAddress;
 
 /**
@@ -55,15 +67,15 @@ public class ConsensusEnvironment {
 
 	private final ConsensusProvider CS_PROVIDER;
 
-	private ConsensusViewSettings csSettings;
+	private volatile ConsensusViewSettings viewSettings;
 
 	private String realmName;
 
 	private Replica[] replicas;
 
-	private volatile NodeServer[] nodeServers;
+	private volatile NodeServerProxy[] nodeServers;
 
-	private List<ConsensusClient> clients = new LinkedList<ConsensusClient>();
+	private Map<Integer, ConsensusClient> clients = new LinkedHashMap<>();
 
 	private volatile MessageHandlerDelegater[] messageDelegaters;
 	private StateMachineReplicate[] stateMachineReplicaters;
@@ -76,7 +88,7 @@ public class ConsensusEnvironment {
 		return replicas.length;
 	}
 
-	public SkippingIterator<ReplicaNodeServer> getNodes() {
+	public SkippingIterator<ReplicaNodeServer> getNodesIterator() {
 		return new AbstractSkippingIterator<ReplicaNodeServer>() {
 
 			@Override
@@ -86,24 +98,63 @@ public class ConsensusEnvironment {
 
 			@Override
 			protected ReplicaNodeServer get(long cursor) {
-				return new ReplicaNodeServer() {
-					@Override
-					public Replica getReplica() {
-						return replicas[(int) cursor];
-					}
-
-					@Override
-					public NodeServer getNodeServer() {
-						return nodeServers[(int) cursor];
-					}
-				};
+				return new ReplicaNodeServerWrapper(replicas[(int) cursor], nodeServers[(int) cursor]);
 			}
 		};
 	}
 
-//	public MessageHandle[] getMessageHandlers() {
-//		return messageHandlers == null ? null : messageHandlers.clone();
-//	}
+	public ReplicaNodeServer getNode(int replicaId) {
+		for (int i = 0; i < replicas.length; i++) {
+			if (replicas[i].getId() == replicaId) {
+				return new ReplicaNodeServerWrapper(replicas[i], nodeServers[i]);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * 返回所有节点的列表；
+	 * <p>
+	 * 
+	 * 返回的列表是有序的，按照节点的 Id 进行升序排列；
+	 * 
+	 * @return
+	 */
+	public ReplicaNodeServer[] getNodes() {
+		SkippingIterator<ReplicaNodeServer> nodesIterator = this.getNodesIterator();
+		ReplicaNodeServer[] servers = new ReplicaNodeServer[(int) nodesIterator.getTotalCount()];
+		nodesIterator.next(servers);
+		Arrays.sort(servers, new Comparator<ReplicaNodeServer>() {
+			@Override
+			public int compare(ReplicaNodeServer o1, ReplicaNodeServer o2) {
+				return o1.getReplica().getId() - o2.getReplica().getId();
+			}
+		});
+		return servers;
+	}
+
+	/**
+	 * 返回运行中的节点；
+	 * 
+	 * @return 节点服务器列表；按照 ID 升序排列；
+	 */
+	public ReplicaNodeServer[] getRunningNodes() {
+		SkippingIterator<ReplicaNodeServer> nodesIterator = this.getNodesIterator();
+		List<ReplicaNodeServer> serverList = new ArrayList<>();
+		while (nodesIterator.hasNext()) {
+			ReplicaNodeServer replicaNodeServer = (ReplicaNodeServer) nodesIterator.next();
+			if (replicaNodeServer.getNodeServer().isRunning()) {
+				serverList.add(replicaNodeServer);
+			}
+		}
+		serverList.sort(new Comparator<ReplicaNodeServer>() {
+			@Override
+			public int compare(ReplicaNodeServer o1, ReplicaNodeServer o2) {
+				return o1.getReplica().getId() - o2.getReplica().getId();
+			}
+		});
+		return serverList.toArray(new ReplicaNodeServer[serverList.size()]);
+	}
 
 	public List<StateMachineReplicate> getStateMachineReplicaters() {
 		return Arrays.asList(stateMachineReplicaters);
@@ -115,7 +166,7 @@ public class ConsensusEnvironment {
 
 		this.realmName = realmName;
 		this.replicas = replicas;
-		this.csSettings = csSettings;
+		this.viewSettings = csSettings;
 
 		this.messageDelegaters = new MessageHandlerDelegater[replicas.length];
 		for (int i = 0; i < messageDelegaters.length; i++) {
@@ -190,7 +241,7 @@ public class ConsensusEnvironment {
 
 		// 创建副本信息；
 		Replica[] replicas = createReplicaWithRandom(nodeCount);
-		BftsmartConsensusSettings csSettings = buildConsensusSettings_BFTSMaRT(consensusProperties, replicas);
+		BftsmartConsensusViewSettings csSettings = buildConsensusSettings_BFTSMaRT(consensusProperties, replicas);
 		csSettings = stubNetworkAddress(csSettings, nodesNetworkAddresses);
 
 		return setup(realmName, csSettings, replicas, messageHandler, smr, BftsmartConsensusProvider.INSTANCE);
@@ -203,7 +254,7 @@ public class ConsensusEnvironment {
 
 		// 创建副本信息；
 		Replica[] replicas = createReplicaWithRandom(nodeCount);
-		BftsmartConsensusSettings csSettings = buildConsensusSettings_BFTSMaRT(consensusProperties, replicas);
+		BftsmartConsensusViewSettings csSettings = buildConsensusSettings_BFTSMaRT(consensusProperties, replicas);
 		csSettings = stubNetworkAddress(csSettings, nodesNetworkAddresses);
 
 		return setup(realmName, csSettings, replicas, smr, BftsmartConsensusProvider.INSTANCE);
@@ -257,29 +308,88 @@ public class ConsensusEnvironment {
 
 	private void installNodeServers() {
 		if (messageDelegaters == null) {
-			return;
+			throw new IllegalStateException("Null message delegaters!");
 		}
 		int nodeCount = replicas.length;
 		if (nodeCount != messageDelegaters.length) {
 			throw new IllegalArgumentException("The number of message handler and replica are not equal!");
 		}
-		NodeServer[] nodeServers = new NodeServer[nodeCount];
+		NodeServerProxy[] nodeServers = new NodeServerProxy[nodeCount];
 		for (int i = 0; i < nodeServers.length; i++) {
-			nodeServers[i] = createNodeServer(realmName, csSettings, replicas[i], messageDelegaters[i],
-					stateMachineReplicaters[i], CS_PROVIDER);
+			nodeServers[i] = new NodeServerProxy(replicas[i], messageDelegaters[i], stateMachineReplicaters[i], this);
 		}
 		this.nodeServers = nodeServers;
 	}
 
-	public boolean isRunning() {
+	public synchronized ReplicaNodeServer reinstallNodeServer(int replicaId) {
+		if (messageDelegaters == null) {
+			throw new IllegalStateException("Null message delegaters!");
+		}
+		int nodeCount = replicas.length;
+		if (nodeCount != messageDelegaters.length) {
+			throw new IllegalArgumentException("The number of message handler and replica are not equal!");
+		}
+		NodeServer nodeServer = null;
+		Replica replica = null;
+		for (int i = 0; i < nodeServers.length; i++) {
+			if (replicas[i].getId() == replicaId) {
+				nodeServer = this.nodeServers[i];
+				this.nodeServers[i].stop();
+
+//				replica = replicas[i];
+//				nodeServer = createNodeServer(realmName, viewSettings, replica, messageDelegaters[i],
+//						stateMachineReplicaters[i], CS_PROVIDER);
+//
+//				NodeServer oldNodeServer = this.nodeServers[i];
+//				this.nodeServers[i] = nodeServer;
+//
+//				if (oldNodeServer != null && oldNodeServer.isRunning()) {
+//					oldNodeServer.stop();
+//				}
+
+				break;
+			}
+		}
+		if (nodeServer == null) {
+			throw new IllegalArgumentException("No replica exist with the specified id[" + replicaId + "]!");
+		}
+		return new ReplicaNodeServerWrapper(replica, nodeServer);
+	}
+	
+
+	public void resetNodeSessionsToTarget(int replicaId) {
+		String target = null;
+		for (int i = 0; i < replicas.length; i++) {
+			if (replicas[i].getId() == replicaId) {
+				target = replicas[i].getAddress().toBase58();
+			}
+		}
+		if (target == null) {
+			return;
+		}
+		for (int i = 0; i < nodeServers.length; i++) {
+			if (!nodeServers[i].isRunning()) {
+				continue;
+			}
+			NodeSession session = nodeServers[i].getCommunication().getSession(target);
+			session.reset();
+		}
+	}
+
+	/**
+	 * 是否全部节点都在运行中；
+	 * 
+	 * @return
+	 */
+	public boolean isTotalRunning() {
 		if (nodeServers != null) {
 			for (NodeServer node : nodeServers) {
-				if (node.isRunning()) {
-					return true;
+				if (!node.isRunning()) {
+					return false;
 				}
 			}
 		}
-		return false;
+		return true;
 	}
 
 	public void reinstallNodeServers() {
@@ -371,8 +481,8 @@ public class ConsensusEnvironment {
 				replica.getPubKey());
 
 		// 创建新的共识节点的视图配置信息；
-		BftsmartConsensusSettings nextViewSettings = (BftsmartConsensusSettings) CS_PROVIDER.getSettingsFactory()
-				.getConsensusSettingsBuilder().addReplicaSetting(csSettings, bftsmartReplica);
+		BftsmartConsensusViewSettings nextViewSettings = (BftsmartConsensusViewSettings) CS_PROVIDER
+				.getSettingsFactory().getConsensusSettingsBuilder().addReplicaSetting(viewSettings, bftsmartReplica);
 
 		// 向现有的共识网络发起“加入节点”的共识请求；
 		AsymmetricKeypair clientKey = Crypto.getSignatureFunction(ClassicAlgorithm.ED25519).generateKeypair();
@@ -381,6 +491,7 @@ public class ConsensusEnvironment {
 
 		try (ConsensusManageClient manageClient = CS_PROVIDER.getManagerClientFactory()
 				.setupManageClient(clientSettings)) {
+			manageClient.connect();
 			AsyncFuture<ConsensusView> future = manageClient.getManageService().addNode(bftsmartReplica);
 			ConsensusView nextView = future.get();
 
@@ -389,14 +500,14 @@ public class ConsensusEnvironment {
 				throw new IllegalStateException(
 						"The next view id from remote consensus network is not equal to the next view id from local settings!");
 			}
+			this.viewSettings = nextViewSettings;
 		}
 
 		// 创建并启动新加入的节点；
 		StateMachineReplicate smr = Mockito.mock(StateMachineReplicate.class);
 
 		MessageHandlerDelegater messageDelegater = new MessageHandlerDelegater(messageHandler);
-		NodeServer nodeServer = createNodeServer(realmName, csSettings, bftsmartReplica, messageDelegater, smr,
-				CS_PROVIDER);
+		NodeServerProxy nodeServer = new NodeServerProxy(bftsmartReplica, messageDelegater, smr, this);
 
 		// 把新节点加入到上下文的节点列表；
 		addNewNode(bftsmartReplica, nodeServer, messageDelegater, smr);
@@ -407,10 +518,10 @@ public class ConsensusEnvironment {
 		return nodeServer;
 	}
 
-	private void addNewNode(Replica replica, NodeServer nodeServer, MessageHandlerDelegater messageDelegater,
+	private void addNewNode(Replica replica, NodeServerProxy nodeServer, MessageHandlerDelegater messageDelegater,
 			StateMachineReplicate smr) {
 		this.replicas = ArrayUtils.concat(this.replicas, replica, Replica.class);
-		this.nodeServers = ArrayUtils.concat(this.nodeServers, nodeServer, NodeServer.class);
+		this.nodeServers = ArrayUtils.concat(this.nodeServers, nodeServer, NodeServerProxy.class);
 
 		this.messageDelegaters = ArrayUtils.concat(this.messageDelegaters, messageDelegater,
 				MessageHandlerDelegater.class);
@@ -433,69 +544,113 @@ public class ConsensusEnvironment {
 	}
 
 	public ConsensusClient[] getClients() {
-		return clients.toArray(new ConsensusClient[clients.size()]);
+		return clients.values().toArray(new ConsensusClient[clients.size()]);
 	}
 
-	public ConsensusClient[] setupNewClients(int clientCount) throws ConsensusSecurityException {
+	/**
+	 * 从指定的共识节点中接入指定数量的客户端；
+	 * 
+	 * <p>
+	 * 每一个客户端在接入前，都随机地从指定的多个共识节点中选择一个作为接入认证的服务端；
+	 * 
+	 * @param clientCount 客户端数量；
+	 * @param authNodeIDs 用作认证服务器的节点ID列表；
+	 * @return
+	 * @throws ConsensusSecurityException
+	 */
+	public ConsensusClient[] setupNewClients(int clientCount, int... authNodeIDs) throws ConsensusSecurityException {
+		if (authNodeIDs == null || authNodeIDs.length == 0) {
+			throw new IllegalArgumentException("No replica was specified as authentication server!");
+		}
 		AsymmetricKeypair[] clientKeys = initRandomKeys(clientCount);
 
-		ClientIncomingSettings[] clientSettings = authClientsFrom(nodeServers, clientKeys, CS_PROVIDER);
+		SkippingIterator<ReplicaNodeServer> nodesIterator = getNodesIterator();
+		List<ReplicaNodeServer> replicaNodes = new ArrayList<>();
+		while (nodesIterator.hasNext()) {
+			ReplicaNodeServer r = nodesIterator.next();
+			for (int i = 0; i < authNodeIDs.length; i++) {
+				if (r.getReplica().getId() == authNodeIDs[i]) {
+					replicaNodes.add(r);
+				}
+			}
+		}
+		if (replicaNodes.size() == 0) {
+			throw new IllegalArgumentException("No replica node found with id in the specified id list!");
+		}
+		if (replicaNodes.size() < authNodeIDs.length) {
+			throw new IllegalArgumentException("Some replica node with id in the specified id list was not found!");
+		}
+
+		Random random = new Random();
+		ClientIncomingSettings[] clientSettings = new ClientIncomingSettings[clientCount];
+		for (int i = 0; i < clientSettings.length; i++) {
+			NodeServer nodeServer = replicaNodes.get(random.nextInt(replicaNodes.size())).getNodeServer();
+			clientSettings[i] = authClientsFrom(nodeServer, clientKeys[i], CS_PROVIDER);
+		}
 
 		ConsensusClient[] newClients = setupConsensusClients(clientSettings, CS_PROVIDER);
 		for (int i = 0; i < newClients.length; i++) {
-			this.clients.add(newClients[i]);
+			newClients[i].connect();
+
+			this.clients.put(newClients[i].getSettings().getClientId(), newClients[i]);
 		}
 
 		return newClients;
 	}
 
-	public ConsensusClient[] resetupClients(int clientCount) throws ConsensusSecurityException {
-		closeAllClients();
-		return setupNewClients(clientCount);
-	}
-
-	public void closeAllClients() {
-		for (ConsensusClient cli : clients) {
-			cli.close();
-		}
-		clients.clear();
-	}
-
 	/**
-	 * 从指定节点服务器中认证客户端，返回客户端接入配置；
-	 * 
+	 * 重装客户端；
 	 * <p>
 	 * 
-	 * 对于参数中的每一个客户端密钥，从服务器列表中随机挑选一个进行认证；
+	 * 方法将从指定的共识节点中接入指定数量的客户端；
 	 * 
 	 * <p>
+	 * 每一个客户端在接入前，都随机地从指定的多个共识节点中选择一个作为接入认证的服务端；
 	 * 
-	 * 返回的客户端接入配置的数量和密钥的数量一致；
-	 * 
-	 * @param nodeServers
-	 * @param clientKeys
+	 * @param clientCount 客户端数量；
+	 * @param authNodeIDs 用作认证服务器的节点ID列表；
 	 * @return
 	 * @throws ConsensusSecurityException
 	 */
-	private static ClientIncomingSettings[] authClientsFrom(NodeServer[] nodeServers, AsymmetricKeypair[] clientKeys,
-			ConsensusProvider consensusProvider) throws ConsensusSecurityException {
-		ClientIncomingSettings[] incomingSettings = new ClientIncomingSettings[clientKeys.length];
-
-		Random rand = new Random();
-		for (int i = 0; i < clientKeys.length; i++) {
-			incomingSettings[i] = authClientsFrom(nodeServers[rand.nextInt(nodeServers.length)], clientKeys[i],
-					consensusProvider);
-		}
-
-		return incomingSettings;
+	public ConsensusClient[] resetupClients(int clientCount, int... authNodeIDs) throws ConsensusSecurityException {
+		closeAllClients();
+		return setupNewClients(clientCount, authNodeIDs);
 	}
 
-	private static ClientIncomingSettings authClientsFrom(NodeServer nodeServer, AsymmetricKeypair clientKeys,
+	public void closeAllClients() {
+		ConsensusClient[] clientArray = clients.values().toArray(new ConsensusClient[clients.size()]);
+		clients.clear();
+
+		for (ConsensusClient cli : clientArray) {
+			cli.close();
+		}
+	}
+
+	public void closeClient(ConsensusClient client) {
+		closeClient(client.getSettings().getClientId());
+	}
+
+	public void closeClient(int clientId) {
+		ConsensusClient cli = clients.remove(clientId);
+		if (cli != null && cli.isConnected()) {
+			cli.close();
+		}
+	}
+	
+	public void close() {
+		stopNodeServers();
+		closeAllClients();
+	}
+
+	private static ClientIncomingSettings authClientsFrom(NodeServer authNodeServer, AsymmetricKeypair clientKeys,
 			ConsensusProvider consensusProvider) {
-		ClientIdentification clientIdentification = consensusProvider.getClientFactory().buildAuthId(clientKeys);
+		if (!authNodeServer.isRunning()) {
+			throw new IllegalStateException("The authencated node server is not running!");
+		}
+		ClientCredential clientIdentification = consensusProvider.getClientFactory().buildCredential(null, clientKeys);
 
 		try {
-			return nodeServer.getClientAuthencationService().authencateIncoming(clientIdentification);
+			return authNodeServer.getClientAuthencationService().authencateIncoming(clientIdentification);
 		} catch (ConsensusSecurityException e) {
 			throw new IllegalStateException("Fail to authencate client incoming! --" + e.getMessage(), e);
 		}
@@ -509,8 +664,6 @@ public class ConsensusEnvironment {
 			ClientSettings clientSettings = consensusProvider.getClientFactory()
 					.buildClientSettings(clientIncomingSettings[i]);
 			clients[i] = consensusProvider.getClientFactory().setupClient(clientSettings);
-
-			clients[i].connect();
 		}
 
 		return clients;
@@ -518,31 +671,42 @@ public class ConsensusEnvironment {
 
 	private static void startNodeServers(NodeServer[] nodeServers) {
 		CountDownLatch startupLatch = new CountDownLatch(nodeServers.length);
+		List<AsyncFuture<?>> futures = new LinkedList<>();
 		for (int i = 0; i < nodeServers.length; i++) {
 			int id = i;
 			NodeServer nodeServer = nodeServers[i];
-			EXECUTOR_SERVICE.execute(new Runnable() {
-
-				@Override
-				public void run() {
-					nodeServer.start();
-					ConsoleUtils.info("Replica Node [%s : %s] started! ", id,
-							nodeServer.getSettings().getReplicaSettings().getAddress());
-					startupLatch.countDown();
-				}
-			});
+			if (nodeServer.isRunning()) {
+				// 运行中，避免重复启动；
+				startupLatch.countDown();
+			} else {
+				// 未运行；
+				AsyncFuture<?> future =nodeServer.start();
+				futures.add(future);
+				
+//				EXECUTOR_SERVICE.execute(new Runnable() {
+//					@Override
+//					public void run() {
+//						nodeServer.start();
+//						ConsoleUtils.info("Replica Node [%s : %s] started! ", id,
+//								nodeServer.getServerSettings().getReplicaSettings().getAddress());
+//						startupLatch.countDown();
+//					}
+//				});
+			}
 		}
 
-		try {
-			startupLatch.await(30, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			throw new IllegalStateException("Timeout occurred while waiting to complete the startup of all nodes!", e);
+//		try {
+//			startupLatch.await(30, TimeUnit.SECONDS);
+//		} catch (InterruptedException e) {
+//			throw new IllegalStateException("Timeout occurred while waiting to complete the startup of all nodes!", e);
+//		}
+		for (AsyncFuture<?> future : futures) {
+			future.get();
 		}
 		ConsoleUtils.info("All replicas start success!");
 	}
 
 	private static void stopNodeServers(NodeServer[] nodeServers) {
-
 		List<NodeServer> runningNodes = new ArrayList<>();
 		for (int i = 0; i < nodeServers.length; i++) {
 			if (nodeServers[i].isRunning()) {
@@ -555,7 +719,6 @@ public class ConsensusEnvironment {
 		CountDownLatch startupLatch = new CountDownLatch(runningNodes.size());
 		for (NodeServer nodeServer : runningNodes) {
 			EXECUTOR_SERVICE.execute(new Runnable() {
-
 				@Override
 				public void run() {
 					nodeServer.stop();
@@ -627,9 +790,9 @@ public class ConsensusEnvironment {
 	 * @param networkAddresses
 	 * @return
 	 */
-	private static BftsmartConsensusSettings stubNetworkAddress(BftsmartConsensusSettings csSettings,
+	private static BftsmartConsensusViewSettings stubNetworkAddress(BftsmartConsensusViewSettings csSettings,
 			NetworkAddress[] networkAddresses) {
-		BftsmartConsensusSettings csSettingStub = Mockito.spy(csSettings);
+		BftsmartConsensusViewSettings csSettingStub = Mockito.spy(csSettings);
 
 		BftsmartNodeSettings[] nodeSettings = (BftsmartNodeSettings[]) csSettingStub.getNodes();
 		nodeSettings = stubNetworkAddresses(nodeSettings, networkAddresses);
@@ -662,30 +825,144 @@ public class ConsensusEnvironment {
 		return nodeSettingStubs;
 	}
 
-	public static BftsmartConsensusSettings buildConsensusSettings_BFTSMaRT(String configFile, Replica[] replicas)
+	public static BftsmartConsensusViewSettings buildConsensusSettings_BFTSMaRT(String configFile, Replica[] replicas)
 			throws IOException {
 		Properties csProperties = PropertiesUtils.loadProperties(configFile, "UTF-8");
-		return (BftsmartConsensusSettings) buildConsensusSettings(csProperties, replicas,
+		return (BftsmartConsensusViewSettings) buildConsensusSettings(csProperties, replicas,
 				BftsmartConsensusProvider.INSTANCE);
 	}
 
-	public static BftsmartConsensusSettings buildConsensusSettings_BFTSMaRT(Properties csProperties,
+	public static BftsmartConsensusViewSettings buildConsensusSettings_BFTSMaRT(Properties csProperties,
 			Replica[] replicas) {
-		return (BftsmartConsensusSettings) buildConsensusSettings(csProperties, replicas,
+
+		return (BftsmartConsensusViewSettings) buildConsensusSettings(csProperties, replicas,
 				BftsmartConsensusProvider.INSTANCE);
 	}
 
 	private static ConsensusViewSettings buildConsensusSettings(Properties csProperties, Replica[] replicas,
 			ConsensusProvider consensusProvider) {
+		csProperties.setProperty(BftsmartConsensusSettingsBuilder.SERVER_NUM_KEY, String.valueOf(replicas.length));
 		return consensusProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(csProperties,
 				replicas);
 	}
 
-	private static NodeServer createNodeServer(String realmName, ConsensusViewSettings csSettings, Replica replica,
+	private static NodeServer createNodeServer(String realmName, ConsensusViewSettings viewSettings, Replica replica,
 			MessageHandlerDelegater messageHandler, StateMachineReplicate smr, ConsensusProvider consensusProvider) {
-		ServerSettings serverSettings = consensusProvider.getServerFactory().buildServerSettings(realmName, csSettings,
-				replica.getAddress().toBase58());
-		return consensusProvider.getServerFactory().setupServer(serverSettings, messageHandler, smr);
+		ServerSettings serverSettings = consensusProvider.getServerFactory().buildServerSettings(realmName,
+				viewSettings, replica.getAddress().toBase58());
+		return consensusProvider.getServerFactory().setupServer(serverSettings, messageHandler, smr,
+				new MemoryStorage("NODE-" + replica.getId()));
+	}
+
+	private static class NodeServerProxy implements NodeServer {
+
+		public static final Logger LOGGER = LoggerFactory.getLogger(NodeServerProxy.class);
+
+		private Replica replica;
+
+		private MessageHandlerDelegater messageHandle;
+
+		private StateMachineReplicate smReplicate;
+
+		private ConsensusEnvironment environment;
+
+		private volatile NodeServer nodeServer;
+
+		public NodeServerProxy(Replica replica, MessageHandlerDelegater messageHandle,
+				StateMachineReplicate smReplicate, ConsensusEnvironment environment) {
+			this.replica = replica;
+			this.messageHandle = messageHandle;
+			this.smReplicate = smReplicate;
+			this.environment = environment;
+			this.nodeServer = createInstance();
+		}
+
+		private NodeServer createInstance() {
+			return ConsensusEnvironment.createNodeServer(environment.realmName, environment.viewSettings, replica,
+					messageHandle, smReplicate, environment.CS_PROVIDER);
+		}
+
+		@Override
+		public String getProviderName() {
+			return nodeServer.getProviderName();
+		}
+
+		@Override
+		public ServerSettings getServerSettings() {
+			return nodeServer.getServerSettings();
+		}
+
+		@Override
+		public ClientAuthencationService getClientAuthencationService() {
+			return nodeServer.getClientAuthencationService();
+		}
+
+		@Override
+		public NodeState getState() {
+			return nodeServer.getState();
+		}
+		
+		@Override
+		public Communication getCommunication() {
+			return nodeServer.getCommunication();
+		}
+
+		@Override
+		public synchronized AsyncFuture<?> start() {
+			if (nodeServer.isRunning()) {
+				return CompletableAsyncFuture.completeFuture(null);
+			}
+			LOGGER.debug("Node server[{}] is starting...", replica.getId());
+			
+			nodeServer = createInstance();
+			AsyncFuture<?> future = nodeServer.start();
+			
+			future.thenRun(new Runnable() {
+				@Override
+				public void run() {
+					LOGGER.debug("Node server[{}] started.", replica.getId());
+				}
+			});
+			return future;
+		}
+
+		@Override
+		public boolean isRunning() {
+			return nodeServer.isRunning();
+		}
+
+		@Override
+		public void stop() {
+			if (!nodeServer.isRunning()) {
+				return;
+			}
+			nodeServer.stop();
+
+			LOGGER.debug("Node server[{}] stopped. --[nodeserver.state={}]", replica.getId(), nodeServer.getState());
+		}
+
+	}
+
+	private static class ReplicaNodeServerWrapper implements ReplicaNodeServer {
+
+		private NodeServer nodeServer;
+		private Replica replica;
+
+		public ReplicaNodeServerWrapper(Replica replica, NodeServer nodeServer) {
+			this.replica = replica;
+			this.nodeServer = nodeServer;
+		}
+
+		@Override
+		public Replica getReplica() {
+			return replica;
+		}
+
+		@Override
+		public NodeServer getNodeServer() {
+			return nodeServer;
+		}
+
 	}
 
 }

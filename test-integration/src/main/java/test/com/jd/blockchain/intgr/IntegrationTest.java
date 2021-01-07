@@ -77,6 +77,7 @@ import com.jd.blockchain.utils.Bytes;
 import com.jd.blockchain.utils.codec.HexUtils;
 import com.jd.blockchain.utils.concurrent.AsyncFuture;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker.AsyncCallback;
+import com.jd.blockchain.utils.io.Storage;
 import com.jd.blockchain.utils.net.NetworkAddress;
 
 import test.com.jd.blockchain.intgr.IntegratedContext.Node;
@@ -338,9 +339,10 @@ public class IntegrationTest {
 							}).when(mockedMessageHandle).processOrdered(anyInt(), any(), any());
 						}
 
-						return new BftsmartNodeServer(serverSettings, mockedMessageHandle, stateMachineReplicate);
+						return new BftsmartNodeServer(serverSettings, mockedMessageHandle, stateMachineReplicate,
+								invocation.getArgumentAt(3, Storage.class));
 					}
-				}).when(mockedServerFactory).setupServer(any(), any(), any());
+				}).when(mockedServerFactory).setupServer(any(), any(), any(), any());
 
 				return mockedServerFactory;
 			}
@@ -834,8 +836,8 @@ public class IntegrationTest {
 		Properties props = LedgerInitializeWebTest
 				.loadConsensusSetting(LedgerInitConsensusConfig.bftsmartConfig.getConfigPath());
 		ConsensusProvider csProvider = getConsensusProvider(LedgerInitConsensusConfig.bftsmartConfig.getProvider());
-		ConsensusViewSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
-				Utils.loadParticipantNodes());
+		ConsensusViewSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder()
+				.createSettings(props, Utils.loadParticipantNodes());
 
 		// 启动服务器；
 		NetworkAddress initAddr0 = initSetting.getConsensusParticipant(0).getInitializerAddress();

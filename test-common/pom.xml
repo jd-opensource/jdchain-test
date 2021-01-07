@@ -16,6 +16,6 @@
 			<groupId>com.jd.blockchain</groupId>
 			<artifactId>peer</artifactId>
 		</dependency>
-		
+
 	</dependencies>
 </project>
