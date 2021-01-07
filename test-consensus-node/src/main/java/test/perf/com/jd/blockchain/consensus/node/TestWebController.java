@@ -5,7 +5,7 @@ import java.util.TreeSet;
 
 import javax.annotation.PostConstruct;
 
-import com.jd.blockchain.consensus.ConsensusSettings;
+import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.consensus.Topology;
 import com.jd.blockchain.utils.codec.HexUtils;
 import com.jd.blockchain.utils.io.FileUtils;
@@ -77,7 +77,7 @@ public class TestWebController {
 	@RequestMapping(path = "/configs/nodes/set/{id}/{host}/{port}", method = RequestMethod.GET)
 	public String setNode(@PathVariable("id") int id, @PathVariable("host") String host,
 						  @PathVariable("port") int port) {
-		nodesConfig.add(id, host, port);
+		nodesConfig.add(id, host, port, -1);
 		return getNodes();
 	}
 
@@ -130,7 +130,7 @@ public class TestWebController {
 		if (replica == null ) {
 			throw new IllegalStateException("Replica not start");
 		}
-		ConsensusSettings settings = replica.getConsensusSetting();
+		ConsensusViewSettings settings = replica.getConsensusSetting();
 		byte[] bytesSettings = BinarySerializeUtils.serialize(settings);
 		return HexUtils.encode(bytesSettings);
 	}

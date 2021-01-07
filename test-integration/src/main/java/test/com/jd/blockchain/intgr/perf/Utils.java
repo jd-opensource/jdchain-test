@@ -6,11 +6,13 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.jd.blockchain.ledger.ParticipantNodeState;
+import org.bouncycastle.util.Arrays;
 import org.springframework.core.io.ClassPathResource;
 
+import com.jd.blockchain.binaryproto.BinaryProtocol;
 import com.jd.blockchain.consensus.ConsensusProvider;
-import com.jd.blockchain.consensus.ConsensusSettings;
+import com.jd.blockchain.consensus.ConsensusViewSettings;
+import com.jd.blockchain.consensus.Replica;
 import com.jd.blockchain.crypto.AddressEncoding;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.Crypto;
@@ -26,8 +28,9 @@ import com.jd.blockchain.crypto.service.sm.SMCryptoService;
 import com.jd.blockchain.ledger.CryptoSetting;
 import com.jd.blockchain.ledger.LedgerInitProperties;
 import com.jd.blockchain.ledger.ParticipantNode;
+import com.jd.blockchain.ledger.ParticipantNodeState;
+import com.jd.blockchain.ledger.TransactionContent;
 import com.jd.blockchain.ledger.core.CryptoConfig;
-import com.jd.blockchain.ledger.core.LedgerConfiguration;
 import com.jd.blockchain.ledger.core.LedgerInitDecision;
 import com.jd.blockchain.ledger.core.LedgerInitProposal;
 import com.jd.blockchain.ledger.core.LedgerManager;
@@ -40,6 +43,7 @@ import com.jd.blockchain.tools.initializer.web.InitConsensusServiceFactory;
 import com.jd.blockchain.tools.initializer.web.LedgerInitConfiguration;
 import com.jd.blockchain.tools.initializer.web.LedgerInitConsensusService;
 import com.jd.blockchain.tools.initializer.web.LedgerInitializeWebController;
+import com.jd.blockchain.tools.initializer.web.ParticipantReplica;
 import com.jd.blockchain.utils.Bytes;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker.AsyncCallback;
@@ -85,12 +89,18 @@ public class Utils {
 		}
 	}
 
-	public static ParticipantNode[] loadParticipantNodes() {
+	public static Replica[] loadParticipantNodes() {
 		ParticipantNode[] participantNodes = new ParticipantNode[PUB_KEYS.length];
 		for (int i = 0; i < PUB_KEYS.length; i++) {
 			participantNodes[i] = new PartNode(i, KeyGenUtils.decodePubKey(PUB_KEYS[i]), ParticipantNodeState.CONSENSUS);
 		}
-		return participantNodes;
+		return ParticipantReplica.wrap(participantNodes);
+	}
+	
+	public static boolean areEqual(TransactionContent initTxContent0, TransactionContent initTxContent1) {
+		byte[] txBytes0 = BinaryProtocol.encode(initTxContent0, TransactionContent.class);
+		byte[] txBytes1 = BinaryProtocol.encode(initTxContent1, TransactionContent.class);
+		return Arrays.areEqual(txBytes0, txBytes1);
 	}
 
 	public static class NodeContext {
@@ -143,7 +153,7 @@ public class Utils {
 		}
 
 		public AsyncCallback<HashDigest> startInit(int currentId, PrivKey privKey, LedgerInitProperties setting,
-				ConsensusSettings csProps, ConsensusProvider consensusProvider, DBConnectionConfig dbConnConfig,
+				ConsensusViewSettings csProps, ConsensusProvider consensusProvider, DBConnectionConfig dbConnConfig,
 				Prompter prompter, boolean autoVerifyHash) {
 			CryptoAlgorithm algorithm = Crypto.getAlgorithm("SHA256");
 			return startInit(currentId, privKey, setting, csProps, consensusProvider, dbConnConfig, prompter,
@@ -151,7 +161,7 @@ public class Utils {
 		}
 
 		public AsyncCallback<HashDigest> startInit(int currentId, PrivKey privKey, LedgerInitProperties setting,
-				ConsensusSettings csProps, ConsensusProvider consensusProvider, DBConnectionConfig dbConnConfig,
+				ConsensusViewSettings csProps, ConsensusProvider consensusProvider, DBConnectionConfig dbConnConfig,
 				Prompter prompter, boolean autoVerifyHash, CryptoAlgorithm hashAlg) {
 
 			CryptoProvider[] supportedProviders = new CryptoProvider[SUPPORTED_PROVIDERS.length];
@@ -169,7 +179,7 @@ public class Utils {
 		}
 
 		public AsyncCallback<HashDigest> startInit(int currentId, PrivKey privKey, LedgerInitProperties setting,
-				ConsensusSettings csProps, ConsensusProvider consensusProvider, DBConnectionConfig dbConnConfig,
+				ConsensusViewSettings csProps, ConsensusProvider consensusProvider, DBConnectionConfig dbConnConfig,
 				Prompter prompter, CryptoSetting cryptoSetting) {
 
 			LedgerInitConfiguration ledgerInitConfig = LedgerInitConfiguration.create(setting);

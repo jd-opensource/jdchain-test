@@ -37,7 +37,7 @@ public class GatewayTestRunner {
 		}
 
 		for (NetworkAddress address : masterPeerAddresses) {
-			config.addMasterPeerAddress(address);
+			config.setMasterPeerAddress(address);
 		}
 
 		config.keys().getDefault().setPubKeyValue(gatewayDefaultKey.getPubKeyValue());

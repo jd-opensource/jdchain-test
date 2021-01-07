@@ -11,7 +11,7 @@ import java.util.concurrent.CountDownLatch;
 import org.springframework.core.io.ClassPathResource;
 
 import com.jd.blockchain.consensus.ConsensusProvider;
-import com.jd.blockchain.consensus.ConsensusSettings;
+import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.crypto.KeyGenUtils;
@@ -124,7 +124,7 @@ public class IntegrationBaseTest {
 		LedgerInitProperties initSetting = loadInitSetting_integration();
 		Properties props = LedgerInitializeWeb4SingleStepsTest.loadConsensusSetting(configPath);
 		ConsensusProvider csProvider = LedgerInitConsensusConfig.getConsensusProvider(providerName);
-		ConsensusSettings csProps = csProvider.getSettingsFactory()
+		ConsensusViewSettings csProps = csProvider.getSettingsFactory()
 				.getConsensusSettingsBuilder()
 				.createSettings(props, Utils.loadParticipantNodes());
 

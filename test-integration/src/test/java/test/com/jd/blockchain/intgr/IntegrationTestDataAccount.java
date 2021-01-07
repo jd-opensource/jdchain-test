@@ -13,7 +13,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import com.alibaba.fastjson.JSON;
 import com.jd.blockchain.consensus.ConsensusProvider;
-import com.jd.blockchain.consensus.ConsensusSettings;
+import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.crypto.KeyGenUtils;
@@ -29,7 +29,7 @@ import com.jd.blockchain.ledger.PreparedTransaction;
 import com.jd.blockchain.ledger.TransactionResponse;
 import com.jd.blockchain.ledger.TransactionTemplate;
 import com.jd.blockchain.ledger.TypedKVEntry;
-import com.jd.blockchain.ledger.core.DataAccountQuery;
+import com.jd.blockchain.ledger.core.DataAccountSet;
 import com.jd.blockchain.ledger.core.LedgerManager;
 import com.jd.blockchain.ledger.core.LedgerQuery;
 import com.jd.blockchain.sdk.BlockchainService;
@@ -188,7 +188,7 @@ public class IntegrationTestDataAccount {
 
 		LedgerQuery ledgerRepository = ledgerManager.register(ledgerHashs[0], memoryBasedDb.getStorageService());
 
-		DataAccountQuery dataAccountSet = ledgerRepository.getDataAccountSet(ledgerRepository.retrieveLatestBlock());
+		DataAccountSet dataAccountSet = ledgerRepository.getDataAccountSet(ledgerRepository.retrieveLatestBlock());
 
 		TransactionTemplate txTpl = blockchainService.newTransaction(ledgerHashs[0]);
 
@@ -259,7 +259,7 @@ public class IntegrationTestDataAccount {
 		LedgerInitProperties initSetting = loadInitSetting_integration();
 		Properties props = LedgerInitializeWeb4SingleStepsTest.loadConsensusSetting(config.getConfigPath());
 		ConsensusProvider csProvider = LedgerInitConsensusConfig.getConsensusProvider(config.getProvider());
-		ConsensusSettings csProps = csProvider.getSettingsFactory()
+		ConsensusViewSettings csProps = csProvider.getSettingsFactory()
 				.getConsensusSettingsBuilder()
 				.createSettings(props, Utils.loadParticipantNodes());
 

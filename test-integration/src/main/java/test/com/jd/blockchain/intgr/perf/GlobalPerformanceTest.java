@@ -14,7 +14,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import com.jd.blockchain.consensus.ConsensusProvider;
 import com.jd.blockchain.consensus.ConsensusProviders;
-import com.jd.blockchain.consensus.ConsensusSettings;
+import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.crypto.KeyGenUtils;
@@ -43,6 +43,7 @@ import com.jd.blockchain.tools.initializer.LedgerInitCommand;
 import com.jd.blockchain.tools.initializer.LedgerInitProcess;
 import com.jd.blockchain.tools.initializer.Prompter;
 import com.jd.blockchain.tools.initializer.web.LedgerInitializeWebController;
+import com.jd.blockchain.tools.initializer.web.ParticipantReplica;
 import com.jd.blockchain.utils.ConsoleUtils;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker.AsyncCallback;
@@ -186,7 +187,7 @@ public class GlobalPerformanceTest {
 		LedgerInitProperties initSetting = loadInitSetting_integration();
 		Properties props = Utils.loadConsensusSetting();
 		ConsensusProvider csProvider = getConsensusProvider();
-		ConsensusSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
+		ConsensusViewSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
 				Utils.loadParticipantNodes());
 
 		// 启动服务器；
@@ -356,7 +357,7 @@ public class GlobalPerformanceTest {
 		}
 
 		public AsyncCallback<HashDigest> startInit(PrivKey privKey, LedgerInitProperties setting,
-				ConsensusSettings csProps, ConsensusProvider csProvider, DBConnectionConfig dbConnConfig,
+				ConsensusViewSettings csProps, ConsensusProvider csProvider, DBConnectionConfig dbConnConfig,
 				Prompter prompter, CountDownLatch quitLatch) {
 
 			ThreadInvoker<HashDigest> invoker = new ThreadInvoker<HashDigest>() {
@@ -378,7 +379,7 @@ public class GlobalPerformanceTest {
 		}
 
 		public AsyncCallback<HashDigest> startInitCommand(PrivKey privKey, String base58Pwd,
-				LedgerInitProperties ledgerSetting, ConsensusSettings csProps, ConsensusProvider csProvider,
+				LedgerInitProperties ledgerSetting, ConsensusViewSettings csProps, ConsensusProvider csProvider,
 				DBConnectionConfig dbConnConfig, Prompter prompter, LedgerBindingConfig conf,
 				CountDownLatch quitLatch) {
 			this.db = new CompositeConnectionFactory();

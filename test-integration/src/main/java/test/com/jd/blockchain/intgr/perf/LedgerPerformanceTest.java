@@ -18,7 +18,7 @@ import org.springframework.core.io.ClassPathResource;
 import com.jd.blockchain.binaryproto.DataContractRegistry;
 import com.jd.blockchain.consensus.ConsensusProvider;
 import com.jd.blockchain.consensus.ConsensusProviders;
-import com.jd.blockchain.consensus.ConsensusSettings;
+import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.Crypto;
 import com.jd.blockchain.crypto.CryptoAlgorithm;
@@ -30,7 +30,7 @@ import com.jd.blockchain.ledger.LedgerPermission;
 import com.jd.blockchain.ledger.LedgerSecurityException;
 import com.jd.blockchain.ledger.TransactionPermission;
 import com.jd.blockchain.ledger.core.DefaultOperationHandleRegisteration;
-import com.jd.blockchain.ledger.core.LedgerDataQuery;
+import com.jd.blockchain.ledger.core.LedgerDataSet;
 import com.jd.blockchain.ledger.core.LedgerEditor;
 import com.jd.blockchain.ledger.core.LedgerManager;
 import com.jd.blockchain.ledger.core.LedgerRepository;
@@ -186,17 +186,19 @@ public class LedgerPerformanceTest {
 			LedgerManager ledgerManager, DefaultOperationHandleRegisteration opHandler, int batchSize, int batchCount,
 			boolean silent) {
 		LedgerRepository ledger = ledgerManager.getLedger(ledgerHash);
+		CryptoSetting cryptoSetting = ledger.getAdminInfo().getSettings().getCryptoSetting();
 		ConsoleUtils.info("\r\n\r\n================= 准备测试交易 [注册用户] =================");
 
 		int totalCount = batchSize * batchCount;
-		List<TransactionRequest> txList = prepareUserRegisterRequests(ledgerHash, totalCount, adminKey);
+		List<TransactionRequest> txList = prepareUserRegisterRequests(ledgerHash, cryptoSetting, totalCount, adminKey);
 
 		// 预热；
 		ConsoleUtils.info("preheat......");
 		int preheatTxBatch = 10;
 		int preheatTxBatchSize = 10;
 		int preheatTotalTx = preheatTxBatch * preheatTxBatchSize;
-		List<TransactionRequest> preheatTxList = prepareUserRegisterRequests(ledgerHash, preheatTotalTx, adminKey);
+		List<TransactionRequest> preheatTxList = prepareUserRegisterRequests(ledgerHash, cryptoSetting, preheatTotalTx,
+				adminKey);
 		execPerformanceTest(preheatTxBatch, preheatTxBatchSize, preheatTxList, ledger, ledgerManager, opHandler, false);
 		preheatTxList.clear();
 		preheatTxList = null;
@@ -227,12 +229,13 @@ public class LedgerPerformanceTest {
 	private static void testKVWrite(HashDigest ledgerHash, AsymmetricKeypair adminKey, LedgerManager ledgerManager,
 			DefaultOperationHandleRegisteration opHandler, int batchSize, int batchCount, boolean silent) {
 		LedgerRepository ledger = ledgerManager.getLedger(ledgerHash);
+		CryptoSetting cryptoSetting = ledger.getAdminInfo().getSettings().getCryptoSetting();
 		ConsoleUtils.info("\r\n\r\n================= 准备测试交易 [写入数据] =================");
 
 		// 创建数据账户；
 		BlockchainIdentity[] dataAccounts = new BlockchainIdentity[10];
-		List<TransactionRequest> dataAccountRegTxList = prepareDataAccountRegisterRequests(ledgerHash, dataAccounts,
-				adminKey, false);
+		List<TransactionRequest> dataAccountRegTxList = prepareDataAccountRegisterRequests(ledgerHash, cryptoSetting,
+				dataAccounts, adminKey, false);
 		execPerformanceTest(1, dataAccounts.length, dataAccountRegTxList, ledger, ledgerManager, opHandler, false);
 
 		// 预热；
@@ -240,16 +243,16 @@ public class LedgerPerformanceTest {
 		int preheatTxBatch = 10;
 		int preheatTxBatchSize = 10;
 		int preheatTotalTx = preheatTxBatch * preheatTxBatchSize;
-		List<TransactionRequest> preheatTxList = prepareDataWriteRequests(ledgerHash, dataAccounts, preheatTotalTx,
-				adminKey, false);
+		List<TransactionRequest> preheatTxList = prepareDataWriteRequests(ledgerHash, cryptoSetting, dataAccounts,
+				preheatTotalTx, adminKey, false);
 		execPerformanceTest(preheatTxBatch, preheatTxBatchSize, preheatTxList, ledger, ledgerManager, opHandler, false);
 		preheatTxList.clear();
 		preheatTxList = null;
 
 		// 准备正式数据；
 		int totalCount = batchSize * batchCount;
-		List<TransactionRequest> txList = prepareDataWriteRequests(ledgerHash, dataAccounts, totalCount, adminKey,
-				false);
+		List<TransactionRequest> txList = prepareDataWriteRequests(ledgerHash, cryptoSetting, dataAccounts, totalCount,
+				adminKey, false);
 
 		Prompter consolePrompter = new ConsolePrompter();
 
@@ -281,18 +284,19 @@ public class LedgerPerformanceTest {
 	private static void testContract(HashDigest ledgerHash, AsymmetricKeypair adminKey, LedgerManager ledgerManager,
 			DefaultOperationHandleRegisteration opHandler, int batchSize, int batchCount, boolean silent) {
 		LedgerRepository ledger = ledgerManager.getLedger(ledgerHash);
+		CryptoSetting cryptoSetting = ledger.getAdminInfo().getSettings().getCryptoSetting();
 		ConsoleUtils.info("\r\n\r\n================= 准备测试交易 [执行合约] =================");
 
 		LedgerBlock latestBlock = ledger.getLatestBlock();
-		LedgerDataQuery previousDataSet = ledger.getLedgerData(latestBlock);
+		LedgerDataSet previousDataSet = ledger.getLedgerDataSet(latestBlock);
 		LedgerEditor newEditor = ledger.createNextBlock();
-		TransactionBatchProcessor txProc = new TransactionBatchProcessor(DEFAULT_SECURITY_MANAGER, newEditor,
-				ledger, opHandler);
+		TransactionBatchProcessor txProc = new TransactionBatchProcessor(DEFAULT_SECURITY_MANAGER, newEditor, ledger,
+				opHandler);
 
 		// 准备请求
 		int totalCount = batchSize * batchCount;
-		List<TransactionRequest> contractTxList = prepareContractRequests(ledgerHash, adminKey, totalCount, false,
-				txProc);
+		List<TransactionRequest> contractTxList = prepareContractRequests(ledgerHash, cryptoSetting, adminKey,
+				totalCount, false, txProc);
 
 		Prompter consolePrompter = new PresetAnswerPrompter("N");
 
@@ -317,7 +321,7 @@ public class LedgerPerformanceTest {
 		long batchStartTs = System.currentTimeMillis();
 		for (int i = 0; i < batchCount; i++) {
 			LedgerBlock latestBlock = ledger.getLatestBlock();
-			LedgerDataQuery previousDataSet = ledger.getLedgerData(latestBlock);
+			LedgerDataSet previousDataSet = ledger.getLedgerDataSet(latestBlock);
 			if (statistic) {
 				ConsoleUtils.info("------ 开始执行交易, 即将生成区块[高度：%s] ------", (latestBlock.getHeight() + 1));
 			}
@@ -361,12 +365,12 @@ public class LedgerPerformanceTest {
 		handle.commit();
 	}
 
-	public static List<TransactionRequest> prepareUserRegisterRequests(HashDigest ledgerHash, int count,
-			AsymmetricKeypair adminKey) {
+	public static List<TransactionRequest> prepareUserRegisterRequests(HashDigest ledgerHash,
+			CryptoSetting cryptoSetting, int count, AsymmetricKeypair adminKey) {
 		long startTs = System.currentTimeMillis();
 		List<TransactionRequest> txList = new ArrayList<>();
 		for (int i = 0; i < count; i++) {
-			TxBuilder txbuilder = new TxBuilder(ledgerHash);
+			TxBuilder txbuilder = new TxBuilder(ledgerHash, cryptoSetting.getHashAlgorithm());
 			BlockchainKeypair userKey = BlockchainKeyGenerator.getInstance().generate();
 			txbuilder.users().register(userKey.getIdentity());
 			TransactionRequestBuilder reqBuilder = txbuilder.prepareRequest();
@@ -382,12 +386,13 @@ public class LedgerPerformanceTest {
 	}
 
 	public static List<TransactionRequest> prepareDataAccountRegisterRequests(HashDigest ledgerHash,
-			BlockchainIdentity[] dataAccounts, AsymmetricKeypair adminKey, boolean statistic) {
+			CryptoSetting cryptoSetting, BlockchainIdentity[] dataAccounts, AsymmetricKeypair adminKey,
+			boolean statistic) {
 		int count = dataAccounts.length;
 		long startTs = System.currentTimeMillis();
 		List<TransactionRequest> txList = new ArrayList<>();
 		for (int i = 0; i < count; i++) {
-			TxBuilder txbuilder = new TxBuilder(ledgerHash);
+			TxBuilder txbuilder = new TxBuilder(ledgerHash, cryptoSetting.getHashAlgorithm());
 			BlockchainKeypair dataAccountKey = BlockchainKeyGenerator.getInstance().generate();
 			dataAccounts[i] = dataAccountKey.getIdentity();
 			txbuilder.dataAccounts().register(dataAccounts[i]);
@@ -405,12 +410,12 @@ public class LedgerPerformanceTest {
 		return txList;
 	}
 
-	public static List<TransactionRequest> prepareDataWriteRequests(HashDigest ledgerHash,
+	public static List<TransactionRequest> prepareDataWriteRequests(HashDigest ledgerHash, CryptoSetting cryptoSetting,
 			BlockchainIdentity[] dataAccounts, int count, AsymmetricKeypair adminKey, boolean statistic) {
 		long startTs = System.currentTimeMillis();
 		List<TransactionRequest> txList = new ArrayList<>();
 		for (int i = 0; i < count; i++) {
-			TxBuilder txbuilder = new TxBuilder(ledgerHash);
+			TxBuilder txbuilder = new TxBuilder(ledgerHash, cryptoSetting.getHashAlgorithm());
 			// BlockchainKeyPair dataAccountKey =
 			// BlockchainKeyGenerator.getInstance().generate();
 			BlockchainIdentity targetAccount = dataAccounts[count % dataAccounts.length];
@@ -433,8 +438,8 @@ public class LedgerPerformanceTest {
 		return ConsensusProviders.getProvider(provider);
 	}
 
-	public static List<TransactionRequest> prepareContractRequests(HashDigest ledgerHash, AsymmetricKeypair adminKey,
-			int count, boolean statistic, TransactionBatchProcessor txProc) {
+	public static List<TransactionRequest> prepareContractRequests(HashDigest ledgerHash, CryptoSetting cryptoSetting,
+			AsymmetricKeypair adminKey, int count, boolean statistic, TransactionBatchProcessor txProc) {
 
 		// deploy contract
 		byte[] chainCode;
@@ -447,7 +452,7 @@ public class LedgerPerformanceTest {
 			e.printStackTrace();
 			return null;
 		}
-		TxBuilder txbuilder = new TxBuilder(ledgerHash);
+		TxBuilder txbuilder = new TxBuilder(ledgerHash, cryptoSetting.getHashAlgorithm());
 		BlockchainKeypair contractAccountKey = BlockchainKeyGenerator.getInstance().generate();
 		BlockchainIdentity contractIdentity = contractAccountKey.getIdentity();
 		txbuilder.contracts().deploy(contractIdentity, chainCode);
@@ -474,7 +479,7 @@ public class LedgerPerformanceTest {
 		long startTs = System.currentTimeMillis();
 		List<TransactionRequest> txList = new ArrayList<>();
 		for (int i = 0; i < count; i++) {
-			txbuilder = new TxBuilder(ledgerHash);
+			txbuilder = new TxBuilder(ledgerHash, cryptoSetting.getHashAlgorithm());
 			String args = dataIdentity.getAddress().toString() + "##" + Integer.toString(i) + "##"
 					+ Integer.toString(i);
 			txbuilder.contractEvents().send(contractIdentity.getAddress(), "print", BytesDataList.singleText("hello"));
@@ -501,7 +506,7 @@ public class LedgerPerformanceTest {
 		LedgerInitProperties initSetting = loadInitSetting();
 		Properties props = loadConsensusSetting(config);
 		ConsensusProvider csProvider = getConsensusProvider(provider);
-		ConsensusSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
+		ConsensusViewSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
 				Utils.loadParticipantNodes());
 
 		DBSetting dbsetting0;
@@ -642,7 +647,7 @@ public class LedgerPerformanceTest {
 		public static final FreedomLedgerSecurityManager INSTANCE = new FreedomLedgerSecurityManager();
 
 		@Override
-		public SecurityPolicy createSecurityPolicy(Set<Bytes> endpoints, Set<Bytes> nodes) {
+		public SecurityPolicy getSecurityPolicy(Set<Bytes> endpoints, Set<Bytes> nodes) {
 			return new FreedomSecurityPolicy(endpoints, nodes);
 		}
 
@@ -703,7 +708,8 @@ public class LedgerPerformanceTest {
 		}
 
 		@Override
-		public void checkNodePermission(LedgerPermission permission, MultiIDsPolicy midPolicy) throws LedgerSecurityException {
+		public void checkNodePermission(LedgerPermission permission, MultiIDsPolicy midPolicy)
+				throws LedgerSecurityException {
 		}
 
 		@Override

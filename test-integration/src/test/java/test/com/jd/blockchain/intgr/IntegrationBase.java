@@ -8,6 +8,27 @@
  */
 package test.com.jd.blockchain.intgr;
 
+import static com.jd.blockchain.transaction.ContractReturnValue.decode;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicLong;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.springframework.core.io.ClassPathResource;
+
 import com.jd.blockchain.binaryproto.DataContractRegistry;
 import com.jd.blockchain.crypto.AddressEncoding;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
@@ -38,26 +59,10 @@ import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.transaction.GenericValueHolder;
 import com.jd.blockchain.utils.Bytes;
+import com.jd.blockchain.utils.Property;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker;
 import com.jd.blockchain.utils.io.BytesUtils;
 import com.jd.blockchain.utils.net.NetworkAddress;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.springframework.core.io.ClassPathResource;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicLong;
-
-import static com.jd.blockchain.transaction.ContractReturnValue.decode;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -104,7 +109,7 @@ public class IntegrationBase {
 		// 签名；
 		PreparedTransaction ptx = txTpl.prepare();
 
-		HashDigest transactionHash = ptx.getHash();
+		HashDigest transactionHash = ptx.getTransactionHash();
 
 		ptx.sign(adminKey);
 
@@ -116,6 +121,32 @@ public class IntegrationBase {
 		keyPairResponse.txResp = txResp;
 		keyPairResponse.txHash = transactionHash;
 		return keyPairResponse;
+	}
+
+	public static void testSDK_Update_Consensus_Settings(AsymmetricKeypair adminKey, HashDigest ledgerHash,
+													   BlockchainService blockchainService) {
+
+		List<Property> properties = new ArrayList<Property>();
+
+		// 修改bftsmart.conf配置文件中的选项；
+		properties.add(new Property("system.communication.useSenderThread",  "false"));
+
+		Property[] propertiesArray = properties.toArray(new Property[properties.size()]);
+
+		TransactionTemplate txTpl = blockchainService.newTransaction(ledgerHash);
+
+		txTpl.settings().update(propertiesArray);
+
+		// TX 准备就绪；
+		PreparedTransaction prepTx = txTpl.prepare();
+
+		// 使用私钥进行签名；
+		prepTx.sign(adminKey);
+
+		// 提交交易；
+		TransactionResponse transactionResponse = prepTx.commit();
+
+		System.out.println(transactionResponse.isSuccess());
 	}
 
 	public static KeyPairResponse testSDK_BlockFullRollBack(AsymmetricKeypair adminKey, HashDigest ledgerHash,
@@ -130,7 +161,7 @@ public class IntegrationBase {
 
 		PreparedTransaction prepTx = txTpl.prepare();
 
-		HashDigest transactionHash = prepTx.getHash();
+		HashDigest transactionHash = prepTx.getTransactionHash();
 
 		prepTx.sign(adminKey);
 
@@ -163,7 +194,7 @@ public class IntegrationBase {
 		// 签名；
 		PreparedTransaction ptx = txTpl.prepare();
 
-		HashDigest transactionHash = ptx.getHash();
+		HashDigest transactionHash = ptx.getTransactionHash();
 
 		ptx.sign(adminKey);
 
@@ -194,7 +225,7 @@ public class IntegrationBase {
 		// TX 准备就绪；
 		PreparedTransaction prepTx = txTemp.prepare();
 
-		HashDigest transactionHash = prepTx.getHash();
+		HashDigest transactionHash = prepTx.getTransactionHash();
 
 		// 使用私钥进行签名；
 		prepTx.sign(adminKey);
@@ -225,7 +256,7 @@ public class IntegrationBase {
 		// 签名；
 		PreparedTransaction ptx = txTpl.prepare();
 
-		HashDigest transactionHash = ptx.getHash();
+		HashDigest transactionHash = ptx.getTransactionHash();
 
 		ptx.sign(adminKey);
 
@@ -249,7 +280,7 @@ public class IntegrationBase {
 		// 签名；
 		PreparedTransaction ptx = txTpl.prepare();
 
-		HashDigest transactionHash = ptx.getHash();
+		HashDigest transactionHash = ptx.getTransactionHash();
 
 		ptx.sign(adminKey);
 
@@ -274,7 +305,7 @@ public class IntegrationBase {
 		// 签名；
 		PreparedTransaction ptx = txTpl.prepare();
 
-		HashDigest transactionHash = ptx.getHash();
+		HashDigest transactionHash = ptx.getTransactionHash();
 
 		ptx.sign(adminKey);
 
@@ -306,7 +337,7 @@ public class IntegrationBase {
 		// TX 准备就绪；
 		PreparedTransaction prepTx = txTemp.prepare();
 
-		HashDigest transactionHash = prepTx.getHash();
+		HashDigest transactionHash = prepTx.getTransactionHash();
 
 		// 使用私钥进行签名；
 		prepTx.sign(adminKey);
@@ -345,7 +376,7 @@ public class IntegrationBase {
 			assertNotNull(ledgerRepository.getDataAccountSet(ledgerRepository.getLatestBlock())
 					.getAccount(keyPair.getAddress()));
 		} else if (keyPairType == KeyPairType.EVENTACCOUNT) {
-			assertNotNull(ledgerRepository.getUserEvents(ledgerRepository.getLatestBlock())
+			assertNotNull(ledgerRepository.getLedgerEventSet(ledgerRepository.getLatestBlock()).getEventAccountSet()
 					.getAccount(keyPair.getAddress()));
 		}
 		System.out.printf("validKeyPair end %s \r\n", index);
@@ -816,7 +847,7 @@ public class IntegrationBase {
 		assertTrue(txResp.isSuccess());
 
         // 验证结果；
-        assertEquals(ptx.getHash(),txResp.getContentHash());
+        assertEquals(ptx.getTransactionHash(),txResp.getContentHash());
 
 		LedgerBlock block = ledgerRepository.getBlock(txResp.getBlockHeight());
 		byte[] contractCodeInDb = ledgerRepository.getContractAccountSet(block)

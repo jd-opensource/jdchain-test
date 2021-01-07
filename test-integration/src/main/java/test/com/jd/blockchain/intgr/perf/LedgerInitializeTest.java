@@ -10,7 +10,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import com.jd.blockchain.consensus.ConsensusProvider;
 import com.jd.blockchain.consensus.ConsensusProviders;
-import com.jd.blockchain.consensus.ConsensusSettings;
+import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.crypto.AddressEncoding;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.Crypto;
@@ -27,7 +27,7 @@ import com.jd.blockchain.ledger.core.LedgerInitProposal;
 import com.jd.blockchain.ledger.core.LedgerManager;
 import com.jd.blockchain.ledger.core.LedgerQuery;
 import com.jd.blockchain.ledger.core.UserAccount;
-import com.jd.blockchain.ledger.core.UserAccountQuery;
+import com.jd.blockchain.ledger.core.UserAccountSet;
 import com.jd.blockchain.storage.service.utils.MemoryDBConnFactory;
 //import com.jd.blockchain.storage.service.utils.MemoryBasedDb;
 import com.jd.blockchain.tools.initializer.DBConnectionConfig;
@@ -114,7 +114,7 @@ public class LedgerInitializeTest {
 
 		LedgerBlock genesisBlock = ledger0.getLatestBlock();
 
-		UserAccountQuery userset0 = ledger0.getUserAccountSet(genesisBlock);
+		UserAccountSet userset0 = ledger0.getUserAccountSet(genesisBlock);
 
 		PubKey pubKey0 = KeyGenUtils.decodePubKey(PUB_KEYS[0]);
 		Bytes address0 = AddressEncoding.generateAddress(pubKey0);

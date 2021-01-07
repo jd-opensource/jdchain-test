@@ -16,7 +16,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import com.jd.blockchain.binaryproto.BinaryProtocol;
 import com.jd.blockchain.consensus.ConsensusProvider;
-import com.jd.blockchain.consensus.ConsensusSettings;
+import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.crypto.KeyGenUtils;
 import com.jd.blockchain.crypto.PrivKey;
@@ -79,7 +79,7 @@ public class LedgerInitializeWeb4SingleStepsTest {
 		// 加载共识配置；
 		Properties props = loadConsensusSetting(consensusConfig.getConfigPath());
 		ConsensusProvider csProvider = LedgerInitConsensusConfig.getConsensusProvider(consensusConfig.getProvider());
-		ConsensusSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
+		ConsensusViewSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
 				Utils.loadParticipantNodes());
 
 		// 启动服务器；
@@ -127,13 +127,16 @@ public class LedgerInitializeWeb4SingleStepsTest {
 		TransactionContent initTxContent2 = node2.getInitTxContent();
 		TransactionContent initTxContent3 = node3.getInitTxContent();
 
-		assertTrue(SignatureUtils.verifySignature(initTxContent0, permission0.getTransactionSignature(), pubKey0));
-		assertTrue(SignatureUtils.verifySignature(initTxContent1, permission1.getTransactionSignature(), pubKey1));
-		assertTrue(SignatureUtils.verifySignature(initTxContent2, permission2.getTransactionSignature(), pubKey2));
-		assertTrue(SignatureUtils.verifySignature(initTxContent3, permission3.getTransactionSignature(), pubKey3));
+		assertTrue(SignatureUtils.verifySignature(initConfig.getCryptoConfig().getHashAlgorithm(), initTxContent0,
+				permission0.getTransactionSignature(), pubKey0));
+		assertTrue(SignatureUtils.verifySignature(initConfig.getCryptoConfig().getHashAlgorithm(), initTxContent1,
+				permission1.getTransactionSignature(), pubKey1));
+		assertTrue(SignatureUtils.verifySignature(initConfig.getCryptoConfig().getHashAlgorithm(), initTxContent2,
+				permission2.getTransactionSignature(), pubKey2));
+		assertTrue(SignatureUtils.verifySignature(initConfig.getCryptoConfig().getHashAlgorithm(), initTxContent3,
+				permission3.getTransactionSignature(), pubKey3));
 
-		assertNotNull(initTxContent0.getHash());
-		if (!initTxContent0.getHash().equals(initTxContent1.getHash())) {
+		if (!Utils.areEqual(initTxContent0, initTxContent1)) {
 			assertNull(initTxContent0.getLedgerHash());
 			assertNull(initTxContent1.getLedgerHash());
 			Operation[] oplist0 = initTxContent0.getOperations();
@@ -172,9 +175,9 @@ public class LedgerInitializeWeb4SingleStepsTest {
 			assertTrue(BytesUtils.equals(regOpBytes03, regOpBytes13));
 
 		}
-		assertEquals(initTxContent0.getHash(), initTxContent1.getHash());
-		assertEquals(initTxContent0.getHash(), initTxContent2.getHash());
-		assertEquals(initTxContent0.getHash(), initTxContent3.getHash());
+		assertTrue(Utils.areEqual(initTxContent0, initTxContent1));
+		assertTrue(Utils.areEqual(initTxContent0, initTxContent2));
+		assertTrue(Utils.areEqual(initTxContent0, initTxContent3));
 
 		assertNull(initTxContent0.getLedgerHash());
 		assertNull(initTxContent1.getLedgerHash());

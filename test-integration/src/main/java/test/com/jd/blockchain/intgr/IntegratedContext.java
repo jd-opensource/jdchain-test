@@ -4,9 +4,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.jd.blockchain.consensus.ConsensusSettings;
+import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.HashDigest;
+import com.jd.blockchain.ledger.CryptoSetting;
 import com.jd.blockchain.ledger.core.LedgerManager;
 import com.jd.blockchain.storage.service.DbConnectionFactory;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
@@ -14,6 +15,8 @@ import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 public class IntegratedContext {
 
 	private HashDigest ledgerHash;
+	
+	private CryptoSetting cryptoSetting;
 
 	private Map<Integer, Node> nodes = new HashMap<>();
 
@@ -35,6 +38,14 @@ public class IntegratedContext {
 	public void setLedgerHash(HashDigest ledgerHash) {
 		this.ledgerHash = ledgerHash;
 	}
+	
+	public void setCryptoSetting(CryptoSetting cryptoSetting) {
+		this.cryptoSetting = cryptoSetting;
+	}
+	
+	public CryptoSetting getCryptoSetting() {
+		return cryptoSetting;
+	}
 
 	public Node getNode(int id) {
 		return nodes.get(id);
@@ -51,7 +62,7 @@ public class IntegratedContext {
 		private AsymmetricKeypair partiKeyPair;
 
 		// private NetworkAddress consensusAddress;
-		private ConsensusSettings consensusSettings;
+		private ConsensusViewSettings consensusSettings;
 
 		private LedgerManager ledgerManager;
 
@@ -63,7 +74,7 @@ public class IntegratedContext {
 			this.id = id;
 		}
 
-		public ConsensusSettings getConsensusAddress() {
+		public ConsensusViewSettings getConsensusAddress() {
 			return consensusSettings;
 		}
 
@@ -87,7 +98,7 @@ public class IntegratedContext {
 			return id;
 		}
 
-		public void setConsensusSettings(ConsensusSettings consensusSettings) {
+		public void setConsensusSettings(ConsensusViewSettings consensusSettings) {
 			this.consensusSettings = consensusSettings;
 		}
 

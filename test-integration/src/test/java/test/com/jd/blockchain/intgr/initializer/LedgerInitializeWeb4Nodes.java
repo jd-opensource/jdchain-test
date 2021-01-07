@@ -1,7 +1,7 @@
 package test.com.jd.blockchain.intgr.initializer;
 
 import com.jd.blockchain.consensus.ConsensusProvider;
-import com.jd.blockchain.consensus.ConsensusSettings;
+import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.crypto.AddressEncoding;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.crypto.KeyGenUtils;
@@ -86,7 +86,7 @@ public class LedgerInitializeWeb4Nodes {
 		LedgerInitProperties initSetting = loadInitSetting_2();
 		Properties props = loadConsensusSetting(config.getConfigPath());
 		ConsensusProvider csProvider = LedgerInitConsensusConfig.getConsensusProvider(config.getProvider());
-		ConsensusSettings csProps = csProvider.getSettingsFactory()
+		ConsensusViewSettings csProps = csProvider.getSettingsFactory()
 				.getConsensusSettingsBuilder()
 				.createSettings(props, Utils.loadParticipantNodes());
 
@@ -154,7 +154,7 @@ public class LedgerInitializeWeb4Nodes {
 		assertEquals(0, genesisBlock.getHeight());
 		assertEquals(ledgerHash0, genesisBlock.getHash());
 
-		UserAccountQuery userset0 = ledger0.getUserAccountSet(genesisBlock);
+		UserAccountSet userset0 = ledger0.getUserAccountSet(genesisBlock);
 
 		PubKey pubKey0 = KeyGenUtils.decodePubKey(PUB_KEYS[0]);
 		Bytes address0 = AddressEncoding.generateAddress(pubKey0);

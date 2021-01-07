@@ -15,19 +15,20 @@ import org.springframework.core.io.ClassPathResource;
 
 import com.jd.blockchain.consensus.ConsensusProvider;
 import com.jd.blockchain.consensus.ConsensusProviders;
-import com.jd.blockchain.consensus.ConsensusSettings;
+import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.crypto.KeyGenUtils;
 import com.jd.blockchain.crypto.PrivKey;
 import com.jd.blockchain.ledger.BlockchainKeyGenerator;
 import com.jd.blockchain.ledger.BlockchainKeypair;
+import com.jd.blockchain.ledger.CryptoSetting;
 import com.jd.blockchain.ledger.LedgerBlock;
 import com.jd.blockchain.ledger.LedgerInitProperties;
 import com.jd.blockchain.ledger.TransactionRequest;
 import com.jd.blockchain.ledger.TransactionRequestBuilder;
 import com.jd.blockchain.ledger.core.DefaultOperationHandleRegisteration;
-import com.jd.blockchain.ledger.core.LedgerDataQuery;
+import com.jd.blockchain.ledger.core.LedgerDataSet;
 import com.jd.blockchain.ledger.core.LedgerEditor;
 import com.jd.blockchain.ledger.core.LedgerManager;
 import com.jd.blockchain.ledger.core.LedgerRepository;
@@ -66,18 +67,19 @@ public class LedgerBlockGeneratingTest {
 	private static void test(HashDigest ledgerHash, AsymmetricKeypair adminKey, LedgerManager ledgerManager,
 			DefaultOperationHandleRegisteration opHandler, int batchSize, int batchCount) {
 		LedgerRepository ledger = ledgerManager.getLedger(ledgerHash);
+		CryptoSetting cryptoSetting = ledger.getAdminInfo().getSettings().getCryptoSetting();
 		long height = ledger.getLatestBlockHeight();
 		assertEquals(0L, height);
 
 		ConsoleUtils.info("\r\n\r\n================= 准备测试交易 [注册用户] =================");
 		int totalCount = batchSize * batchCount;
-		List<TransactionRequest> txList = prepareUserRegisterRequests(ledgerHash, totalCount, adminKey);
+		List<TransactionRequest> txList = prepareUserRegisterRequests(ledgerHash, cryptoSetting, totalCount, adminKey);
 
 		for (int i = 0; i < batchCount; i++) {
 			LedgerBlock latestBlock = ledger.getLatestBlock();
 			assertEquals(height + i, latestBlock.getHeight());
 
-			LedgerDataQuery previousDataSet = ledger.getLedgerData(latestBlock);
+			LedgerDataSet previousDataSet = ledger.getLedgerDataSet(latestBlock);
 			ConsoleUtils.info("------ 开始执行交易, 即将生成区块[%s] ------", (latestBlock.getHeight() + 1));
 			long startTs = System.currentTimeMillis();
 
@@ -105,11 +107,11 @@ public class LedgerBlockGeneratingTest {
 		handle.commit();
 	}
 
-	private static List<TransactionRequest> prepareUserRegisterRequests(HashDigest ledgerHash, int count,
-			AsymmetricKeypair adminKey) {
+	private static List<TransactionRequest> prepareUserRegisterRequests(HashDigest ledgerHash,
+			CryptoSetting cryptoSetting, int count, AsymmetricKeypair adminKey) {
 		List<TransactionRequest> txList = new ArrayList<>();
 		for (int i = 0; i < count; i++) {
-			TxBuilder txbuilder = new TxBuilder(ledgerHash);
+			TxBuilder txbuilder = new TxBuilder(ledgerHash, cryptoSetting.getHashAlgorithm());
 			BlockchainKeypair userKey = BlockchainKeyGenerator.getInstance().generate();
 			txbuilder.users().register(userKey.getIdentity());
 			TransactionRequestBuilder reqBuilder = txbuilder.prepareRequest();
@@ -130,7 +132,7 @@ public class LedgerBlockGeneratingTest {
 		LedgerInitProperties initSetting = loadInitSetting();
 		Properties props = loadConsensusSetting();
 		ConsensusProvider csProvider = getConsensusProvider();
-		ConsensusSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
+		ConsensusViewSettings csProps = csProvider.getSettingsFactory().getConsensusSettingsBuilder().createSettings(props,
 				Utils.loadParticipantNodes());
 
 		NodeContext node0 = new NodeContext(initSetting.getConsensusParticipant(0).getInitializerAddress(),

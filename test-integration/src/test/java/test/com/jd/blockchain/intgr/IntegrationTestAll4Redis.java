@@ -35,7 +35,7 @@ import com.jd.blockchain.ledger.TransactionState;
 import com.jd.blockchain.ledger.TransactionTemplate;
 import com.jd.blockchain.ledger.TypedKVEntry;
 import com.jd.blockchain.ledger.core.DataAccount;
-import com.jd.blockchain.ledger.core.DataAccountQuery;
+import com.jd.blockchain.ledger.core.DataAccountSet;
 import com.jd.blockchain.ledger.core.LedgerManage;
 import com.jd.blockchain.ledger.core.LedgerManager;
 import com.jd.blockchain.ledger.core.LedgerQuery;
@@ -300,7 +300,7 @@ public class IntegrationTestAll4Redis {
 		// 先验证应答
 		assertEquals(TransactionState.SUCCESS, txResp.getExecutionState());
 		assertEquals(txResp.getBlockHeight(), ledgerRepository.getLatestBlockHeight());
-		assertEquals(txResp.getContentHash(), prepTx.getHash());
+		assertEquals(txResp.getContentHash(), prepTx.getTransactionHash());
 		assertEquals(txResp.getBlockHash(), ledgerRepository.getLatestBlockHash());
 
 		TypedKVEntry[] kvDataEntries = blockchainService.getDataEntries(ledgerHash, dataAccountAddress.toString(),
@@ -326,7 +326,7 @@ public class IntegrationTestAll4Redis {
 		// 签名；
 		PreparedTransaction ptx = txTpl.prepare();
 
-		HashDigest transactionHash = ptx.getHash();
+		HashDigest transactionHash = ptx.getTransactionHash();
 
 		ptx.sign(adminKey);
 
@@ -361,7 +361,7 @@ public class IntegrationTestAll4Redis {
 		// 签名；
 		PreparedTransaction ptx = txTpl.prepare();
 
-		HashDigest transactionHash = ptx.getHash();
+		HashDigest transactionHash = ptx.getTransactionHash();
 
 		ptx.sign(adminKey);
 
@@ -432,7 +432,7 @@ public class IntegrationTestAll4Redis {
 		byte[] contractCodeInDb = ledgerRepository.getContractAccountSet(block)
 				.getAccount(contractDeployKey.getAddress()).getChainCode();
 		assertArrayEquals(contractCode, contractCodeInDb);
-		txContentHash = ptx.getHash();
+		txContentHash = ptx.getTransactionHash();
 
 		// execute the contract;
 		testContractExe(adminKey, ledgerHash, userKey, blockchainService, ledgerRepository);
@@ -468,7 +468,7 @@ public class IntegrationTestAll4Redis {
 		assertEquals(txResp.getBlockHeight(), backgroundLedgerBlock.getHeight());
 
 		// 验证合约中的赋值，外部可以获得;
-		DataAccountQuery dataAccountSet = ledgerRepository.getDataAccountSet(backgroundLedgerBlock);
+		DataAccountSet dataAccountSet = ledgerRepository.getDataAccountSet(backgroundLedgerBlock);
 		AsymmetricKeypair key = Crypto.getSignatureFunction("ED25519").generateKeypair();
 		PubKey pubKey = key.getPubKey();
 		Bytes dataAddress = AddressEncoding.generateAddress(pubKey);
