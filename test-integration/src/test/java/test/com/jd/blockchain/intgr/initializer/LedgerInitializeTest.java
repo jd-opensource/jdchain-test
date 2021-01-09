@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
-import com.jd.blockchain.binaryproto.DataContractRegistry;
+import com.jd.binaryproto.DataContractRegistry;
 import com.jd.blockchain.crypto.AddressEncoding;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.Crypto;

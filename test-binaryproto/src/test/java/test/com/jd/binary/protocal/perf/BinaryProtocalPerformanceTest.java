@@ -5,7 +5,7 @@ import java.util.concurrent.Callable;
 import org.junit.Test;
 
 import com.google.protobuf.ByteString;
-import com.jd.blockchain.binaryproto.BinaryProtocol;
+import com.jd.binaryproto.BinaryProtocol;
 import com.jd.blockchain.utils.ConsoleUtils;
 import com.jd.blockchain.utils.security.RandomUtils;
 import com.jd.blockchain.utils.serialize.binary.BinarySerializeUtils;

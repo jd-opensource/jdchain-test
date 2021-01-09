@@ -15,7 +15,7 @@ import java.util.Set;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
-import com.jd.blockchain.binaryproto.DataContractRegistry;
+import com.jd.binaryproto.DataContractRegistry;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.crypto.KeyGenUtils;
 import com.jd.blockchain.crypto.PrivKey;

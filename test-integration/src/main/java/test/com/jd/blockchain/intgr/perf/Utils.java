@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.bouncycastle.util.Arrays;
 import org.springframework.core.io.ClassPathResource;
 
-import com.jd.blockchain.binaryproto.BinaryProtocol;
+import com.jd.binaryproto.BinaryProtocol;
 import com.jd.blockchain.consensus.ConsensusProvider;
 import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.consensus.Replica;
