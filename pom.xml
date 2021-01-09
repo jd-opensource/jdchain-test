@@ -18,6 +18,7 @@
 	<properties>
 		<core.version>1.4.0.RELEASE</core.version>
 		<kvdb.version>1.1.1.RELEASE</kvdb.version>
+		<httpservice.version>1.4.0.RELEASE</httpservice.version>
 	</properties>
 
 	<modules>

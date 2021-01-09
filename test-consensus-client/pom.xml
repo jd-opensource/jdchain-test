@@ -29,11 +29,10 @@
 		<dependency>
 			<groupId>com.jd.blockchain</groupId>
 			<artifactId>consensus-bftsmart</artifactId>
-			<version>${core.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.jd.blockchain</groupId>
-			<artifactId>utils-http</artifactId>
+			<groupId>com.jd.httpservice</groupId>
+			<artifactId>httpservice-agent</artifactId>
 			<version>${framework.version}</version>
 		</dependency>
 		<dependency>

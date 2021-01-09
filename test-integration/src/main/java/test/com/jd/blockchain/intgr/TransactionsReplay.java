@@ -36,7 +36,8 @@ import com.jd.blockchain.transaction.TxContentBlob;
 import com.jd.blockchain.transaction.TxRequestBuilder;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker.AsyncCallback;
 import com.jd.blockchain.utils.net.NetworkAddress;
-import com.jd.blockchain.utils.web.model.WebResponse;
+import com.jd.httpservice.utils.web.WebResponse;
+
 import org.springframework.core.io.ClassPathResource;
 import test.com.jd.blockchain.intgr.IntegratedContext.Node;
 import test.com.jd.blockchain.intgr.perf.LedgerInitializeWebTest;
