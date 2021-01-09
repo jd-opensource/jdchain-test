@@ -43,15 +43,15 @@ import com.jd.blockchain.tools.initializer.web.LedgerInitConfiguration;
 import com.jd.blockchain.tools.initializer.web.LedgerInitConsensusService;
 import com.jd.blockchain.tools.initializer.web.LedgerInitializeWebController;
 import com.jd.blockchain.transaction.SignatureUtils;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker.AsyncCallback;
-import com.jd.blockchain.utils.io.BytesUtils;
-import com.jd.blockchain.utils.io.FileUtils;
-import com.jd.blockchain.utils.net.NetworkAddress;
 
 import test.com.jd.blockchain.intgr.LedgerInitConsensusConfig;
 import test.com.jd.blockchain.intgr.PresetAnswerPrompter;
 import test.com.jd.blockchain.intgr.perf.Utils;
+import utils.concurrent.ThreadInvoker;
+import utils.concurrent.ThreadInvoker.AsyncCallback;
+import utils.io.BytesUtils;
+import utils.io.FileUtils;
+import utils.net.NetworkAddress;
 
 public class LedgerInitializeWeb4SingleStepsTest {
 

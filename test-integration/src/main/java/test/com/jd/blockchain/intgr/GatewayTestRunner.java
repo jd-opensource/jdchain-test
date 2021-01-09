@@ -2,9 +2,11 @@ package test.com.jd.blockchain.intgr;
 
 import com.jd.blockchain.gateway.GatewayConfigProperties;
 import com.jd.blockchain.gateway.GatewayConfigProperties.KeyPairConfig;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker.AsyncCallback;
-import com.jd.blockchain.utils.net.NetworkAddress;
+
+import utils.concurrent.ThreadInvoker;
+import utils.concurrent.ThreadInvoker.AsyncCallback;
+import utils.net.NetworkAddress;
+
 import com.jd.blockchain.gateway.GatewayServerBooter;
 
 import org.springframework.core.io.ClassPathResource;

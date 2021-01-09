@@ -10,12 +10,13 @@ import com.jd.blockchain.storage.service.DbConnection;
 import com.jd.blockchain.storage.service.KVStorageService;
 import com.jd.blockchain.storage.service.VersioningKVStorage;
 import com.jd.blockchain.storage.service.impl.redis.RedisConnectionFactory;
-import com.jd.blockchain.utils.ArgumentSet;
-import com.jd.blockchain.utils.Bytes;
-import com.jd.blockchain.utils.ConsoleUtils;
-import com.jd.blockchain.utils.codec.Base58Utils;
-import com.jd.blockchain.utils.io.BytesUtils;
-import com.jd.blockchain.utils.security.ShaUtils;
+
+import utils.ArgumentSet;
+import utils.Bytes;
+import utils.ConsoleUtils;
+import utils.codec.Base58Utils;
+import utils.io.BytesUtils;
+import utils.security.ShaUtils;
 
 public class PerformanceTest {
 

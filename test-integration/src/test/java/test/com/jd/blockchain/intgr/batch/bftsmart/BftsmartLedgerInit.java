@@ -35,14 +35,14 @@ import com.jd.blockchain.storage.service.DbConnectionFactory;
 import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.tools.initializer.LedgerInitCommand;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker;
-import com.jd.blockchain.utils.io.FileUtils;
-import com.jd.blockchain.utils.net.NetworkAddress;
 
 import test.com.jd.blockchain.intgr.GatewayTestRunner;
 import test.com.jd.blockchain.intgr.IntegrationBase;
 import test.com.jd.blockchain.intgr.LedgerInitConsensusConfig;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeTest;
+import utils.concurrent.ThreadInvoker;
+import utils.io.FileUtils;
+import utils.net.NetworkAddress;
 
 /**
  *

@@ -24,12 +24,13 @@ import com.jd.blockchain.sdk.client.GatewayServiceFactory;
 import com.jd.blockchain.storage.service.DbConnectionFactory;
 import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
-import com.jd.blockchain.utils.Bytes;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker;
-import com.jd.blockchain.utils.io.BytesUtils;
+
 import org.junit.Test;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeTest;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeWeb4Nodes;
+import utils.Bytes;
+import utils.concurrent.ThreadInvoker;
+import utils.io.BytesUtils;
 
 import java.util.HashMap;
 import java.util.Map;

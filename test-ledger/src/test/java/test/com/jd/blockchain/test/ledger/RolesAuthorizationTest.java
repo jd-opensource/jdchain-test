@@ -58,8 +58,9 @@ import com.jd.blockchain.storage.service.KVStorageService;
 import com.jd.blockchain.storage.service.utils.MemoryKVStorage;
 import com.jd.blockchain.tools.initializer.web.LedgerInitConfiguration;
 import com.jd.blockchain.transaction.TxBuilder;
-import com.jd.blockchain.utils.Bytes;
-import com.jd.blockchain.utils.io.RuntimeIOException;
+
+import utils.Bytes;
+import utils.io.RuntimeIOException;
 
 public class RolesAuthorizationTest {
 

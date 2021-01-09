@@ -9,8 +9,6 @@ import com.jd.blockchain.sdk.client.GatewayServiceFactory;
 import com.jd.blockchain.storage.service.DbConnectionFactory;
 import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker;
-import com.jd.blockchain.utils.net.NetworkAddress;
 import com.jd.httpservice.converters.JsonResponseConverter;
 import com.jd.httpservice.utils.web.WebResponse;
 
@@ -26,6 +24,8 @@ import org.junit.Test;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeTest;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeWeb4Nodes;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeWeb5Nodes;
+import utils.concurrent.ThreadInvoker;
+import utils.net.NetworkAddress;
 
 import java.io.File;
 import java.io.IOException;

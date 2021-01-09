@@ -4,7 +4,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 
 import com.jd.blockchain.ledger.PreparedTransaction;
-import com.jd.blockchain.utils.ConsoleUtils;
+
+import utils.ConsoleUtils;
 
 public class TransactionCommitter {
 	

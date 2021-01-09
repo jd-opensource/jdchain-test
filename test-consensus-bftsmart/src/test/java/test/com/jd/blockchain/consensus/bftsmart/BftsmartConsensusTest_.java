@@ -13,11 +13,12 @@ import org.junit.Test;
 import com.jd.blockchain.consensus.ConsensusSecurityException;
 import com.jd.blockchain.consensus.Replica;
 import com.jd.blockchain.consensus.bftsmart.service.BftsmartNodeState;
-import com.jd.blockchain.utils.codec.Base58Utils;
-import com.jd.blockchain.utils.concurrent.AsyncFuture;
-import com.jd.blockchain.utils.net.NetworkAddress;
-import com.jd.blockchain.utils.security.RandomUtils;
-import com.jd.blockchain.utils.serialize.json.JSONSerializeUtils;
+
+import utils.codec.Base58Utils;
+import utils.concurrent.AsyncFuture;
+import utils.net.NetworkAddress;
+import utils.security.RandomUtils;
+import utils.serialize.json.JSONSerializeUtils;
 
 /**
  * 消息共识测试；

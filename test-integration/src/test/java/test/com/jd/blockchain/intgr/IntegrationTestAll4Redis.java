@@ -45,13 +45,13 @@ import com.jd.blockchain.storage.service.DbConnection;
 import com.jd.blockchain.storage.service.DbConnectionFactory;
 import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
-import com.jd.blockchain.utils.Bytes;
-import com.jd.blockchain.utils.codec.HexUtils;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker.AsyncCallback;
-import com.jd.blockchain.utils.net.NetworkAddress;
 
 import test.com.jd.blockchain.intgr.contract.AssetContract;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeWeb4SingleStepsTest;
+import utils.Bytes;
+import utils.codec.HexUtils;
+import utils.concurrent.ThreadInvoker.AsyncCallback;
+import utils.net.NetworkAddress;
 
 public class IntegrationTestAll4Redis {
 

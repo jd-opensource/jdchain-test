@@ -4,9 +4,10 @@ import com.jd.blockchain.ledger.core.LedgerManager;
 import com.jd.blockchain.peer.PeerServerBooter;
 import com.jd.blockchain.storage.service.DbConnectionFactory;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker.AsyncCallback;
-import com.jd.blockchain.utils.net.NetworkAddress;
+
+import utils.concurrent.ThreadInvoker;
+import utils.concurrent.ThreadInvoker.AsyncCallback;
+import utils.net.NetworkAddress;
 
 /**
  * PeerServer 定义了一个 Peer 节点服务器实例；

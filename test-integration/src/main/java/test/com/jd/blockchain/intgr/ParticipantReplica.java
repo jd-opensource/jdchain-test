@@ -3,7 +3,8 @@ package test.com.jd.blockchain.intgr;
 import com.jd.blockchain.consensus.Replica;
 import com.jd.blockchain.crypto.PubKey;
 import com.jd.blockchain.ledger.ParticipantNode;
-import com.jd.blockchain.utils.Bytes;
+
+import utils.Bytes;
 
 public class ParticipantReplica implements Replica {
 	

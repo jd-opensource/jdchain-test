@@ -7,8 +7,9 @@ import com.jd.blockchain.crypto.service.classic.ClassicAlgorithm;
 import com.jd.blockchain.ledger.merkletree.MerkleHashSortTree;
 import com.jd.blockchain.ledger.merkletree.TreeOptions;
 import com.jd.blockchain.storage.service.utils.MemoryKVStorage;
-import com.jd.blockchain.utils.Bytes;
-import com.jd.blockchain.utils.ConsoleUtils;
+
+import utils.Bytes;
+import utils.ConsoleUtils;
 
 public class MerkleHashSortTreePerformanceTest {
 	

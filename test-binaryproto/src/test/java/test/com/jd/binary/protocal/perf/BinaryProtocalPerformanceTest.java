@@ -6,11 +6,11 @@ import org.junit.Test;
 
 import com.google.protobuf.ByteString;
 import com.jd.binaryproto.BinaryProtocol;
-import com.jd.blockchain.utils.ConsoleUtils;
-import com.jd.blockchain.utils.security.RandomUtils;
-import com.jd.blockchain.utils.serialize.binary.BinarySerializeUtils;
 
 import test.com.jd.binary.protocal.perf.protobuf.BillProto;
+import utils.ConsoleUtils;
+import utils.security.RandomUtils;
+import utils.serialize.binary.BinarySerializeUtils;
 
 public class BinaryProtocalPerformanceTest {
 

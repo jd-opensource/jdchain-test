@@ -73,16 +73,16 @@ import com.jd.blockchain.tools.initializer.Prompter;
 import com.jd.blockchain.transaction.TxContentBlob;
 import com.jd.blockchain.transaction.TxRequestBuilder;
 import com.jd.blockchain.transaction.UserRegisterOpTemplate;
-import com.jd.blockchain.utils.Bytes;
-import com.jd.blockchain.utils.codec.HexUtils;
-import com.jd.blockchain.utils.concurrent.AsyncFuture;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker.AsyncCallback;
-import com.jd.blockchain.utils.io.Storage;
-import com.jd.blockchain.utils.net.NetworkAddress;
 
 import test.com.jd.blockchain.intgr.IntegratedContext.Node;
 import test.com.jd.blockchain.intgr.perf.LedgerInitializeWebTest;
 import test.com.jd.blockchain.intgr.perf.Utils;
+import utils.Bytes;
+import utils.codec.HexUtils;
+import utils.concurrent.AsyncFuture;
+import utils.concurrent.ThreadInvoker.AsyncCallback;
+import utils.io.Storage;
+import utils.net.NetworkAddress;
 
 public class IntegrationTest {
 	// 合约测试使用的初始化数据;

@@ -42,10 +42,6 @@ import com.jd.blockchain.tools.initializer.LedgerInitCommand;
 import com.jd.blockchain.tools.initializer.LedgerInitProcess;
 import com.jd.blockchain.tools.initializer.Prompter;
 import com.jd.blockchain.tools.initializer.web.LedgerInitializeWebController;
-import com.jd.blockchain.utils.ConsoleUtils;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker.AsyncCallback;
-import com.jd.blockchain.utils.net.NetworkAddress;
 
 import test.com.jd.blockchain.intgr.GatewayTestRunner;
 import test.com.jd.blockchain.intgr.IntegratedContext;
@@ -54,6 +50,10 @@ import test.com.jd.blockchain.intgr.PresetAnswerPrompter;
 import test.com.jd.blockchain.intgr.perf.LedgerInitTestConfiguration;
 import test.com.jd.blockchain.intgr.perf.TransactionCommitter;
 import test.com.jd.blockchain.intgr.perf.Utils;
+import utils.ConsoleUtils;
+import utils.concurrent.ThreadInvoker;
+import utils.concurrent.ThreadInvoker.AsyncCallback;
+import utils.net.NetworkAddress;
 
 public class ConsensusTest {
 

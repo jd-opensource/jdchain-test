@@ -11,9 +11,10 @@ import com.jd.blockchain.crypto.service.classic.ClassicAlgorithm;
 import com.jd.blockchain.ledger.TransactionRequest;
 import com.jd.blockchain.ledger.TransactionRequestBuilder;
 import com.jd.blockchain.transaction.TxBuilder;
-import com.jd.blockchain.utils.Bytes;
-import com.jd.blockchain.utils.codec.Base58Utils;
-import com.jd.blockchain.utils.security.RandomUtils;
+
+import utils.Bytes;
+import utils.codec.Base58Utils;
+import utils.security.RandomUtils;
 
 public class TransactionSizeTest {
 

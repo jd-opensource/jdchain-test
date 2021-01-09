@@ -58,11 +58,12 @@ import com.jd.blockchain.storage.service.DbConnectionFactory;
 import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.transaction.GenericValueHolder;
-import com.jd.blockchain.utils.Bytes;
-import com.jd.blockchain.utils.Property;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker;
-import com.jd.blockchain.utils.io.BytesUtils;
-import com.jd.blockchain.utils.net.NetworkAddress;
+
+import utils.Bytes;
+import utils.Property;
+import utils.concurrent.ThreadInvoker;
+import utils.io.BytesUtils;
+import utils.net.NetworkAddress;
 
 /**
  *
