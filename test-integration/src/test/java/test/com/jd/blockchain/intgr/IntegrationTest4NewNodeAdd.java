@@ -10,9 +10,10 @@ import com.jd.blockchain.storage.service.DbConnectionFactory;
 import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.utils.concurrent.ThreadInvoker;
-import com.jd.blockchain.utils.http.converters.JsonResponseConverter;
 import com.jd.blockchain.utils.net.NetworkAddress;
 import com.jd.blockchain.utils.web.model.WebResponse;
+import com.jd.httpservice.converters.JsonResponseConverter;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;

@@ -1,8 +1,8 @@
 package test.perf.com.jd.blockchain.consensus.client;
 
-import com.jd.blockchain.utils.http.HttpAction;
-import com.jd.blockchain.utils.http.HttpMethod;
-import com.jd.blockchain.utils.http.HttpService;
+import com.jd.httpservice.HttpAction;
+import com.jd.httpservice.HttpMethod;
+import com.jd.httpservice.HttpService;
 
 /**
  * Created by zhangshuang3 on 2018/9/11.
