@@ -15,7 +15,7 @@
 			<artifactId>binary-proto</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.jd.blockchain</groupId>
+			<groupId>com.jd.utils</groupId>
 			<artifactId>utils-serialize</artifactId>
 		</dependency>
 
