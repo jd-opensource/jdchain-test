@@ -13,11 +13,6 @@ import com.jd.blockchain.storage.service.DbConnection;
 import com.jd.blockchain.storage.service.impl.composite.CompositeConnectionFactory;
 import com.jd.blockchain.tools.initializer.*;
 import com.jd.blockchain.tools.initializer.web.LedgerInitializeWebController;
-import com.jd.blockchain.utils.Bytes;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker.AsyncCallback;
-import com.jd.blockchain.utils.io.FileUtils;
-import com.jd.blockchain.utils.net.NetworkAddress;
 
 import org.junit.Test;
 import org.springframework.boot.SpringApplication;
@@ -27,6 +22,11 @@ import test.com.jd.blockchain.intgr.IntegrationBase;
 import test.com.jd.blockchain.intgr.LedgerInitConsensusConfig;
 import test.com.jd.blockchain.intgr.PresetAnswerPrompter;
 import test.com.jd.blockchain.intgr.perf.Utils;
+import utils.Bytes;
+import utils.concurrent.ThreadInvoker;
+import utils.concurrent.ThreadInvoker.AsyncCallback;
+import utils.io.FileUtils;
+import utils.net.NetworkAddress;
 
 import java.io.IOException;
 import java.io.InputStream;

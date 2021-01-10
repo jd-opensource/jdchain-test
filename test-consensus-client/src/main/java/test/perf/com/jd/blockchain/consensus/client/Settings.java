@@ -3,7 +3,7 @@ package test.perf.com.jd.blockchain.consensus.client;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import com.jd.blockchain.utils.io.ByteArray;
+import utils.io.ByteArray;
 
 /**
  * @author huanghaiquan

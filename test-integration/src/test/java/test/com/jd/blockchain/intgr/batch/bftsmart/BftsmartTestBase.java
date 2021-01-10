@@ -16,8 +16,9 @@ import org.junit.Test;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.Crypto;
 import com.jd.blockchain.crypto.SignatureFunction;
-import com.jd.blockchain.utils.codec.Base58Utils;
-import com.jd.blockchain.utils.security.ShaUtils;
+
+import utils.codec.Base58Utils;
+import utils.security.ShaUtils;
 
 /**
  *

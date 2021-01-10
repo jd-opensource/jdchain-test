@@ -15,7 +15,7 @@ import com.jd.blockchain.ledger.*;
 import com.jd.blockchain.ledger.core.UserRolesPrivileges;
 import org.springframework.core.io.ClassPathResource;
 
-import com.jd.blockchain.binaryproto.DataContractRegistry;
+import com.jd.binaryproto.DataContractRegistry;
 import com.jd.blockchain.consensus.ConsensusProvider;
 import com.jd.blockchain.consensus.ConsensusProviders;
 import com.jd.blockchain.consensus.ConsensusViewSettings;
@@ -50,15 +50,15 @@ import com.jd.blockchain.tools.initializer.DBConnectionConfig;
 import com.jd.blockchain.tools.initializer.Prompter;
 import com.jd.blockchain.tools.initializer.web.LedgerInitConsensusService;
 import com.jd.blockchain.transaction.TxBuilder;
-import com.jd.blockchain.utils.ArgumentSet;
-import com.jd.blockchain.utils.Bytes;
-import com.jd.blockchain.utils.ConsoleUtils;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker.AsyncCallback;
-import com.jd.blockchain.utils.io.FileUtils;
-import com.jd.blockchain.utils.net.NetworkAddress;
 
 import test.com.jd.blockchain.intgr.PresetAnswerPrompter;
 import test.com.jd.blockchain.intgr.perf.Utils.NodeContext;
+import utils.ArgumentSet;
+import utils.Bytes;
+import utils.ConsoleUtils;
+import utils.concurrent.ThreadInvoker.AsyncCallback;
+import utils.io.FileUtils;
+import utils.net.NetworkAddress;
 
 //import com.jd.blockchain.storage.service.utils.MemoryBasedDb;
 

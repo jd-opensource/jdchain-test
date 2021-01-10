@@ -38,16 +38,16 @@ import com.jd.blockchain.tools.initializer.DBConnectionConfig;
 import com.jd.blockchain.tools.initializer.Prompter;
 import com.jd.blockchain.tools.initializer.web.LedgerInitConsensusService;
 import com.jd.blockchain.transaction.TxBuilder;
-import com.jd.blockchain.utils.ConsoleUtils;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker.AsyncCallback;
-import com.jd.blockchain.utils.io.FileUtils;
-import com.jd.blockchain.utils.net.NetworkAddress;
 
 import test.com.jd.blockchain.intgr.PresetAnswerPrompter;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeTest;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeTest.NodeContext;
 import test.com.jd.blockchain.intgr.perf.LedgerPerformanceTest;
 import test.com.jd.blockchain.intgr.perf.Utils;
+import utils.ConsoleUtils;
+import utils.concurrent.ThreadInvoker.AsyncCallback;
+import utils.io.FileUtils;
+import utils.net.NetworkAddress;
 
 public class LedgerBlockGeneratingTest {
 

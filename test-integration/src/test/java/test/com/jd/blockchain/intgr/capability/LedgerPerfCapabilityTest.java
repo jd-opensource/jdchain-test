@@ -8,7 +8,7 @@
  */
 package test.com.jd.blockchain.intgr.capability;
 
-import com.jd.blockchain.binaryproto.DataContractRegistry;
+import com.jd.binaryproto.DataContractRegistry;
 import com.jd.blockchain.ledger.LedgerInitOperation;
 import com.jd.blockchain.ledger.UserRegisterOperation;
 import org.junit.Test;

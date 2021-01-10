@@ -33,10 +33,11 @@ import com.jd.blockchain.consensus.ConsensusSecurityException;
 import com.jd.blockchain.consensus.client.ConsensusClient;
 import com.jd.blockchain.consensus.service.MessageHandle;
 import com.jd.blockchain.consensus.service.StateSnapshot;
-import com.jd.blockchain.utils.SkippingIterator;
-import com.jd.blockchain.utils.concurrent.AsyncFuture;
-import com.jd.blockchain.utils.concurrent.AsyncHandle;
-import com.jd.blockchain.utils.concurrent.CompletableAsyncFuture;
+
+import utils.SkippingIterator;
+import utils.concurrent.AsyncFuture;
+import utils.concurrent.AsyncHandle;
+import utils.concurrent.CompletableAsyncFuture;
 
 /**
  * 消息共识的测试；

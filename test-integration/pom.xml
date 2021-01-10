@@ -60,12 +60,10 @@
 		<dependency>
 			<groupId>com.jd.blockchain</groupId>
 			<artifactId>storage-kvdb</artifactId>
-			<version>${core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jd.blockchain</groupId>
 			<artifactId>kvdb-server</artifactId>
-			<version>${kvdb.version}</version>
 		</dependency>
 	</dependencies>
 

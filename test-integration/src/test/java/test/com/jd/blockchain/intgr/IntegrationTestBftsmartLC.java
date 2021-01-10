@@ -31,13 +31,14 @@ import com.jd.blockchain.sdk.client.GatewayServiceFactory;
 import com.jd.blockchain.storage.service.DbConnectionFactory;
 import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
-import com.jd.blockchain.utils.Property;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.Test;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeTest;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeWeb4Nodes;
+import utils.Property;
+import utils.concurrent.ThreadInvoker;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;

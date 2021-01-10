@@ -2,9 +2,9 @@ package com.jd.blockchain.test;
 
 import java.util.Random;
 
-import com.jd.blockchain.utils.hash.MurmurHash3;
-import com.jd.blockchain.utils.security.RipeMD160Utils;
-import com.jd.blockchain.utils.security.ShaUtils;
+import utils.hash.MurmurHash3;
+import utils.security.RipeMD160Utils;
+import utils.security.ShaUtils;
 
 public class HashPerformanceTest {
 	

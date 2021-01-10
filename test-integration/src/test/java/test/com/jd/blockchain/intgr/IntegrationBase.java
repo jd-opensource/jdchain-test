@@ -29,7 +29,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ClassPathResource;
 
-import com.jd.blockchain.binaryproto.DataContractRegistry;
+import com.jd.binaryproto.DataContractRegistry;
 import com.jd.blockchain.crypto.AddressEncoding;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.HashDigest;
@@ -58,11 +58,12 @@ import com.jd.blockchain.storage.service.DbConnectionFactory;
 import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.transaction.GenericValueHolder;
-import com.jd.blockchain.utils.Bytes;
-import com.jd.blockchain.utils.Property;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker;
-import com.jd.blockchain.utils.io.BytesUtils;
-import com.jd.blockchain.utils.net.NetworkAddress;
+
+import utils.Bytes;
+import utils.Property;
+import utils.concurrent.ThreadInvoker;
+import utils.io.BytesUtils;
+import utils.net.NetworkAddress;
 
 /**
  *

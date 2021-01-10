@@ -8,11 +8,12 @@
  */
 package test.com.jd.blockchain.intgr.batch.bftsmart;
 
-import com.jd.blockchain.utils.codec.Base58Utils;
-import com.jd.blockchain.utils.io.FileUtils;
-import com.jd.blockchain.utils.security.ShaUtils;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
+
+import utils.codec.Base58Utils;
+import utils.io.FileUtils;
+import utils.security.ShaUtils;
 
 import java.io.File;
 import java.io.IOException;

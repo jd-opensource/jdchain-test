@@ -15,7 +15,7 @@ import java.util.Set;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
-import com.jd.blockchain.binaryproto.DataContractRegistry;
+import com.jd.binaryproto.DataContractRegistry;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.crypto.KeyGenUtils;
 import com.jd.blockchain.crypto.PrivKey;
@@ -58,8 +58,9 @@ import com.jd.blockchain.storage.service.KVStorageService;
 import com.jd.blockchain.storage.service.utils.MemoryKVStorage;
 import com.jd.blockchain.tools.initializer.web.LedgerInitConfiguration;
 import com.jd.blockchain.transaction.TxBuilder;
-import com.jd.blockchain.utils.Bytes;
-import com.jd.blockchain.utils.io.RuntimeIOException;
+
+import utils.Bytes;
+import utils.io.RuntimeIOException;
 
 public class RolesAuthorizationTest {
 

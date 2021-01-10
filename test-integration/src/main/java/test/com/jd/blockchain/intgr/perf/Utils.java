@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.bouncycastle.util.Arrays;
 import org.springframework.core.io.ClassPathResource;
 
-import com.jd.blockchain.binaryproto.BinaryProtocol;
+import com.jd.binaryproto.BinaryProtocol;
 import com.jd.blockchain.consensus.ConsensusProvider;
 import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.consensus.Replica;
@@ -44,11 +44,12 @@ import com.jd.blockchain.tools.initializer.web.LedgerInitConfiguration;
 import com.jd.blockchain.tools.initializer.web.LedgerInitConsensusService;
 import com.jd.blockchain.tools.initializer.web.LedgerInitializeWebController;
 import com.jd.blockchain.tools.initializer.web.ParticipantReplica;
-import com.jd.blockchain.utils.Bytes;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker.AsyncCallback;
-import com.jd.blockchain.utils.io.FileUtils;
-import com.jd.blockchain.utils.net.NetworkAddress;
+
+import utils.Bytes;
+import utils.concurrent.ThreadInvoker;
+import utils.concurrent.ThreadInvoker.AsyncCallback;
+import utils.io.FileUtils;
+import utils.net.NetworkAddress;
 
 public class Utils {
 

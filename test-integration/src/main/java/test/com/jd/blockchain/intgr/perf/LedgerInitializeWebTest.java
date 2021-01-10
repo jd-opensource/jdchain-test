@@ -10,7 +10,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 
-import com.jd.blockchain.binaryproto.BinaryProtocol;
+import com.jd.binaryproto.BinaryProtocol;
 import com.jd.blockchain.consensus.ConsensusProvider;
 import com.jd.blockchain.consensus.ConsensusProviders;
 import com.jd.blockchain.consensus.ConsensusViewSettings;
@@ -49,15 +49,15 @@ import com.jd.blockchain.tools.initializer.web.LedgerInitConfiguration;
 import com.jd.blockchain.tools.initializer.web.LedgerInitConsensusService;
 import com.jd.blockchain.tools.initializer.web.LedgerInitializeWebController;
 import com.jd.blockchain.tools.initializer.web.ParticipantReplica;
-import com.jd.blockchain.utils.Bytes;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker.AsyncCallback;
-import com.jd.blockchain.utils.io.BytesUtils;
-import com.jd.blockchain.utils.io.FileUtils;
-import com.jd.blockchain.utils.net.NetworkAddress;
 
 import test.com.jd.blockchain.intgr.LedgerInitConsensusConfig;
 import test.com.jd.blockchain.intgr.PresetAnswerPrompter;
+import utils.Bytes;
+import utils.concurrent.ThreadInvoker;
+import utils.concurrent.ThreadInvoker.AsyncCallback;
+import utils.io.BytesUtils;
+import utils.io.FileUtils;
+import utils.net.NetworkAddress;
 
 public class LedgerInitializeWebTest {
 

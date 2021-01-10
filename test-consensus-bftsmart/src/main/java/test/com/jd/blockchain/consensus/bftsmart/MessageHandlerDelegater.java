@@ -6,7 +6,8 @@ import com.jd.blockchain.consensus.service.ConsensusContext;
 import com.jd.blockchain.consensus.service.ConsensusMessageContext;
 import com.jd.blockchain.consensus.service.MessageHandle;
 import com.jd.blockchain.consensus.service.StateSnapshot;
-import com.jd.blockchain.utils.concurrent.AsyncFuture;
+
+import utils.concurrent.AsyncFuture;
 
 public class MessageHandlerDelegater implements MessageHandle {
 	

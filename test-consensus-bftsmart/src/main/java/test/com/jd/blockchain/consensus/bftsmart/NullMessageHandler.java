@@ -6,10 +6,11 @@ import com.jd.blockchain.consensus.service.ConsensusContext;
 import com.jd.blockchain.consensus.service.ConsensusMessageContext;
 import com.jd.blockchain.consensus.service.MessageHandle;
 import com.jd.blockchain.consensus.service.StateSnapshot;
-import com.jd.blockchain.utils.BusinessException;
-import com.jd.blockchain.utils.concurrent.AsyncFuture;
-import com.jd.blockchain.utils.concurrent.CompletableAsyncFuture;
-import com.jd.blockchain.utils.io.BytesUtils;
+
+import utils.BusinessException;
+import utils.concurrent.AsyncFuture;
+import utils.concurrent.CompletableAsyncFuture;
+import utils.io.BytesUtils;
 
 
 public class NullMessageHandler implements MessageHandle{

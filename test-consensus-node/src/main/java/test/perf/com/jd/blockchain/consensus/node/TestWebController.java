@@ -7,9 +7,6 @@ import javax.annotation.PostConstruct;
 
 import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.consensus.Topology;
-import com.jd.blockchain.utils.codec.HexUtils;
-import com.jd.blockchain.utils.io.FileUtils;
-import com.jd.blockchain.utils.serialize.binary.BinarySerializeUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import bftsmart.reconfiguration.util.HostsConfig;
+import utils.codec.HexUtils;
+import utils.io.FileUtils;
+import utils.serialize.binary.BinarySerializeUtils;
 
 @RestController
 public class TestWebController {

@@ -15,9 +15,10 @@ import com.jd.blockchain.consensus.service.StateSnapshot;
 import com.jd.blockchain.crypto.Crypto;
 import com.jd.blockchain.crypto.HashDigester;
 import com.jd.blockchain.crypto.service.classic.ClassicAlgorithm;
-import com.jd.blockchain.utils.concurrent.AsyncFuture;
-import com.jd.blockchain.utils.concurrent.CompletableAsyncFuture;
-import com.jd.blockchain.utils.io.BytesUtils;
+
+import utils.concurrent.AsyncFuture;
+import utils.concurrent.CompletableAsyncFuture;
+import utils.io.BytesUtils;
 
 public class MessageSnapshotHandler implements MessageHandle {
 

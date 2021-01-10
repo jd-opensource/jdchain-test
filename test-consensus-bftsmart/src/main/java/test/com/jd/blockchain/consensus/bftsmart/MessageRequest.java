@@ -1,7 +1,8 @@
 package test.com.jd.blockchain.consensus.bftsmart;
 
 import com.jd.blockchain.consensus.client.ConsensusClient;
-import com.jd.blockchain.utils.concurrent.AsyncHandle;
+
+import utils.concurrent.AsyncHandle;
 
 /**
  * 消息请求；

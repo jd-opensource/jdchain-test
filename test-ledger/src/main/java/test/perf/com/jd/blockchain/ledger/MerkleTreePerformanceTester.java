@@ -12,7 +12,8 @@ import com.jd.blockchain.ledger.CryptoSetting;
 import com.jd.blockchain.ledger.core.CryptoConfig;
 import com.jd.blockchain.ledger.proof.MerkleHashTrie;
 import com.jd.blockchain.storage.service.utils.MemoryKVStorage;
-import com.jd.blockchain.utils.Bytes;
+
+import utils.Bytes;
 
 public class MerkleTreePerformanceTester {
 

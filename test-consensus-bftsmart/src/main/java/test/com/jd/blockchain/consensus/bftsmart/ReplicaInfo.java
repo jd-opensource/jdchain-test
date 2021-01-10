@@ -4,7 +4,8 @@ import com.jd.blockchain.consensus.Replica;
 import com.jd.blockchain.crypto.AddressEncoding;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.PubKey;
-import com.jd.blockchain.utils.Bytes;
+
+import utils.Bytes;
 
 public class ReplicaInfo implements Replica {
 

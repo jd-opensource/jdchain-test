@@ -1,8 +1,8 @@
 package test.com.jd.binary.protocal.perf;
 
-import com.jd.blockchain.binaryproto.DataContract;
-import com.jd.blockchain.binaryproto.DataField;
-import com.jd.blockchain.binaryproto.PrimitiveType;
+import com.jd.binaryproto.DataContract;
+import com.jd.binaryproto.DataField;
+import com.jd.binaryproto.PrimitiveType;
 
 @DataContract(code = 102)
 public interface Location {

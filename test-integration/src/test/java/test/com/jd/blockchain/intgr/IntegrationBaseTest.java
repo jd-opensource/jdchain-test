@@ -24,13 +24,13 @@ import com.jd.blockchain.test.PeerServer;
 import com.jd.blockchain.tools.initializer.DBConnectionConfig;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 import com.jd.blockchain.tools.initializer.Prompter;
-import com.jd.blockchain.utils.concurrent.ThreadInvoker.AsyncCallback;
-import com.jd.blockchain.utils.net.NetworkAddress;
 
 import test.com.jd.blockchain.intgr.IntegratedContext.Node;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeWeb4SingleStepsTest;
 import test.com.jd.blockchain.intgr.initializer.LedgerInitializeWeb4SingleStepsTest.NodeWebContext;
 import test.com.jd.blockchain.intgr.perf.Utils;
+import utils.concurrent.ThreadInvoker.AsyncCallback;
+import utils.net.NetworkAddress;
 
 public class IntegrationBaseTest {
 

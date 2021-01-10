@@ -5,12 +5,12 @@ import java.util.concurrent.Callable;
 import org.junit.Test;
 
 import com.google.protobuf.ByteString;
-import com.jd.blockchain.binaryproto.BinaryProtocol;
-import com.jd.blockchain.utils.ConsoleUtils;
-import com.jd.blockchain.utils.security.RandomUtils;
-import com.jd.blockchain.utils.serialize.binary.BinarySerializeUtils;
+import com.jd.binaryproto.BinaryProtocol;
 
 import test.com.jd.binary.protocal.perf.protobuf.BillProto;
+import utils.ConsoleUtils;
+import utils.security.RandomUtils;
+import utils.serialize.binary.BinarySerializeUtils;
 
 public class BinaryProtocalPerformanceTest {
 
