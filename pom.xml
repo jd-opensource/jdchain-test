@@ -21,7 +21,7 @@
 		<httpservice.version>2.0.0.RELEASE</httpservice.version>
 		<binaryproto.version>1.5.0.RELEASE</binaryproto.version>
 		
-		<core.version>1.4.1.RELEASE</core.version>
+		<core.version>1.5.0-SNAPSHOT</core.version>
 	</properties>
 
 	<modules>
