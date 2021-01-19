@@ -45,7 +45,7 @@
 //
 //public class IntegrationTest4NewNodeAddTwoLedgers {
 //
-//    static String NEW_PUB1 = "3snPdw7i7PkdgqiGX7GbZuFSi1cwZn7vtjw4vifb1YoXgr9k6Kfmis";
+//    static String NEW_PUB1 = "7VeRMme1hyW9d5gjWdQqVMk9V6afSb4HDMLFuidaByyXRhwZ";
 //    static String NEW_PRIV1 = "177gjtZu8w1phqHFVNiFhA35cfimXmP6VuqrBFhfbXBWK8s4TRwro2tnpffwP1Emwr6SMN6";
 //
 //    static String NEW_PUB2 = "3snPdw7i7PnhPm1KakwRfQQME5g8aAtVnYznLqmHkdjem1ggQT3d21";
@@ -54,10 +54,10 @@
 //    public static final String NEW_PASSWORD = "123456";
 //
 //
-//    public static final String[] PUB_KEYS = { "3snPdw7i7PjVKiTH2VnXZu5H8QmNaSXpnk4ei533jFpuifyjS5zzH9",
-//            "3snPdw7i7PajLB35tEau1kmixc6ZrjLXgxwKbkv5bHhP7nT5dhD9eX",
-//            "3snPdw7i7PZi6TStiyc6mzjprnNhgs2atSGNS8wPYzhbKaUWGFJt7x",
-//            "3snPdw7i7PifPuRX7fu3jBjsb3rJRfDe9GtbDfvFJaJ4V4hHXQfhwk" };
+//    public static final String[] PUB_KEYS = { "7VeRLdGtSz1Y91gjLTqEdnkotzUfaAqdap3xw6fQ1yKHkvVq",
+//            "7VeRBsHM2nsGwP8b2ufRxz36hhNtSqjKTquzoa4WVKWty5sD",
+//            "7VeRAr3dSbi1xatq11ZcF7sEPkaMmtZhV9shonGJWk9T4pLe",
+//            "7VeRKoM5RE6iFXr214Hsiic2aoqCQ7MEU1dHQFRnjXQcReAS" };
 //
 //    public static final String[] PRIV_KEYS = {
 //            "177gjzHTznYdPgWqZrH43W3yp37onm74wYXT4v9FukpCHBrhRysBBZh7Pzdo5AMRyQGJD7x",
