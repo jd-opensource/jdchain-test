@@ -22,7 +22,6 @@ import com.jd.blockchain.ledger.core.LedgerQuery;
 import com.jd.blockchain.ledger.core.LedgerRepository;
 import com.jd.blockchain.ledger.core.OperationHandleRegisteration;
 import com.jd.blockchain.ledger.core.TransactionBatchProcessor;
-import com.jd.blockchain.sdk.converters.ClientResolveUtil;
 import com.jd.blockchain.sdk.service.PeerBlockchainServiceFactory;
 import com.jd.blockchain.sdk.service.SimpleConsensusClientManager;
 import com.jd.blockchain.service.TransactionBatchResultHandle;
@@ -242,7 +241,7 @@ public class TransactionsReplay {
 						// convert operation, from json to object
 						for (Operation operation : ledgerTransaction.getRequest().getTransactionContent()
 								.getOperations()) {
-							txContentBlob.addOperation(ClientResolveUtil.read(operation));
+							txContentBlob.addOperation(operation);
 						}
 
 						TxRequestBuilder txRequestBuilder = new TxRequestBuilder(
