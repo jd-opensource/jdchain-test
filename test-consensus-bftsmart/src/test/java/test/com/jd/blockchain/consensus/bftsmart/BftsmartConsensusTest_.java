@@ -62,7 +62,8 @@ public class BftsmartConsensusTest_ {
 			messageSendTest.run(csEnv);
 		} finally {
 			// 退出测试前关闭；
-			csEnv.close();
+			System.out.println("-------- Quit Test --------");
+//			csEnv.close();
 		}
 	}
 
@@ -148,9 +149,10 @@ public class BftsmartConsensusTest_ {
 	 * 验证共识服务端节点的 ID 和客户端的 ID 出现冲突时引发消息共识失败的情形；
 	 * 
 	 * @throws IOException
+	 * @throws InterruptedException 
 	 */
 	@Test
-	public void testProcessIDConflict() throws IOException {
+	public void testProcessIDConflict() throws IOException, InterruptedException {
 		// 目前的 ProcessID 分配方式下，预期从 ID 为 0 的共识服务端节点认证客户端时会出现 ID 冲突；
 		final int N = 4;
 		final String realmName = Base58Utils.encode(RandomUtils.generateRandomBytes(32));
@@ -163,6 +165,9 @@ public class BftsmartConsensusTest_ {
 		try {
 			// 启动 4 个共识节点；
 			csEnv.startNodeServers();
+			
+			// 等待启动完成；
+			Thread.sleep(2000);
 
 			// 配置用例；
 			MessageConsensusTestcase messageSendTest = new MessageConsensusTestcase();
