@@ -96,7 +96,7 @@ public class IntegrationTest4Bftsmart {
 
 		try {
 			// 休眠20秒，保证Peer节点启动成功
-			Thread.sleep(20000);
+			Thread.sleep(60000);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -256,7 +256,7 @@ public class IntegrationTest4Bftsmart {
 		}
 
 		System.out.println("----------------- test tx querying and operation resolving -----------------");
-		LedgerTransaction[] txs = gwsrvFact.getBlockchainService().getTransactions(ledgerHash, 17, 0, 100);
+		LedgerTransaction[] txs = gwsrvFact.getBlockchainService().getTransactions(ledgerHash, ledgerRepository.retrieveLatestBlockHeight(), 0, 100);
 		for (int i = 0; i < txs.length; i++) {
 			System.out.println("---- tx[" + i + "]: operations ----");
 			Operation[] ops = txs[i].getRequest().getTransactionContent().getOperations();
