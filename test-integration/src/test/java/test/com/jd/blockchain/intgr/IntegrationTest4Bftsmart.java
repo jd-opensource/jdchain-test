@@ -96,7 +96,7 @@ public class IntegrationTest4Bftsmart {
 
 		try {
 			// 休眠20秒，保证Peer节点启动成功
-			Thread.sleep(60000);
+			Thread.sleep(20000);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -131,6 +131,13 @@ public class IntegrationTest4Bftsmart {
 		IntegrationBase.testConsistencyAmongNodes(ledgers);
 
 		LedgerQuery ledgerRepository = ledgers[0];
+
+		try {
+			// 休眠20秒，保证Peer节点启动成功
+			Thread.sleep(20000);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		GatewayServiceFactory gwsrvFact = GatewayServiceFactory.connect(gateway.getServiceAddress());
 
