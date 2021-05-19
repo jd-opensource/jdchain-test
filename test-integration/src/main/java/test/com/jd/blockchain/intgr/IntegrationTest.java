@@ -339,8 +339,9 @@ public class IntegrationTest {
 							}).when(mockedMessageHandle).processOrdered(anyInt(), any(), any());
 						}
 
+						Storage storage = invocation.getArgument(3, Storage.class);
 						return new BftsmartNodeServer(serverSettings, mockedMessageHandle, stateMachineReplicate,
-								invocation.getArgumentAt(3, Storage.class));
+								storage);
 					}
 				}).when(mockedServerFactory).setupServer(any(), any(), any(), any());
 
