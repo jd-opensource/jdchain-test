@@ -16,6 +16,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.mockito.Mockito;
+import static org.mockito.Mockito.*;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -356,7 +358,6 @@ public class ConsensusEnvironment {
 		}
 		return new ReplicaNodeServerWrapper(replica, nodeServer);
 	}
-	
 
 	public void resetNodeSessionsToTarget(int replicaId) {
 		String target = null;
@@ -637,7 +638,7 @@ public class ConsensusEnvironment {
 			cli.close();
 		}
 	}
-	
+
 	public void close() {
 		stopNodeServers();
 		closeAllClients();
@@ -681,9 +682,9 @@ public class ConsensusEnvironment {
 				startupLatch.countDown();
 			} else {
 				// 未运行；
-				AsyncFuture<?> future =nodeServer.start();
+				AsyncFuture<?> future = nodeServer.start();
 				futures.add(future);
-				
+
 //				EXECUTOR_SERVICE.execute(new Runnable() {
 //					@Override
 //					public void run() {
@@ -798,7 +799,7 @@ public class ConsensusEnvironment {
 		BftsmartNodeSettings[] nodeSettings = (BftsmartNodeSettings[]) csSettingStub.getNodes();
 		nodeSettings = stubNetworkAddresses(nodeSettings, networkAddresses);
 
-		Mockito.stub(csSettingStub.getNodes()).toReturn(nodeSettings);
+		when(csSettingStub.getNodes()).thenReturn(nodeSettings);
 
 		return csSettingStub;
 	}
@@ -821,7 +822,7 @@ public class ConsensusEnvironment {
 		for (int i = 0; i < nodeSettingStubs.length; i++) {
 			nodeSettingStubs[i] = Mockito.spy(nodeSettings[i]);
 
-			Mockito.stub(nodeSettingStubs[i].getNetworkAddress()).toReturn(networkAddresses[i]);
+			when(nodeSettingStubs[i].getNetworkAddress()).thenReturn(networkAddresses[i]);
 		}
 		return nodeSettingStubs;
 	}
@@ -902,7 +903,7 @@ public class ConsensusEnvironment {
 		public NodeState getState() {
 			return nodeServer.getState();
 		}
-		
+
 		@Override
 		public Communication getCommunication() {
 			return nodeServer.getCommunication();
@@ -914,10 +915,10 @@ public class ConsensusEnvironment {
 				return CompletableAsyncFuture.completeFuture(null);
 			}
 			LOGGER.debug("Node server[{}] is starting...", replica.getId());
-			
+
 			nodeServer = createInstance();
 			AsyncFuture<?> future = nodeServer.start();
-			
+
 			future.thenRun(new Runnable() {
 				@Override
 				public void run() {
