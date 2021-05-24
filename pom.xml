@@ -5,14 +5,14 @@
 	<parent>
 		<groupId>com.jd.blockchain</groupId>
 		<artifactId>jdchain-core</artifactId>
-		<version>1.4.3.RELEASE</version>
+		<version>1.5.0.RELEASE</version>
 		<relativePath>../core</relativePath>
 	</parent>
 
 
 	<groupId>com.jd.blockchain</groupId>
 	<artifactId>test</artifactId>
-	<version>1.4.3.RELEASE</version>
+	<version>1.5.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<properties>
