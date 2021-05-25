@@ -12,16 +12,16 @@
 
 	<groupId>com.jd.blockchain</groupId>
 	<artifactId>test</artifactId>
-	<version>1.5.0-SNAPSHOT</version>
+	<version>1.5.0.RELEASE</version>
 	<packaging>pom</packaging>
 
 	<properties>
 		<kvdb.version>1.1.2.RELEASE</kvdb.version>
-		<utils.version>2.0.2.RELEASE</utils.version>
+		<utils.version>2.0.3.RELEASE</utils.version>
 		<httpservice.version>2.0.2.RELEASE</httpservice.version>
-		<binaryproto.version>1.6.0.RELEASE</binaryproto.version>
+		<binaryproto.version>1.6.1.RELEASE</binaryproto.version>
 		
-		<core.version>1.4.3.RELEASE</core.version>
+		<core.version>1.5.0.RELEASE</core.version>
 	</properties>
 
 	<modules>
