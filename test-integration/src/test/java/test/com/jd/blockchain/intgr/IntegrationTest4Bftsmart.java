@@ -132,6 +132,13 @@ public class IntegrationTest4Bftsmart {
 
 		LedgerQuery ledgerRepository = ledgers[0];
 
+		try {
+			// 休眠20秒，保证Peer节点启动成功
+			Thread.sleep(20000);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		GatewayServiceFactory gwsrvFact = GatewayServiceFactory.connect(gateway.getServiceAddress());
 
 		PrivKey privkey0 = KeyGenUtils.decodePrivKeyWithRawPassword(IntegrationBase.PRIV_KEYS[0],
@@ -256,7 +263,7 @@ public class IntegrationTest4Bftsmart {
 		}
 
 		System.out.println("----------------- test tx querying and operation resolving -----------------");
-		LedgerTransaction[] txs = gwsrvFact.getBlockchainService().getTransactions(ledgerHash, 17, 0, 100);
+		LedgerTransaction[] txs = gwsrvFact.getBlockchainService().getTransactions(ledgerHash, ledgerRepository.retrieveLatestBlockHeight(), 0, 100);
 		for (int i = 0; i < txs.length; i++) {
 			System.out.println("---- tx[" + i + "]: operations ----");
 			Operation[] ops = txs[i].getRequest().getTransactionContent().getOperations();

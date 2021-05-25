@@ -143,7 +143,7 @@ public class IntegrationTest4NewNodeAdd {
 
         // 第二个账本的rocksdb存储从标识6开始
         for (int i = 0; i < rocksdbConnectionStrings2.length; i++) {
-            String dbDir = currDir + File.separator + "rocksdb" + (i+6) + ".db";
+            String dbDir = currDir + File.separator + "rocksdb" + (i+7) + ".db";
             rocksdbDirStrings2[i] = dbDir;
             rocksdbConnectionStrings2[i] = "rocksdb://" + dbDir;
         }
@@ -1119,6 +1119,13 @@ public class IntegrationTest4NewNodeAdd {
                         dbConnectionFactory1,
                         dbConnectionFactory2,
                         dbConnectionFactory3});
+
+        try {
+            // 休眠20秒，保证Peer节点启动成功
+            Thread.sleep(20000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         GatewayServiceFactory gwsrvFact = GatewayServiceFactory.connect(gateway.getServiceAddress());
 

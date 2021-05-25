@@ -1211,6 +1211,11 @@ public class IntegrationTest4NewNodeDel {
                         dbConnectionFactory2,
                         dbConnectionFactory3});
 
+        try {
+        Thread.sleep(20000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         GatewayServiceFactory gwsrvFact = GatewayServiceFactory.connect(gateway.getServiceAddress());
 
         BlockchainService blockchainService = gwsrvFact.getBlockchainService();
