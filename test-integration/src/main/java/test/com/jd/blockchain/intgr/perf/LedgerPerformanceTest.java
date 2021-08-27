@@ -653,8 +653,8 @@ public class LedgerPerformanceTest {
 		}
 
 		@Override
-		public SecurityPolicy getSecurityPolicy(Set<Bytes> endpoints, Set<Bytes> nodes, X509Certificate rootCa, Map<Bytes, X509Certificate> certs) {
-			return new FreedomSecurityPolicy(endpoints, nodes, rootCa, certs);
+		public SecurityPolicy getSecurityPolicy(Set<Bytes> endpoints, Set<Bytes> nodes, X509Certificate[] ledgerCAs) {
+			return new FreedomSecurityPolicy(endpoints, nodes, ledgerCAs);
 		}
 
 		@Override
@@ -667,19 +667,17 @@ public class LedgerPerformanceTest {
 
 		private Set<Bytes> endpoints;
 		private Set<Bytes> nodes;
-		private X509Certificate rootCa;
-		private Map<Bytes, X509Certificate> certs;
+		private X509Certificate[] ledgerCAs;
 
 		public FreedomSecurityPolicy(Set<Bytes> endpoints, Set<Bytes> nodes) {
 			this.endpoints = endpoints;
 			this.nodes = nodes;
 		}
 
-		public FreedomSecurityPolicy(Set<Bytes> endpoints, Set<Bytes> nodes, X509Certificate rootCa, Map<Bytes, X509Certificate> certs) {
+		public FreedomSecurityPolicy(Set<Bytes> endpoints, Set<Bytes> nodes, X509Certificate[] ledgerCAs) {
 			this.endpoints = endpoints;
 			this.nodes = nodes;
-			this.rootCa = rootCa;
-			this.certs = certs;
+			this.ledgerCAs = ledgerCAs;
 		}
 
 		@Override
@@ -733,17 +731,12 @@ public class LedgerPerformanceTest {
 		}
 
 		@Override
-		public void checkRootCa() throws LedgerSecurityException {
+		public void checkEndpointCA(MultiIDsPolicy midPolicy) throws LedgerSecurityException {
 
 		}
 
 		@Override
-		public void checkEndpointCa(MultiIDsPolicy midPolicy) throws LedgerSecurityException {
-
-		}
-
-		@Override
-		public void checkNodeCa(MultiIDsPolicy midPolicy) throws LedgerSecurityException {
+		public void checkNodeCA(MultiIDsPolicy midPolicy) throws LedgerSecurityException {
 
 		}
 
