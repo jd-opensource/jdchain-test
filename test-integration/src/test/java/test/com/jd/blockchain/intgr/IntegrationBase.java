@@ -474,7 +474,7 @@ public class IntegrationBase {
 			HashDigest ledgerHash = bindingConfigs[0].getLedgerHashs()[0];
 			DbConnection conn = dbConnectionFactories[i]
 					.connect(bindingConfigs[i].getLedger(ledgerHash).getDbConnection().getUri());
-			ledgers[i] = ledgerManagers[i].register(ledgerHash, conn.getStorageService());
+			ledgers[i] = ledgerManagers[i].register(ledgerHash, conn.getStorageService(), "default");
 		}
 		return ledgers;
 	}

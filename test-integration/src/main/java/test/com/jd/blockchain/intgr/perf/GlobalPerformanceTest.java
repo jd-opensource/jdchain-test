@@ -348,7 +348,7 @@ public class GlobalPerformanceTest {
 
 			DbConnection conn = db.connect(dbConnConfig.getUri(), dbConnConfig.getPassword());
 			conns.add(conn);
-			LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService());
+			LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService(), "default");
 			return ledgerRepo;
 		}
 

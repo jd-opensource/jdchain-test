@@ -119,7 +119,7 @@ public class RolesAuthorizationTest {
 		final HashDigest ledgerHash = genesisBlock.getHash();
 
 		LedgerManager ledgerManager = new LedgerManager();
-		LedgerRepository ledger = ledgerManager.register(ledgerHash, storage);
+		LedgerRepository ledger = ledgerManager.register(ledgerHash, storage, "default");
 		CryptoSetting cryptoSetting = ledger.getAdminInfo().getSettings().getCryptoSetting();
 		// 验证角色和用户的权限配置；
 		assertUserRolesPermissions(ledger);
@@ -217,7 +217,7 @@ public class RolesAuthorizationTest {
 	 */
 	private void assertPredefineData(HashDigest ledgerHash, MemoryKVStorage storage) {
 		LedgerManager ledgerManager = new LedgerManager();
-		LedgerRepository ledger = ledgerManager.register(ledgerHash, storage);
+		LedgerRepository ledger = ledgerManager.register(ledgerHash, storage, "default");
 		UserAccount newUser = ledger.getUserAccountSet().getAccount(NEW_USER.getAddress());
 		assertNotNull(newUser);
 		DataAccount dataAccount = ledger.getDataAccountSet().getAccount(DATA_ACCOUNT_ID.getAddress());

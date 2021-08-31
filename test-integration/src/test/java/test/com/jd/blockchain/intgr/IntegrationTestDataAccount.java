@@ -186,7 +186,7 @@ public class IntegrationTestDataAccount {
 		DbConnection memoryBasedDb = context.getNode(0).getStorageDB()
 				.connect(LedgerInitConsensusConfig.memConnectionStrings[0]);
 
-		LedgerQuery ledgerRepository = ledgerManager.register(ledgerHashs[0], memoryBasedDb.getStorageService());
+		LedgerQuery ledgerRepository = ledgerManager.register(ledgerHashs[0], memoryBasedDb.getStorageService(), "default");
 
 		DataAccountSet dataAccountSet = ledgerRepository.getDataAccountSet(ledgerRepository.retrieveLatestBlock());
 

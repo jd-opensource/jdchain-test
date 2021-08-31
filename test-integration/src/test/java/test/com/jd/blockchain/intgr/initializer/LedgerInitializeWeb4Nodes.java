@@ -243,7 +243,7 @@ public class LedgerInitializeWeb4Nodes {
 
 		public LedgerQuery registLedger(HashDigest ledgerHash) {
 			DbConnection conn = db.connect(dbConnConfig.getUri());
-			LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService());
+			LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService(), "default");
 			return ledgerRepo;
 		}
 

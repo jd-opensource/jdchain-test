@@ -223,7 +223,7 @@ public class LedgerInitializeTest {
 		}
 
 		public LedgerQuery registLedger(HashDigest ledgerHash, String connString) {
-			return ledgerManager.register(ledgerHash, memoryDBConnFactory.connect(connString).getStorageService());
+			return ledgerManager.register(ledgerHash, memoryDBConnFactory.connect(connString).getStorageService(), "default");
 		}
 	}
 

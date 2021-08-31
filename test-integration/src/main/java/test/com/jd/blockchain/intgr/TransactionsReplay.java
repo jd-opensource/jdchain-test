@@ -115,9 +115,9 @@ public class TransactionsReplay {
 		HashDigest ledgerHash = ledgerManage3.getLedgerHashs()[0];
 
 		LedgerRepository ledgerRepository0 = (LedgerRepository) ledgerManage0.register(ledgerHash,
-				node0.getStorageDB().connect("memory://local/0").getStorageService());
+				node0.getStorageDB().connect("memory://local/0").getStorageService(), "default");
 		LedgerRepository ledgerRepository3 = (LedgerRepository) ledgerManage3.register(ledgerHash,
-				node0.getStorageDB().connect("memory://local/3").getStorageService());
+				node0.getStorageDB().connect("memory://local/3").getStorageService(), "default");
 
 		addNewBlocksForNode0(node0, pubKey, privKey);
 
@@ -139,7 +139,7 @@ public class TransactionsReplay {
 		HashDigest ledgerHash0 = ledgerManage0.getLedgerHashs()[0];
 		long startTs = System.currentTimeMillis();
 		LedgerRepository ledgerRepository0 = (LedgerRepository) ledgerManage0.register(ledgerHash0,
-				node0.getStorageDB().connect("memory://local/0").getStorageService());
+				node0.getStorageDB().connect("memory://local/0").getStorageService(), "default");
 
 		for (int height = 1; height < 20; height++) {
 			TransactionBatchProcessor txbatchProcessor = new TransactionBatchProcessor(ledgerRepository0, opReg);

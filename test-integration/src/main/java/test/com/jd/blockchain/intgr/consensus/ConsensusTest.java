@@ -347,7 +347,7 @@ public class ConsensusTest {
 			// dbConnConfig.getPassword());
 
 			DbConnection conn = db.connect(dbConnConfig.getUri(), dbConnConfig.getPassword());
-			LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService());
+			LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService(), "default");
 			return ledgerRepo;
 		}
 

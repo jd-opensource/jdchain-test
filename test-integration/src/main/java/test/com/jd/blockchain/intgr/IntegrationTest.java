@@ -520,7 +520,7 @@ public class IntegrationTest {
 
 		KVStorageService storageService = node0.getStorageDB().connect(memDbConnString).getStorageService();
 
-		LedgerQuery ledgerOfNode0 = ledgerManager.register(ledgerHashs[0], storageService);
+		LedgerQuery ledgerOfNode0 = ledgerManager.register(ledgerHashs[0], storageService, "default");
 
 	}
 
@@ -560,7 +560,7 @@ public class IntegrationTest {
 
 		KVStorageService storageService = node0.getStorageDB().connect(memDbConnString).getStorageService();
 
-		LedgerQuery ledgerOfNode0 = ledgerManager.register(ledgerHashs[0], storageService);
+		LedgerQuery ledgerOfNode0 = ledgerManager.register(ledgerHashs[0], storageService, "default");
 
 	}
 
@@ -650,7 +650,7 @@ public class IntegrationTest {
 
 		KVStorageService storageService = node0.getStorageDB().connect(memDbConnString).getStorageService();
 
-		LedgerQuery ledgerOfNode0 = ledgerManager.register(ledgerHash, storageService);
+		LedgerQuery ledgerOfNode0 = ledgerManager.register(ledgerHash, storageService, "default");
 
 		return user;
 	}
@@ -682,7 +682,7 @@ public class IntegrationTest {
 
 		KVStorageService storageService = node0.getStorageDB().connect(memDbConnString).getStorageService();
 
-		LedgerQuery ledgerOfNode0 = ledgerManager.register(ledgerHash, storageService);
+		LedgerQuery ledgerOfNode0 = ledgerManager.register(ledgerHash, storageService, "default");
 		long latestBlockHeight = ledgerOfNode0.retrieveLatestBlockHeight();
 
 		return dataAccount;
@@ -701,7 +701,7 @@ public class IntegrationTest {
 
 		KVStorageService storageService = node0.getStorageDB().connect(memDbConnString).getStorageService();
 
-		LedgerQuery ledgerOfNode0 = ledgerManager.register(ledgerHash, storageService);
+		LedgerQuery ledgerOfNode0 = ledgerManager.register(ledgerHash, storageService, "default");
 
 		// getLedgerHashs
 		HashDigest[] ledgerHashs = blockchainService.getLedgerHashs();

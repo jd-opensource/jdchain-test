@@ -196,7 +196,7 @@ public class Utils5Nodes {
         }
 
         public LedgerQuery registLedger(HashDigest ledgerHash, DBConnectionConfig dbConnConf) {
-            return ledgerManager.register(ledgerHash, dbConnFactory.connect(dbConnConf.getUri()).getStorageService());
+            return ledgerManager.register(ledgerHash, dbConnFactory.connect(dbConnConf.getUri()).getStorageService(), "default");
         }
     }
 
