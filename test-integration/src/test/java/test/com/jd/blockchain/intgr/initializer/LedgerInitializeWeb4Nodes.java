@@ -140,10 +140,10 @@ public class LedgerInitializeWeb4Nodes {
 		assertEquals(ledgerHash0, ledgerHash2);
 		assertEquals(ledgerHash0, ledgerHash3);
 
-		LedgerQuery ledger0 = node0.registLedger(ledgerHash0);
-		LedgerQuery ledger1 = node1.registLedger(ledgerHash1);
-		LedgerQuery ledger2 = node2.registLedger(ledgerHash2);
-		LedgerQuery ledger3 = node3.registLedger(ledgerHash3);
+		LedgerQuery ledger0 = node0.registLedger(ledgerHash0, initSetting.getAnchorType());
+		LedgerQuery ledger1 = node1.registLedger(ledgerHash1, initSetting.getAnchorType());
+		LedgerQuery ledger2 = node2.registLedger(ledgerHash2, initSetting.getAnchorType());
+		LedgerQuery ledger3 = node3.registLedger(ledgerHash3, initSetting.getAnchorType());
 
 		assertNotNull(ledger0);
 		assertNotNull(ledger1);
@@ -241,9 +241,9 @@ public class LedgerInitializeWeb4Nodes {
 			this.serverAddress = serverAddress;
 		}
 
-		public LedgerQuery registLedger(HashDigest ledgerHash) {
+		public LedgerQuery registLedger(HashDigest ledgerHash, String anchorType) {
 			DbConnection conn = db.connect(dbConnConfig.getUri());
-			LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService(), "default");
+			LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService(), anchorType);
 			return ledgerRepo;
 		}
 
