@@ -296,11 +296,6 @@ public class Utils5Nodes {
             return participantNodeState;
         }
 
-        @Override
-        public String getCertificate() {
-            throw new IllegalStateException("Not implement");
-        }
-
     }
 
 }

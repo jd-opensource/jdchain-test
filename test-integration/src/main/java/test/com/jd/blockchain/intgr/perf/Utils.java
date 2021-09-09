@@ -300,11 +300,6 @@ public class Utils {
 			return participantNodeState;
 		}
 
-		@Override
-		public String getCertificate() {
-			throw new IllegalStateException("Not implement");
-		}
-
 	}
 
 }
