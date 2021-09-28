@@ -483,8 +483,8 @@ public class LedgerPerformanceTest {
 			txbuilder = new TxBuilder(ledgerHash, cryptoSetting.getHashAlgorithm());
 			String args = dataIdentity.getAddress().toString() + "##" + Integer.toString(i) + "##"
 					+ Integer.toString(i);
-			txbuilder.contractEvents().send(contractIdentity.getAddress(), "print", BytesDataList.singleText("hello"));
-//			txbuilder.contractEvents().send(contractIdentity.getAddress(), "print", args.getBytes());
+			txbuilder.contract(contractIdentity.getAddress()).invoke("print", BytesDataList.singleText("hello"));
+//			txbuilder.contract(contractIdentity.getAddress()).send("print", args.getBytes());
 			reqBuilder = txbuilder.prepareRequest();
 			reqBuilder.signAsEndpoint(adminKey);
 			txList.add(reqBuilder.buildRequest());
@@ -728,6 +728,16 @@ public class LedgerPerformanceTest {
 		@Override
 		public void checkNodePermission(TransactionPermission permission, MultiIDsPolicy midPolicy)
 				throws LedgerSecurityException {
+		}
+
+		@Override
+		public void checkDataPermission(DataPermission permission, DataPermissionType permissionType) throws LedgerSecurityException {
+
+		}
+
+		@Override
+		public void checkDataOwners(DataPermission permission, MultiIDsPolicy midPolicy) throws LedgerSecurityException {
+
 		}
 
 		@Override
