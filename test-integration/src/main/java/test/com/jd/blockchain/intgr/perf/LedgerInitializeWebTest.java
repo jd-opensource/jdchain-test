@@ -409,7 +409,7 @@ public class LedgerInitializeWebTest {
 			// DbConnection conn = db.connect(dbConnConfig.getUri(),
 			// dbConnConfig.getPassword());
 			DbConnection conn = db.connect(dbConnConfig.getUri());
-			LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService(), "default");
+			LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService(), dbConnConfig.getAnchor());
 
 			return ledgerRepo;
 		}

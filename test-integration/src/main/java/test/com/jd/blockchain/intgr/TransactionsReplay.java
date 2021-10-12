@@ -115,9 +115,9 @@ public class TransactionsReplay {
 		HashDigest ledgerHash = ledgerManage3.getLedgerHashs()[0];
 
 		LedgerRepository ledgerRepository0 = (LedgerRepository) ledgerManage0.register(ledgerHash,
-				node0.getStorageDB().connect("memory://local/0").getStorageService(), "default");
+				node0.getStorageDB().connect("memory://local/0").getStorageService(), node0.getConnectionConfig().getAnchor());
 		LedgerRepository ledgerRepository3 = (LedgerRepository) ledgerManage3.register(ledgerHash,
-				node0.getStorageDB().connect("memory://local/3").getStorageService(), "default");
+				node0.getStorageDB().connect("memory://local/3").getStorageService(), node0.getConnectionConfig().getAnchor());
 
 		addNewBlocksForNode0(node0, pubKey, privKey);
 
@@ -139,7 +139,7 @@ public class TransactionsReplay {
 		HashDigest ledgerHash0 = ledgerManage0.getLedgerHashs()[0];
 		long startTs = System.currentTimeMillis();
 		LedgerRepository ledgerRepository0 = (LedgerRepository) ledgerManage0.register(ledgerHash0,
-				node0.getStorageDB().connect("memory://local/0").getStorageService(), "default");
+				node0.getStorageDB().connect("memory://local/0").getStorageService(), node0.getConnectionConfig().getAnchor());
 
 		for (int height = 1; height < 20; height++) {
 			TransactionBatchProcessor txbatchProcessor = new TransactionBatchProcessor(ledgerRepository0, opReg);
@@ -326,6 +326,7 @@ public class TransactionsReplay {
 		TestDbFactory dbFactory0 = new TestDbFactory(new CompositeConnectionFactory());
 		DBConnectionConfig testDb0 = new DBConnectionConfig();
 		testDb0.setConnectionUri("memory://local/0");
+		testDb0.setAnchor(initSetting.getAnchorType());
 		LedgerBindingConfig bindingConfig0 = new LedgerBindingConfig();
 		AsyncCallback<HashDigest> callback0 = nodeCtx0.startInitCommand(privkey0, encodedPassword, initSetting, csProps,
 				csProvider, testDb0, consolePrompter, bindingConfig0, quitLatch, dbFactory0);
@@ -333,6 +334,7 @@ public class TransactionsReplay {
 		TestDbFactory dbFactory1 = new TestDbFactory(new CompositeConnectionFactory());
 		DBConnectionConfig testDb1 = new DBConnectionConfig();
 		testDb1.setConnectionUri("memory://local/1");
+		testDb1.setAnchor(initSetting.getAnchorType());
 		LedgerBindingConfig bindingConfig1 = new LedgerBindingConfig();
 		AsyncCallback<HashDigest> callback1 = nodeCtx1.startInitCommand(privkey1, encodedPassword, initSetting, csProps,
 				csProvider, testDb1, consolePrompter, bindingConfig1, quitLatch, dbFactory1);
@@ -340,6 +342,7 @@ public class TransactionsReplay {
 		TestDbFactory dbFactory2 = new TestDbFactory(new CompositeConnectionFactory());
 		DBConnectionConfig testDb2 = new DBConnectionConfig();
 		testDb2.setConnectionUri("memory://local/2");
+		testDb2.setAnchor(initSetting.getAnchorType());
 		LedgerBindingConfig bindingConfig2 = new LedgerBindingConfig();
 		AsyncCallback<HashDigest> callback2 = nodeCtx2.startInitCommand(privkey2, encodedPassword, initSetting, csProps,
 				csProvider, testDb2, consolePrompter, bindingConfig2, quitLatch, dbFactory2);
@@ -347,6 +350,7 @@ public class TransactionsReplay {
 		TestDbFactory dbFactory3 = new TestDbFactory(new CompositeConnectionFactory());
 		DBConnectionConfig testDb3 = new DBConnectionConfig();
 		testDb3.setConnectionUri("memory://local/3");
+		testDb3.setAnchor(initSetting.getAnchorType());
 		LedgerBindingConfig bindingConfig3 = new LedgerBindingConfig();
 		AsyncCallback<HashDigest> callback3 = nodeCtx3.startInitCommand(privkey3, encodedPassword, initSetting, csProps,
 				csProvider, testDb3, consolePrompter, bindingConfig3, quitLatch, dbFactory3);
@@ -376,6 +380,7 @@ public class TransactionsReplay {
 		node0.setStorageDB(nodeCtx0.getStorageDB());
 		node0.setPartiKeyPair(new AsymmetricKeypair(initSetting.getConsensusParticipant(0).getPubKey(), privkey0));
 		node0.setBindingConfig(bindingConfig0);
+		node0.setConnectionConfig(testDb0);
 		context.addNode(node0);
 
 		Node node1 = new Node(1);
@@ -384,6 +389,7 @@ public class TransactionsReplay {
 		node1.setStorageDB(nodeCtx1.getStorageDB());
 		node1.setPartiKeyPair(new AsymmetricKeypair(initSetting.getConsensusParticipant(1).getPubKey(), privkey1));
 		node1.setBindingConfig(bindingConfig1);
+		node1.setConnectionConfig(testDb1);
 		context.addNode(node1);
 
 		Node node2 = new Node(2);
@@ -392,6 +398,7 @@ public class TransactionsReplay {
 		node2.setStorageDB(nodeCtx2.getStorageDB());
 		node2.setPartiKeyPair(new AsymmetricKeypair(initSetting.getConsensusParticipant(2).getPubKey(), privkey2));
 		node2.setBindingConfig(bindingConfig2);
+		node2.setConnectionConfig(testDb2);
 		context.addNode(node2);
 
 		Node node3 = new Node(3);
@@ -400,6 +407,7 @@ public class TransactionsReplay {
 		node3.setStorageDB(nodeCtx3.getStorageDB());
 		node3.setPartiKeyPair(new AsymmetricKeypair(initSetting.getConsensusParticipant(3).getPubKey(), privkey3));
 		node3.setBindingConfig(bindingConfig3);
+		node3.setConnectionConfig(testDb3);
 		context.addNode(node3);
 
 		nodeCtx0.closeServer();

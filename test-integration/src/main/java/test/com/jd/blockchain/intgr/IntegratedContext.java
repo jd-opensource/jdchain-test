@@ -10,6 +10,7 @@ import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.ledger.CryptoSetting;
 import com.jd.blockchain.ledger.core.LedgerManager;
 import com.jd.blockchain.storage.service.DbConnectionFactory;
+import com.jd.blockchain.tools.initializer.DBConnectionConfig;
 import com.jd.blockchain.tools.initializer.LedgerBindingConfig;
 
 public class IntegratedContext {
@@ -70,6 +71,8 @@ public class IntegratedContext {
 
 		private LedgerBindingConfig bindingConfig;
 
+		private DBConnectionConfig connectionConfig;
+
 		public Node(int id) {
 			this.id = id;
 		}
@@ -118,6 +121,13 @@ public class IntegratedContext {
 			this.bindingConfig = bindingConfig;
 		}
 
+		public void setConnectionConfig(DBConnectionConfig connectionConfig) {
+			this.connectionConfig = connectionConfig;
+		}
+
+		public DBConnectionConfig getConnectionConfig() {
+			return connectionConfig;
+		}
 	}
 
 }
