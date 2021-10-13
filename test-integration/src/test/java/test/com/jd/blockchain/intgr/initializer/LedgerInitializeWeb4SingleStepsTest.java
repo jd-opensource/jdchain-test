@@ -217,9 +217,13 @@ public class LedgerInitializeWeb4SingleStepsTest {
 
 		// 测试生成账本，并创建“账本初始化决议”；
 		DBConnectionConfig testDb0 = new DBConnectionConfig(dbConns[0]);
+		testDb0.setAnchor(initSetting.getAnchorType());
 		DBConnectionConfig testDb1 = new DBConnectionConfig(dbConns[1]);
+		testDb1.setAnchor(initSetting.getAnchorType());
 		DBConnectionConfig testDb2 = new DBConnectionConfig(dbConns[2]);
+		testDb2.setAnchor(initSetting.getAnchorType());
 		DBConnectionConfig testDb3 = new DBConnectionConfig(dbConns[3]);
+		testDb3.setAnchor(initSetting.getAnchorType());
 
 		LedgerInitDecision dec0 = node0.prepareLedger(testDb0, privkey0);
 		LedgerInitDecision dec1 = node1.prepareLedger(testDb1, privkey1);
@@ -339,7 +343,7 @@ public class LedgerInitializeWeb4SingleStepsTest {
 			// DbConnection conn = db.connect(dbConnConfig.getUri(),
 			// dbConnConfig.getPassword());
 			DbConnection conn = db.connect(dbConnConfig.getUri());
-			LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService(), "default");
+			LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService(), dbConnConfig.getAnchor());
 			return ledgerRepo;
 		}
 

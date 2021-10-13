@@ -123,27 +123,32 @@ public class LedgerInitializeWeb5Nodes {
 
         DBConnectionConfig testDb0 = new DBConnectionConfig();
         testDb0.setConnectionUri(dbConns[0]);
+        testDb0.setAnchor(initSetting.getAnchorType());
         ThreadInvoker.AsyncCallback<HashDigest> callback0 = node0.startInit(privkey0, initSetting, testDb0, consolePrompter,
                 quitLatch);
 
         DBConnectionConfig testDb1 = new DBConnectionConfig();
         testDb1.setConnectionUri(dbConns[1]);
+        testDb1.setAnchor(initSetting.getAnchorType());
         ThreadInvoker.AsyncCallback<HashDigest> callback1 = node1.startInit(privkey1, initSetting, testDb1, consolePrompter,
                 quitLatch);
 
         DBConnectionConfig testDb2 = new DBConnectionConfig();
         testDb2.setConnectionUri(dbConns[2]);
+        testDb2.setAnchor(initSetting.getAnchorType());
         ThreadInvoker.AsyncCallback<HashDigest> callback2 = node2.startInit(privkey2, initSetting, testDb2, consolePrompter,
                 quitLatch);
 
-        DBConnectionConfig testDb03 = new DBConnectionConfig();
-        testDb03.setConnectionUri(dbConns[3]);
-        ThreadInvoker.AsyncCallback<HashDigest> callback3 = node3.startInit(privkey3, initSetting, testDb03, consolePrompter,
+        DBConnectionConfig testDb3 = new DBConnectionConfig();
+        testDb3.setConnectionUri(dbConns[3]);
+        testDb3.setAnchor(initSetting.getAnchorType());
+        ThreadInvoker.AsyncCallback<HashDigest> callback3 = node3.startInit(privkey3, initSetting, testDb3, consolePrompter,
                 quitLatch);
 
-        DBConnectionConfig testDb04 = new DBConnectionConfig();
-        testDb04.setConnectionUri(dbConns[4]);
-        ThreadInvoker.AsyncCallback<HashDigest> callback4 = node4.startInit(privkey4, initSetting, testDb04, consolePrompter,
+        DBConnectionConfig testDb4 = new DBConnectionConfig();
+        testDb4.setConnectionUri(dbConns[4]);
+        testDb4.setAnchor(initSetting.getAnchorType());
+        ThreadInvoker.AsyncCallback<HashDigest> callback4 = node4.startInit(privkey4, initSetting, testDb4, consolePrompter,
                 quitLatch);
 
         HashDigest ledgerHash0 = callback0.waitReturn();
@@ -269,7 +274,7 @@ public class LedgerInitializeWeb5Nodes {
 
         public LedgerQuery registLedger(HashDigest ledgerHash) {
             DbConnection conn = db.connect(dbConnConfig.getUri());
-            LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService(), "default");
+            LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService(), dbConnConfig.getAnchor());
             return ledgerRepo;
         }
 

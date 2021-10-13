@@ -81,6 +81,8 @@ public class RolesAuthorizationTest {
 
 	public static final BlockchainKeypair[] KEYS;
 
+	public static String anchorType;
+
 	private static final BlockchainKeypair ADMIN_USER;
 	private static final BlockchainKeypair MANAGER_USER;
 	private static final BlockchainKeypair DEFAULT_USER;
@@ -119,7 +121,7 @@ public class RolesAuthorizationTest {
 		final HashDigest ledgerHash = genesisBlock.getHash();
 
 		LedgerManager ledgerManager = new LedgerManager();
-		LedgerRepository ledger = ledgerManager.register(ledgerHash, storage, "default");
+		LedgerRepository ledger = ledgerManager.register(ledgerHash, storage, anchorType);
 		CryptoSetting cryptoSetting = ledger.getAdminInfo().getSettings().getCryptoSetting();
 		// 验证角色和用户的权限配置；
 		assertUserRolesPermissions(ledger);
@@ -217,7 +219,7 @@ public class RolesAuthorizationTest {
 	 */
 	private void assertPredefineData(HashDigest ledgerHash, MemoryKVStorage storage) {
 		LedgerManager ledgerManager = new LedgerManager();
-		LedgerRepository ledger = ledgerManager.register(ledgerHash, storage, "default");
+		LedgerRepository ledger = ledgerManager.register(ledgerHash, storage, anchorType);
 		UserAccount newUser = ledger.getUserAccountSet().getAccount(NEW_USER.getAddress());
 		assertNotNull(newUser);
 		DataAccount dataAccount = ledger.getDataAccountSet().getAccount(DATA_ACCOUNT_ID.getAddress());
@@ -344,6 +346,7 @@ public class RolesAuthorizationTest {
 
 	private LedgerBlock initLedger(KVStorageService storage) {
 		LedgerInitProperties initProps = loadInitProperties();
+		anchorType = initProps.getAnchorType();
 		LedgerInitConfiguration initConfig = LedgerInitConfiguration.create(initProps);
 		LedgerInitializer initializer = LedgerInitializer.create(initConfig.getLedgerSettings(),
 				initConfig.getSecuritySettings());

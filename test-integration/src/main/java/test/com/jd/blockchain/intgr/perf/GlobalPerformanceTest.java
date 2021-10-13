@@ -214,24 +214,28 @@ public class GlobalPerformanceTest {
 
 		DBConnectionConfig testDb0 = new DBConnectionConfig();
 		testDb0.setConnectionUri("memory://local/0");
+		testDb0.setAnchor(initSetting.getAnchorType());
 		LedgerBindingConfig bindingConfig0 = new LedgerBindingConfig();
 		AsyncCallback<HashDigest> callback0 = nodeCtx0.startInitCommand(privkey0, encodedPassword, initSetting, csProps,
 				csProvider, testDb0, consolePrompter, bindingConfig0, quitLatch);
 
 		DBConnectionConfig testDb1 = new DBConnectionConfig();
 		testDb1.setConnectionUri("memory://local/1");
+		testDb1.setAnchor(initSetting.getAnchorType());
 		LedgerBindingConfig bindingConfig1 = new LedgerBindingConfig();
 		AsyncCallback<HashDigest> callback1 = nodeCtx1.startInitCommand(privkey1, encodedPassword, initSetting, csProps,
 				csProvider, testDb1, consolePrompter, bindingConfig1, quitLatch);
 
 		DBConnectionConfig testDb2 = new DBConnectionConfig();
 		testDb2.setConnectionUri("memory://local/2");
+		testDb2.setAnchor(initSetting.getAnchorType());
 		LedgerBindingConfig bindingConfig2 = new LedgerBindingConfig();
 		AsyncCallback<HashDigest> callback2 = nodeCtx2.startInitCommand(privkey2, encodedPassword, initSetting, csProps,
 				csProvider, testDb2, consolePrompter, bindingConfig2, quitLatch);
 
 		DBConnectionConfig testDb3 = new DBConnectionConfig();
 		testDb3.setConnectionUri("memory://local/3");
+		testDb3.setAnchor(initSetting.getAnchorType());
 		LedgerBindingConfig bindingConfig3 = new LedgerBindingConfig();
 		AsyncCallback<HashDigest> callback3 = nodeCtx3.startInitCommand(privkey3, encodedPassword, initSetting, csProps,
 				csProvider, testDb3, consolePrompter, bindingConfig3, quitLatch);
@@ -254,6 +258,7 @@ public class GlobalPerformanceTest {
 		node0.setStorageDB(nodeCtx0.getStorageDB());
 		node0.setPartiKeyPair(new AsymmetricKeypair(initSetting.getConsensusParticipant(0).getPubKey(), privkey0));
 		node0.setBindingConfig(bindingConfig0);
+		node0.setConnectionConfig(testDb0);
 		context.addNode(node0);
 
 		Node node1 = new Node(1);
@@ -262,6 +267,7 @@ public class GlobalPerformanceTest {
 		node1.setStorageDB(nodeCtx1.getStorageDB());
 		node1.setPartiKeyPair(new AsymmetricKeypair(initSetting.getConsensusParticipant(1).getPubKey(), privkey1));
 		node1.setBindingConfig(bindingConfig1);
+		node1.setConnectionConfig(testDb1);
 		context.addNode(node1);
 
 		Node node2 = new Node(2);
@@ -270,6 +276,7 @@ public class GlobalPerformanceTest {
 		node2.setStorageDB(nodeCtx2.getStorageDB());
 		node2.setPartiKeyPair(new AsymmetricKeypair(initSetting.getConsensusParticipant(2).getPubKey(), privkey2));
 		node2.setBindingConfig(bindingConfig2);
+		node2.setConnectionConfig(testDb2);
 		context.addNode(node2);
 
 		Node node3 = new Node(3);
@@ -278,6 +285,7 @@ public class GlobalPerformanceTest {
 		node3.setStorageDB(nodeCtx3.getStorageDB());
 		node3.setPartiKeyPair(new AsymmetricKeypair(initSetting.getConsensusParticipant(3).getPubKey(), privkey3));
 		node3.setBindingConfig(bindingConfig3);
+		node3.setConnectionConfig(testDb3);
 		context.addNode(node3);
 
 		nodeCtx0.closeServer();
@@ -348,7 +356,7 @@ public class GlobalPerformanceTest {
 
 			DbConnection conn = db.connect(dbConnConfig.getUri(), dbConnConfig.getPassword());
 			conns.add(conn);
-			LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService(), "default");
+			LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService(), dbConnConfig.getAnchor());
 			return ledgerRepo;
 		}
 

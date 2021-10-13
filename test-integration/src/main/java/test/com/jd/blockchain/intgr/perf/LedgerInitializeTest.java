@@ -107,10 +107,10 @@ public class LedgerInitializeTest {
 		HashDigest ledgerHash2 = callback2.waitReturn();
 		HashDigest ledgerHash3 = callback3.waitReturn();
 
-		LedgerQuery ledger0 = node0.registLedger(ledgerHash0, memoryConnString[0]);
-		LedgerQuery ledger1 = node1.registLedger(ledgerHash1, memoryConnString[1]);
-		LedgerQuery ledger2 = node2.registLedger(ledgerHash2, memoryConnString[2]);
-		LedgerQuery ledger3 = node3.registLedger(ledgerHash3, memoryConnString[3]);
+		LedgerQuery ledger0 = node0.registLedger(ledgerHash0, memoryConnString[0], initSetting.getAnchorType());
+		LedgerQuery ledger1 = node1.registLedger(ledgerHash1, memoryConnString[1], initSetting.getAnchorType());
+		LedgerQuery ledger2 = node2.registLedger(ledgerHash2, memoryConnString[2], initSetting.getAnchorType());
+		LedgerQuery ledger3 = node3.registLedger(ledgerHash3, memoryConnString[3], initSetting.getAnchorType());
 
 		LedgerBlock genesisBlock = ledger0.getLatestBlock();
 
@@ -222,8 +222,8 @@ public class LedgerInitializeTest {
 			return invoker.start();
 		}
 
-		public LedgerQuery registLedger(HashDigest ledgerHash, String connString) {
-			return ledgerManager.register(ledgerHash, memoryDBConnFactory.connect(connString).getStorageService(), "default");
+		public LedgerQuery registLedger(HashDigest ledgerHash, String connString, String anchorType) {
+			return ledgerManager.register(ledgerHash, memoryDBConnFactory.connect(connString).getStorageService(), anchorType);
 		}
 	}
 
