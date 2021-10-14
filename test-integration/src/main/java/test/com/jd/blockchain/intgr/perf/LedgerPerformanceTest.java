@@ -3,6 +3,7 @@ package test.com.jd.blockchain.intgr.perf;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -482,8 +483,8 @@ public class LedgerPerformanceTest {
 			txbuilder = new TxBuilder(ledgerHash, cryptoSetting.getHashAlgorithm());
 			String args = dataIdentity.getAddress().toString() + "##" + Integer.toString(i) + "##"
 					+ Integer.toString(i);
-			txbuilder.contractEvents().send(contractIdentity.getAddress(), "print", BytesDataList.singleText("hello"));
-//			txbuilder.contractEvents().send(contractIdentity.getAddress(), "print", args.getBytes());
+			txbuilder.contract(contractIdentity.getAddress()).invoke("print", BytesDataList.singleText("hello"));
+//			txbuilder.contract(contractIdentity.getAddress()).send("print", args.getBytes());
 			reqBuilder = txbuilder.prepareRequest();
 			reqBuilder.signAsEndpoint(adminKey);
 			txList.add(reqBuilder.buildRequest());
@@ -655,6 +656,11 @@ public class LedgerPerformanceTest {
 		}
 
 		@Override
+		public SecurityPolicy getSecurityPolicy(Set<Bytes> endpoints, Set<Bytes> nodes, X509Certificate[] ledgerCAs) {
+			return new FreedomSecurityPolicy(endpoints, nodes, ledgerCAs);
+		}
+
+		@Override
 		public UserRolesPrivileges getUserRolesPrivilegs(Bytes userAddress) {
 			return null;
 		}
@@ -664,10 +670,17 @@ public class LedgerPerformanceTest {
 
 		private Set<Bytes> endpoints;
 		private Set<Bytes> nodes;
+		private X509Certificate[] ledgerCAs;
 
 		public FreedomSecurityPolicy(Set<Bytes> endpoints, Set<Bytes> nodes) {
 			this.endpoints = endpoints;
 			this.nodes = nodes;
+		}
+
+		public FreedomSecurityPolicy(Set<Bytes> endpoints, Set<Bytes> nodes, X509Certificate[] ledgerCAs) {
+			this.endpoints = endpoints;
+			this.nodes = nodes;
+			this.ledgerCAs = ledgerCAs;
 		}
 
 		@Override
@@ -718,6 +731,26 @@ public class LedgerPerformanceTest {
 		@Override
 		public void checkNodePermission(TransactionPermission permission, MultiIDsPolicy midPolicy)
 				throws LedgerSecurityException {
+		}
+
+		@Override
+		public void checkDataPermission(DataPermission permission, DataPermissionType permissionType) throws LedgerSecurityException {
+
+		}
+
+		@Override
+		public void checkDataOwners(DataPermission permission, MultiIDsPolicy midPolicy) throws LedgerSecurityException {
+
+		}
+
+		@Override
+		public void checkEndpointCA(MultiIDsPolicy midPolicy) throws LedgerSecurityException {
+
+		}
+
+		@Override
+		public void checkNodeCA(MultiIDsPolicy midPolicy) throws LedgerSecurityException {
+
 		}
 
 		@Override
