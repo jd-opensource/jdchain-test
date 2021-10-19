@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.jd.blockchain.ledger.LedgerDataStructure;
 import org.bouncycastle.util.Arrays;
 import org.springframework.core.io.ClassPathResource;
 
@@ -199,8 +200,8 @@ public class Utils {
 			return invoker.start();
 		}
 
-		public LedgerQuery registLedger(HashDigest ledgerHash, DBConnectionConfig dbConnConf) {
-			return ledgerManager.register(ledgerHash, dbConnFactory.connect(dbConnConf.getUri()).getStorageService(), dbConnConf.getAnchor());
+		public LedgerQuery registerLedger(HashDigest ledgerHash, DBConnectionConfig dbConnConf, LedgerDataStructure ledgerDataStructure) {
+			return ledgerManager.register(ledgerHash, dbConnFactory.connect(dbConnConf.getUri()).getStorageService(), ledgerDataStructure);
 		}
 	}
 

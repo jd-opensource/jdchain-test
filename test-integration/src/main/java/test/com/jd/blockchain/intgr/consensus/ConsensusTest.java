@@ -6,6 +6,7 @@ import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 
+import com.jd.blockchain.ledger.LedgerDataStructure;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ClassPathResource;
@@ -216,28 +217,24 @@ public class ConsensusTest {
 
 		DBConnectionConfig testDb0 = new DBConnectionConfig();
 		testDb0.setConnectionUri("memory://local/0");
-		testDb0.setAnchor(initSetting.getAnchorType());
 		LedgerBindingConfig bindingConfig0 = new LedgerBindingConfig();
 		AsyncCallback<HashDigest> callback0 = nodeCtx0.startInitCommand(privkey0, encodedPassword, initSetting, csProps,
 				csProvider, testDb0, consolePrompter, bindingConfig0, quitLatch);
 
 		DBConnectionConfig testDb1 = new DBConnectionConfig();
 		testDb1.setConnectionUri("memory://local/1");
-		testDb1.setAnchor(initSetting.getAnchorType());
 		LedgerBindingConfig bindingConfig1 = new LedgerBindingConfig();
 		AsyncCallback<HashDigest> callback1 = nodeCtx1.startInitCommand(privkey1, encodedPassword, initSetting, csProps,
 				csProvider, testDb1, consolePrompter, bindingConfig1, quitLatch);
 
 		DBConnectionConfig testDb2 = new DBConnectionConfig();
 		testDb2.setConnectionUri("memory://local/2");
-		testDb2.setAnchor(initSetting.getAnchorType());
 		LedgerBindingConfig bindingConfig2 = new LedgerBindingConfig();
 		AsyncCallback<HashDigest> callback2 = nodeCtx2.startInitCommand(privkey2, encodedPassword, initSetting, csProps,
 				csProvider, testDb2, consolePrompter, bindingConfig2, quitLatch);
 
 		DBConnectionConfig testDb3 = new DBConnectionConfig();
 		testDb3.setConnectionUri("memory://local/3");
-		testDb3.setAnchor(initSetting.getAnchorType());
 		LedgerBindingConfig bindingConfig3 = new LedgerBindingConfig();
 		AsyncCallback<HashDigest> callback3 = nodeCtx3.startInitCommand(privkey3, encodedPassword, initSetting, csProps,
 				csProvider, testDb3, consolePrompter, bindingConfig3, quitLatch);
@@ -247,10 +244,10 @@ public class ConsensusTest {
 		HashDigest ledgerHash2 = callback2.waitReturn();
 		HashDigest ledgerHash3 = callback3.waitReturn();
 
-		nodeCtx0.registLedger(ledgerHash0);
-		nodeCtx1.registLedger(ledgerHash1);
-		nodeCtx2.registLedger(ledgerHash2);
-		nodeCtx3.registLedger(ledgerHash3);
+		nodeCtx0.registerLedger(ledgerHash0, initSetting.getLedgerDataStructure());
+		nodeCtx1.registerLedger(ledgerHash1, initSetting.getLedgerDataStructure());
+		nodeCtx2.registerLedger(ledgerHash2, initSetting.getLedgerDataStructure());
+		nodeCtx3.registerLedger(ledgerHash3, initSetting.getLedgerDataStructure());
 
 		IntegratedContext context = new IntegratedContext();
 
@@ -343,15 +340,9 @@ public class ConsensusTest {
 			this.serverAddress = serverAddress;
 		}
 
-		public LedgerQuery registLedger(HashDigest ledgerHash) {
-			// LedgerManage ledgerManager = ctx.getBean(LedgerManage.class);
-			//
-			// DbConnectionFactory dbConnFactory = ctx.getBean(DbConnectionFactory.class);
-			// DbConnection conn = dbConnFactory.connect(dbConnConfig.getUri(),
-			// dbConnConfig.getPassword());
-
+		public LedgerQuery registerLedger(HashDigest ledgerHash, LedgerDataStructure ledgerDataStructure) {
 			DbConnection conn = db.connect(dbConnConfig.getUri(), dbConnConfig.getPassword());
-			LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService(), dbConnConfig.getAnchor());
+			LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService(), ledgerDataStructure);
 			return ledgerRepo;
 		}
 

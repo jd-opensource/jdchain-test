@@ -188,10 +188,10 @@ public class IntegrationBaseTest {
 		assertEquals(ledgerHash0, ledgerHash2);
 		assertEquals(ledgerHash0, ledgerHash3);
 
-		LedgerQuery ledger0 = nodeCtx0.registLedger(ledgerHash0);
-		LedgerQuery ledger1 = nodeCtx1.registLedger(ledgerHash1);
-		LedgerQuery ledger2 = nodeCtx2.registLedger(ledgerHash2);
-		LedgerQuery ledger3 = nodeCtx3.registLedger(ledgerHash3);
+		LedgerQuery ledger0 = nodeCtx0.registerLedger(ledgerHash0, initSetting.getLedgerDataStructure());
+		LedgerQuery ledger1 = nodeCtx1.registerLedger(ledgerHash1, initSetting.getLedgerDataStructure());
+		LedgerQuery ledger2 = nodeCtx2.registerLedger(ledgerHash2, initSetting.getLedgerDataStructure());
+		LedgerQuery ledger3 = nodeCtx3.registerLedger(ledgerHash3, initSetting.getLedgerDataStructure());
 
 		assertNotNull(ledger0);
 		assertNotNull(ledger1);

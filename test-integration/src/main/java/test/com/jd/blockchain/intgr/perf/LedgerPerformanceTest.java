@@ -515,10 +515,10 @@ public class LedgerPerformanceTest {
 		DBSetting dbsetting2;
 		DBSetting dbsetting3;
 		if (dbType == DBType.REDIS) {
-			dbsetting0 = DBSetting.createRedisDBSetting("redis://127.0.0.1:6079", initSetting.getAnchorType());
-			dbsetting1 = DBSetting.createRedisDBSetting("redis://127.0.0.1:6179", initSetting.getAnchorType());
-			dbsetting2 = DBSetting.createRedisDBSetting("redis://127.0.0.1:6279", initSetting.getAnchorType());
-			dbsetting3 = DBSetting.createRedisDBSetting("redis://127.0.0.1:6379", initSetting.getAnchorType());
+			dbsetting0 = DBSetting.createRedisDBSetting("redis://127.0.0.1:6079");
+			dbsetting1 = DBSetting.createRedisDBSetting("redis://127.0.0.1:6179");
+			dbsetting2 = DBSetting.createRedisDBSetting("redis://127.0.0.1:6279");
+			dbsetting3 = DBSetting.createRedisDBSetting("redis://127.0.0.1:6379");
 
 			cleanRedisDB(dbsetting0);
 			cleanRedisDB(dbsetting1);
@@ -538,15 +538,15 @@ public class LedgerPerformanceTest {
 			FileUtils.deleteFile(dbDir2);
 			FileUtils.deleteFile(dbDir3);
 
-			dbsetting0 = DBSetting.createRocksDBSetting("rocksdb://" + dbDir0, initSetting.getAnchorType());
-			dbsetting1 = DBSetting.createRocksDBSetting("rocksdb://" + dbDir1, initSetting.getAnchorType());
-			dbsetting2 = DBSetting.createRocksDBSetting("rocksdb://" + dbDir2, initSetting.getAnchorType());
-			dbsetting3 = DBSetting.createRocksDBSetting("rocksdb://" + dbDir3, initSetting.getAnchorType());
+			dbsetting0 = DBSetting.createRocksDBSetting("rocksdb://" + dbDir0);
+			dbsetting1 = DBSetting.createRocksDBSetting("rocksdb://" + dbDir1);
+			dbsetting2 = DBSetting.createRocksDBSetting("rocksdb://" + dbDir2);
+			dbsetting3 = DBSetting.createRocksDBSetting("rocksdb://" + dbDir3);
 		} else {
-			dbsetting0 = DBSetting.createMemoryDBSetting("memory://local/0", initSetting.getAnchorType());
-			dbsetting1 = DBSetting.createMemoryDBSetting("memory://local/1", initSetting.getAnchorType());
-			dbsetting2 = DBSetting.createMemoryDBSetting("memory://local/2", initSetting.getAnchorType());
-			dbsetting3 = DBSetting.createMemoryDBSetting("memory://local/3", initSetting.getAnchorType());
+			dbsetting0 = DBSetting.createMemoryDBSetting("memory://local/0");
+			dbsetting1 = DBSetting.createMemoryDBSetting("memory://local/1");
+			dbsetting2 = DBSetting.createMemoryDBSetting("memory://local/2");
+			dbsetting3 = DBSetting.createMemoryDBSetting("memory://local/3");
 		}
 
 		NodeContext node0 = new NodeContext(initSetting.getConsensusParticipant(0).getInitializerAddress(),
@@ -579,10 +579,10 @@ public class LedgerPerformanceTest {
 		HashDigest ledgerHash2 = callback2.waitReturn();
 		HashDigest ledgerHash3 = callback3.waitReturn();
 
-		node0.registLedger(ledgerHash0, dbsetting0.connectionConfig);
-		node1.registLedger(ledgerHash1, dbsetting1.connectionConfig);
-		node2.registLedger(ledgerHash2, dbsetting2.connectionConfig);
-		node3.registLedger(ledgerHash3, dbsetting3.connectionConfig);
+		node0.registerLedger(ledgerHash0, dbsetting0.connectionConfig, initSetting.getLedgerDataStructure());
+		node1.registerLedger(ledgerHash1, dbsetting1.connectionConfig, initSetting.getLedgerDataStructure());
+		node2.registerLedger(ledgerHash2, dbsetting2.connectionConfig, initSetting.getLedgerDataStructure());
+		node3.registerLedger(ledgerHash3, dbsetting3.connectionConfig, initSetting.getLedgerDataStructure());
 
 		return new NodeContext[] { node0, node1, node2, node3 };
 	}
@@ -620,26 +620,23 @@ public class LedgerPerformanceTest {
 
 		private DbConnectionFactory connectionFactory;
 
-		public static DBSetting createMemoryDBSetting(String uri, String anchorType) {
+		public static DBSetting createMemoryDBSetting(String uri) {
 			DBSetting setting = new DBSetting();
 			setting.connectionConfig = new DBConnectionConfig(uri);
-			setting.connectionConfig.setAnchor(anchorType);
 			setting.connectionFactory = new MemoryDBConnFactory();
 			return setting;
 		}
 
-		public static DBSetting createRedisDBSetting(String uri, String anchorType) {
+		public static DBSetting createRedisDBSetting(String uri) {
 			DBSetting setting = new DBSetting();
 			setting.connectionConfig = new DBConnectionConfig(uri);
-			setting.connectionConfig.setAnchor(anchorType);
 			setting.connectionFactory = new RedisConnectionFactory();
 			return setting;
 		}
 
-		public static DBSetting createRocksDBSetting(String uri, String anchorType) {
+		public static DBSetting createRocksDBSetting(String uri) {
 			DBSetting setting = new DBSetting();
 			setting.connectionConfig = new DBConnectionConfig(uri);
-			setting.connectionConfig.setAnchor(anchorType);
 			setting.connectionFactory = new RocksDBConnectionFactory();
 			return setting;
 		}

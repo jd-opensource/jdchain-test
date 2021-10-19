@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
+import com.jd.blockchain.ledger.LedgerDataStructure;
 import org.bouncycastle.util.Arrays;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -48,7 +49,6 @@ import com.jd.blockchain.tools.initializer.web.HttpInitConsensServiceFactory;
 import com.jd.blockchain.tools.initializer.web.LedgerInitConfiguration;
 import com.jd.blockchain.tools.initializer.web.LedgerInitConsensusService;
 import com.jd.blockchain.tools.initializer.web.LedgerInitializeWebController;
-import com.jd.blockchain.tools.initializer.web.ParticipantReplica;
 
 import test.com.jd.blockchain.intgr.LedgerInitConsensusConfig;
 import test.com.jd.blockchain.intgr.PresetAnswerPrompter;
@@ -303,10 +303,10 @@ public class LedgerInitializeWebTest {
 		HashDigest ledgerHash2 = callback2.waitReturn();
 		HashDigest ledgerHash3 = callback3.waitReturn();
 
-		LedgerQuery ledger0 = node0.registLedger(ledgerHash0);
-		LedgerQuery ledger1 = node1.registLedger(ledgerHash1);
-		LedgerQuery ledger2 = node2.registLedger(ledgerHash2);
-		LedgerQuery ledger3 = node3.registLedger(ledgerHash3);
+		LedgerQuery ledger0 = node0.registerLedger(ledgerHash0, initSetting.getLedgerDataStructure());
+		LedgerQuery ledger1 = node1.registerLedger(ledgerHash1, initSetting.getLedgerDataStructure());
+		LedgerQuery ledger2 = node2.registerLedger(ledgerHash2, initSetting.getLedgerDataStructure());
+		LedgerQuery ledger3 = node3.registerLedger(ledgerHash3, initSetting.getLedgerDataStructure());
 
 		LedgerBlock genesisBlock = ledger0.getLatestBlock();
 
@@ -399,17 +399,9 @@ public class LedgerInitializeWebTest {
 			this.serverAddress = serverAddress;
 		}
 
-		public LedgerQuery registLedger(HashDigest ledgerHash) {
-			// LedgerManage ledgerManager = ctx.getBean(LedgerManage.class);
-			//
-			// DbConnectionFactory dbConnFactory = ctx.getBean(DbConnectionFactory.class);
-			// DbConnection conn = dbConnFactory.connect(dbConnConfig.getUri(),
-			// dbConnConfig.getPassword());
-
-			// DbConnection conn = db.connect(dbConnConfig.getUri(),
-			// dbConnConfig.getPassword());
+		public LedgerQuery registerLedger(HashDigest ledgerHash, LedgerDataStructure ledgerDataStructure) {
 			DbConnection conn = db.connect(dbConnConfig.getUri());
-			LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService(), dbConnConfig.getAnchor());
+			LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService(), ledgerDataStructure);
 
 			return ledgerRepo;
 		}

@@ -4,6 +4,7 @@ import com.jd.blockchain.consensus.ConsensusProvider;
 import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.crypto.*;
 import com.jd.blockchain.ledger.LedgerBlock;
+import com.jd.blockchain.ledger.LedgerDataStructure;
 import com.jd.blockchain.ledger.LedgerInitProperties;
 import com.jd.blockchain.ledger.TransactionContent;
 import com.jd.blockchain.ledger.core.*;
@@ -21,7 +22,6 @@ import org.springframework.core.io.ClassPathResource;
 import test.com.jd.blockchain.intgr.IntegrationBase;
 import test.com.jd.blockchain.intgr.LedgerInitConsensusConfig;
 import test.com.jd.blockchain.intgr.PresetAnswerPrompter;
-import test.com.jd.blockchain.intgr.perf.Utils;
 import test.com.jd.blockchain.intgr.perf.Utils5Nodes;
 import utils.Bytes;
 import utils.concurrent.ThreadInvoker;
@@ -123,31 +123,26 @@ public class LedgerInitializeWeb5Nodes {
 
         DBConnectionConfig testDb0 = new DBConnectionConfig();
         testDb0.setConnectionUri(dbConns[0]);
-        testDb0.setAnchor(initSetting.getAnchorType());
         ThreadInvoker.AsyncCallback<HashDigest> callback0 = node0.startInit(privkey0, initSetting, testDb0, consolePrompter,
                 quitLatch);
 
         DBConnectionConfig testDb1 = new DBConnectionConfig();
         testDb1.setConnectionUri(dbConns[1]);
-        testDb1.setAnchor(initSetting.getAnchorType());
         ThreadInvoker.AsyncCallback<HashDigest> callback1 = node1.startInit(privkey1, initSetting, testDb1, consolePrompter,
                 quitLatch);
 
         DBConnectionConfig testDb2 = new DBConnectionConfig();
         testDb2.setConnectionUri(dbConns[2]);
-        testDb2.setAnchor(initSetting.getAnchorType());
         ThreadInvoker.AsyncCallback<HashDigest> callback2 = node2.startInit(privkey2, initSetting, testDb2, consolePrompter,
                 quitLatch);
 
         DBConnectionConfig testDb3 = new DBConnectionConfig();
         testDb3.setConnectionUri(dbConns[3]);
-        testDb3.setAnchor(initSetting.getAnchorType());
         ThreadInvoker.AsyncCallback<HashDigest> callback3 = node3.startInit(privkey3, initSetting, testDb3, consolePrompter,
                 quitLatch);
 
         DBConnectionConfig testDb4 = new DBConnectionConfig();
         testDb4.setConnectionUri(dbConns[4]);
-        testDb4.setAnchor(initSetting.getAnchorType());
         ThreadInvoker.AsyncCallback<HashDigest> callback4 = node4.startInit(privkey4, initSetting, testDb4, consolePrompter,
                 quitLatch);
 
@@ -163,11 +158,11 @@ public class LedgerInitializeWeb5Nodes {
         assertEquals(ledgerHash0, ledgerHash3);
         assertEquals(ledgerHash0, ledgerHash4);
 
-        LedgerQuery ledger0 = node0.registLedger(ledgerHash0);
-        LedgerQuery ledger1 = node1.registLedger(ledgerHash1);
-        LedgerQuery ledger2 = node2.registLedger(ledgerHash2);
-        LedgerQuery ledger3 = node3.registLedger(ledgerHash3);
-        LedgerQuery ledger4 = node4.registLedger(ledgerHash4);
+        LedgerQuery ledger0 = node0.registLedger(ledgerHash0, initSetting.getLedgerDataStructure());
+        LedgerQuery ledger1 = node1.registLedger(ledgerHash1, initSetting.getLedgerDataStructure());
+        LedgerQuery ledger2 = node2.registLedger(ledgerHash2, initSetting.getLedgerDataStructure());
+        LedgerQuery ledger3 = node3.registLedger(ledgerHash3, initSetting.getLedgerDataStructure());
+        LedgerQuery ledger4 = node4.registLedger(ledgerHash4, initSetting.getLedgerDataStructure());
 
         assertNotNull(ledger0);
         assertNotNull(ledger1);
@@ -272,9 +267,9 @@ public class LedgerInitializeWeb5Nodes {
             this.serverAddress = serverAddress;
         }
 
-        public LedgerQuery registLedger(HashDigest ledgerHash) {
+        public LedgerQuery registLedger(HashDigest ledgerHash, LedgerDataStructure ledgerDataStructure) {
             DbConnection conn = db.connect(dbConnConfig.getUri());
-            LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService(), dbConnConfig.getAnchor());
+            LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService(), ledgerDataStructure);
             return ledgerRepo;
         }
 

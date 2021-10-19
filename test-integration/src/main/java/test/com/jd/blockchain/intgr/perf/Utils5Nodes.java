@@ -194,10 +194,6 @@ public class Utils5Nodes {
 
             return invoker.start();
         }
-
-        public LedgerQuery registLedger(HashDigest ledgerHash, DBConnectionConfig dbConnConf) {
-            return ledgerManager.register(ledgerHash, dbConnFactory.connect(dbConnConf.getUri()).getStorageService(), dbConnConf.getAnchor());
-        }
     }
 
     private static class MultiThreadInterInvokerFactory implements InitConsensusServiceFactory {

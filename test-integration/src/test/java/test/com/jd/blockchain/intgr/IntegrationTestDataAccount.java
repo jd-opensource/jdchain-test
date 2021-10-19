@@ -186,7 +186,7 @@ public class IntegrationTestDataAccount {
 		DbConnection memoryBasedDb = context.getNode(0).getStorageDB()
 				.connect(LedgerInitConsensusConfig.memConnectionStrings[0]);
 
-		LedgerQuery ledgerRepository = ledgerManager.register(ledgerHashs[0], memoryBasedDb.getStorageService(), context.getNode(0).getConnectionConfig().getAnchor());
+		LedgerQuery ledgerRepository = ledgerManager.register(ledgerHashs[0], memoryBasedDb.getStorageService(), context.getNode(0).getBindingConfig().getLedger(ledgerHashs[0]).getDataStructure());
 
 		DataAccountSet dataAccountSet = ledgerRepository.getDataAccountSet(ledgerRepository.retrieveLatestBlock());
 
@@ -291,28 +291,24 @@ public class IntegrationTestDataAccount {
 
 		DBConnectionConfig testDb0 = new DBConnectionConfig();
 		testDb0.setConnectionUri(dbConns[0]);
-		testDb0.setAnchor(initSetting.getAnchorType());
 		LedgerBindingConfig bindingConfig0 = new LedgerBindingConfig();
 		AsyncCallback<HashDigest> callback0 = nodeCtx0.startInitCommand(privkey0, encodedPassword, initSetting, testDb0,
 				consolePrompter, bindingConfig0, quitLatch);
 
 		DBConnectionConfig testDb1 = new DBConnectionConfig();
 		testDb1.setConnectionUri(dbConns[1]);
-		testDb1.setAnchor(initSetting.getAnchorType());
 		LedgerBindingConfig bindingConfig1 = new LedgerBindingConfig();
 		AsyncCallback<HashDigest> callback1 = nodeCtx1.startInitCommand(privkey1, encodedPassword, initSetting, testDb1,
 				consolePrompter, bindingConfig1, quitLatch);
 
 		DBConnectionConfig testDb2 = new DBConnectionConfig();
 		testDb2.setConnectionUri(dbConns[2]);
-		testDb2.setAnchor(initSetting.getAnchorType());
 		LedgerBindingConfig bindingConfig2 = new LedgerBindingConfig();
 		AsyncCallback<HashDigest> callback2 = nodeCtx2.startInitCommand(privkey2, encodedPassword, initSetting, testDb2,
 				consolePrompter, bindingConfig2, quitLatch);
 
 		DBConnectionConfig testDb3 = new DBConnectionConfig();
 		testDb3.setConnectionUri(dbConns[3]);
-		testDb3.setAnchor(initSetting.getAnchorType());
 		LedgerBindingConfig bindingConfig3 = new LedgerBindingConfig();
 		AsyncCallback<HashDigest> callback3 = nodeCtx3.startInitCommand(privkey3, encodedPassword, initSetting, testDb3,
 				consolePrompter, bindingConfig3, quitLatch);
@@ -327,10 +323,10 @@ public class IntegrationTestDataAccount {
 		assertEquals(ledgerHash0, ledgerHash2);
 		assertEquals(ledgerHash0, ledgerHash3);
 
-		LedgerQuery ledger0 = nodeCtx0.registLedger(ledgerHash0);
-		LedgerQuery ledger1 = nodeCtx1.registLedger(ledgerHash1);
-		LedgerQuery ledger2 = nodeCtx2.registLedger(ledgerHash2);
-		LedgerQuery ledger3 = nodeCtx3.registLedger(ledgerHash3);
+		LedgerQuery ledger0 = nodeCtx0.registerLedger(ledgerHash0, initSetting.getLedgerDataStructure());
+		LedgerQuery ledger1 = nodeCtx1.registerLedger(ledgerHash1, initSetting.getLedgerDataStructure());
+		LedgerQuery ledger2 = nodeCtx2.registerLedger(ledgerHash2, initSetting.getLedgerDataStructure());
+		LedgerQuery ledger3 = nodeCtx3.registerLedger(ledgerHash3, initSetting.getLedgerDataStructure());
 
 		assertNotNull(ledger0);
 		assertNotNull(ledger1);

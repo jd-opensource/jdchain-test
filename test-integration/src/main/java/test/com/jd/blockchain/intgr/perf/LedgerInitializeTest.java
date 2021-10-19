@@ -6,14 +6,13 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.jd.blockchain.ledger.LedgerDataStructure;
 import org.springframework.core.io.ClassPathResource;
 
 import com.jd.blockchain.consensus.ConsensusProvider;
 import com.jd.blockchain.consensus.ConsensusProviders;
-import com.jd.blockchain.consensus.ConsensusViewSettings;
 import com.jd.blockchain.crypto.AddressEncoding;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
-import com.jd.blockchain.crypto.Crypto;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.crypto.KeyGenUtils;
 import com.jd.blockchain.crypto.PrivKey;
@@ -21,7 +20,6 @@ import com.jd.blockchain.crypto.PubKey;
 import com.jd.blockchain.crypto.SignatureDigest;
 import com.jd.blockchain.ledger.LedgerBlock;
 import com.jd.blockchain.ledger.LedgerInitProperties;
-import com.jd.blockchain.ledger.core.CryptoConfig;
 import com.jd.blockchain.ledger.core.LedgerInitDecision;
 import com.jd.blockchain.ledger.core.LedgerInitProposal;
 import com.jd.blockchain.ledger.core.LedgerManager;
@@ -107,10 +105,10 @@ public class LedgerInitializeTest {
 		HashDigest ledgerHash2 = callback2.waitReturn();
 		HashDigest ledgerHash3 = callback3.waitReturn();
 
-		LedgerQuery ledger0 = node0.registLedger(ledgerHash0, memoryConnString[0], initSetting.getAnchorType());
-		LedgerQuery ledger1 = node1.registLedger(ledgerHash1, memoryConnString[1], initSetting.getAnchorType());
-		LedgerQuery ledger2 = node2.registLedger(ledgerHash2, memoryConnString[2], initSetting.getAnchorType());
-		LedgerQuery ledger3 = node3.registLedger(ledgerHash3, memoryConnString[3], initSetting.getAnchorType());
+		LedgerQuery ledger0 = node0.registerLedger(ledgerHash0, memoryConnString[0], initSetting.getLedgerDataStructure());
+		LedgerQuery ledger1 = node1.registerLedger(ledgerHash1, memoryConnString[1], initSetting.getLedgerDataStructure());
+		LedgerQuery ledger2 = node2.registerLedger(ledgerHash2, memoryConnString[2], initSetting.getLedgerDataStructure());
+		LedgerQuery ledger3 = node3.registerLedger(ledgerHash3, memoryConnString[3], initSetting.getLedgerDataStructure());
 
 		LedgerBlock genesisBlock = ledger0.getLatestBlock();
 
@@ -222,8 +220,8 @@ public class LedgerInitializeTest {
 			return invoker.start();
 		}
 
-		public LedgerQuery registLedger(HashDigest ledgerHash, String connString, String anchorType) {
-			return ledgerManager.register(ledgerHash, memoryDBConnFactory.connect(connString).getStorageService(), anchorType);
+		public LedgerQuery registerLedger(HashDigest ledgerHash, String connString, LedgerDataStructure ledgerDataStructure) {
+			return ledgerManager.register(ledgerHash, memoryDBConnFactory.connect(connString).getStorageService(), ledgerDataStructure);
 		}
 	}
 
