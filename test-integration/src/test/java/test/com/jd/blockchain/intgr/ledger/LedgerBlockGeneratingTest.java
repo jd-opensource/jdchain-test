@@ -180,10 +180,10 @@ public class LedgerBlockGeneratingTest {
 		HashDigest ledgerHash2 = callback2.waitReturn();
 		HashDigest ledgerHash3 = callback3.waitReturn();
 
-		node0.registLedger(ledgerHash0, memConns[0]);
-		node1.registLedger(ledgerHash1, memConns[1]);
-		node2.registLedger(ledgerHash2, memConns[2]);
-		node3.registLedger(ledgerHash3, memConns[3]);
+		node0.registLedger(ledgerHash0, memConns[0], initSetting.getLedgerDataStructure());
+		node1.registLedger(ledgerHash1, memConns[1], initSetting.getLedgerDataStructure());
+		node2.registLedger(ledgerHash2, memConns[2], initSetting.getLedgerDataStructure());
+		node3.registLedger(ledgerHash3, memConns[3], initSetting.getLedgerDataStructure());
 
 		return new NodeContext[] { node0, node1, node2, node3 };
 	}
