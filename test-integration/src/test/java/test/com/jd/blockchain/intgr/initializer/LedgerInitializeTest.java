@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.jd.blockchain.ledger.LedgerDataStructure;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
@@ -133,10 +134,10 @@ public class LedgerInitializeTest {
 		assertEquals(ledgerHash0, ledgerHash2);
 		assertEquals(ledgerHash0, ledgerHash3);
 
-		LedgerQuery ledger0 = node0.registLedger(ledgerHash0, dbConnections[0]);
-		LedgerQuery ledger1 = node1.registLedger(ledgerHash1, dbConnections[1]);
-		LedgerQuery ledger2 = node2.registLedger(ledgerHash2, dbConnections[2]);
-		LedgerQuery ledger3 = node3.registLedger(ledgerHash3, dbConnections[3]);
+		LedgerQuery ledger0 = node0.registLedger(ledgerHash0, dbConnections[0], initSetting.getLedgerDataStructure());
+		LedgerQuery ledger1 = node1.registLedger(ledgerHash1, dbConnections[1], initSetting.getLedgerDataStructure());
+		LedgerQuery ledger2 = node2.registLedger(ledgerHash2, dbConnections[2], initSetting.getLedgerDataStructure());
+		LedgerQuery ledger3 = node3.registLedger(ledgerHash3, dbConnections[3], initSetting.getLedgerDataStructure());
 
 		assertNotNull(ledger0);
 		assertNotNull(ledger1);
@@ -277,8 +278,8 @@ public class LedgerInitializeTest {
 			return invoker.start();
 		}
 
-		public LedgerQuery registLedger(HashDigest ledgerHash, String memConn) {
-			return ledgerManager.register(ledgerHash, storageDb.connect(memConn).getStorageService(), "default");
+		public LedgerQuery registLedger(HashDigest ledgerHash, String memConn, LedgerDataStructure ledgerDataStructure) {
+			return ledgerManager.register(ledgerHash, storageDb.connect(memConn).getStorageService(), ledgerDataStructure);
 		}
 	}
 
