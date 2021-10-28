@@ -741,12 +741,12 @@ public class LedgerPerformanceTest {
 		}
 
 		@Override
-		public void checkEndpointCA(MultiIDsPolicy midPolicy) throws LedgerSecurityException {
+		public void checkEndpointState(MultiIDsPolicy midPolicy) throws LedgerSecurityException {
 
 		}
 
 		@Override
-		public void checkNodeCA(MultiIDsPolicy midPolicy) throws LedgerSecurityException {
+		public void checkNodeState(MultiIDsPolicy midPolicy) throws LedgerSecurityException {
 
 		}
 
