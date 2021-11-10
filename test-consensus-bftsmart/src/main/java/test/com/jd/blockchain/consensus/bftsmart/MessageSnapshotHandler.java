@@ -174,6 +174,11 @@ public class MessageSnapshotHandler implements MessageHandle {
 		return new byte[0];
 	}
 
+	@Override
+	public long getTimestampByCid(String realName, int cid) {
+		return 0;
+	}
+
 	private void reportError(Throwable error) {
 		LOGGER.error(error.getMessage(), error);
 
