@@ -5,14 +5,14 @@
 	<parent>
 		<groupId>com.jd.blockchain</groupId>
 		<artifactId>jdchain-core</artifactId>
-		<version>1.6.1.RELEASE</version>
+		<version>1.6.2.RELEASE</version>
 		<relativePath>../core</relativePath>
 	</parent>
 
 
 	<groupId>com.jd.blockchain</groupId>
 	<artifactId>test</artifactId>
-	<version>1.6.1.RELEASE</version>
+	<version>1.6.2.RELEASE</version>
 	<packaging>pom</packaging>
 
 	<properties>
@@ -21,7 +21,7 @@
 		<httpservice.version>2.1.0.RELEASE</httpservice.version>
 		<binaryproto.version>1.6.3.RELEASE</binaryproto.version>
 		
-		<core.version>1.6.1.RELEASE</core.version>
+		<core.version>1.6.2.RELEASE</core.version>
 	</properties>
 
 	<modules>
