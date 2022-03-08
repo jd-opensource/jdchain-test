@@ -1,18 +1,13 @@
 package test.perf.com.jd.blockchain.consensus.node;
 
-import java.util.Properties;
-
 import bftsmart.reconfiguration.util.HostsConfig;
-import utils.ConsoleUtils;
-import utils.io.MemoryStorage;
-
 import com.jd.blockchain.consensus.AsyncActionResponse;
-import com.jd.blockchain.consensus.action.ActionRequest;
 import com.jd.blockchain.consensus.bftsmart.service.BftsmartNodeServer;
 import com.jd.blockchain.consensus.bftsmart.service.BftsmartServerSettingConfig;
-import com.jd.blockchain.consensus.bftsmart.service.BftsmartServerSettings;
-import com.jd.blockchain.consensus.service.MessageHandle;
 import com.jd.blockchain.peer.consensus.ConsensusMessageDispatcher;
+import utils.io.MemoryStorage;
+
+import java.util.Properties;
 
 public class TestReplica extends BftsmartNodeServer {
 
@@ -51,7 +46,7 @@ public class TestReplica extends BftsmartNodeServer {
 	}
 
 	@Override
-	public byte[] getSnapshot() {
+	public byte[] getCheckPointSnapshot(int cid) {
 		// TODO Auto-generated method stub
 		return null;
 	}

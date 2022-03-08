@@ -1,13 +1,5 @@
 package test.com.jd.blockchain.consensus.bftsmart;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.jd.blockchain.consensus.service.ConsensusContext;
 import com.jd.blockchain.consensus.service.ConsensusMessageContext;
 import com.jd.blockchain.consensus.service.MessageHandle;
@@ -15,10 +7,16 @@ import com.jd.blockchain.consensus.service.StateSnapshot;
 import com.jd.blockchain.crypto.Crypto;
 import com.jd.blockchain.crypto.HashDigester;
 import com.jd.blockchain.crypto.service.classic.ClassicAlgorithm;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import utils.concurrent.AsyncFuture;
 import utils.concurrent.CompletableAsyncFuture;
 import utils.io.BytesUtils;
+
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class MessageSnapshotHandler implements MessageHandle {
 
@@ -83,7 +81,7 @@ public class MessageSnapshotHandler implements MessageHandle {
 
 	@Override
 	public AsyncFuture<byte[]> processOrdered(int messageSequence, byte[] messageBytes,
-			ConsensusMessageContext messageContext) {
+                                              ConsensusMessageContext messageContext) {
 
 		this.hashDigester.update(BytesUtils.toBytes(messageSequence));
 		this.hashDigester.update(BytesUtils.toBytes(messageContext.getTimestamp()));
@@ -152,13 +150,33 @@ public class MessageSnapshotHandler implements MessageHandle {
 	}
 
 	@Override
-	public StateSnapshot getStateSnapshot(ConsensusContext consensusContext) {
+	public StateSnapshot getLatestStateSnapshot(String realName) {
 		return lastSnapshot;
 	}
 
 	@Override
-	public StateSnapshot getGenesisStateSnapshot(ConsensusContext consensusContext) {
+	public StateSnapshot getGenesisStateSnapshot(String realName) {
 		return snapshotHistory.get(0);
+	}
+
+	@Override
+	public int getCommandsNumByCid(String realName, int cid) {
+		return 0;
+	}
+
+	@Override
+	public byte[][] getCommandsByCid(String realName, int cid, int currCidCommandsSize) {
+		return new byte[0][];
+	}
+
+	@Override
+	public byte[] getSnapshotByHeight(String realName, int cid) {
+		return new byte[0];
+	}
+
+	@Override
+	public long getTimestampByCid(String realName, int cid) {
+		return 0;
 	}
 
 	private void reportError(Throwable error) {

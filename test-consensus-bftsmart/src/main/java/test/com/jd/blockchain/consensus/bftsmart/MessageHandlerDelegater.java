@@ -94,21 +94,51 @@ public class MessageHandlerDelegater implements MessageHandle {
 	}
 
 	@Override
-	public StateSnapshot getStateSnapshot(ConsensusContext consensusContext) {
-		check();
-//		if (messageHandle == null) {
-//			return NULL_HANDLER.getStateSnapshot(consensusContext);
-//		}
-		return messageHandle.getStateSnapshot(consensusContext);
+	public StateSnapshot getLatestStateSnapshot(String realName) {
+		return null;
 	}
 
 	@Override
-	public StateSnapshot getGenesisStateSnapshot(ConsensusContext consensusContext) {
-		check();
-//		if (messageHandle == null) {
-//			return NULL_HANDLER.getGenesisStateSnapshot(consensusContext);
-//		}
-		return messageHandle.getGenesisStateSnapshot(consensusContext);
+	public StateSnapshot getGenesisStateSnapshot(String realName) {
+		return null;
 	}
+
+	@Override
+	public int getCommandsNumByCid(String realName, int cid) {
+		return 0;
+	}
+
+	@Override
+	public byte[][] getCommandsByCid(String realName, int cid, int currCidCommandsSize) {
+		return new byte[0][];
+	}
+
+	@Override
+	public byte[] getSnapshotByHeight(String realName, int cid) {
+		return new byte[0];
+	}
+
+	@Override
+	public long getTimestampByCid(String realName, int cid) {
+		return 0;
+	}
+
+//	@Override
+//	public StateSnapshot getStateSnapshot(ConsensusContext consensusContext) {
+//		check();
+////		if (messageHandle == null) {
+////			return NULL_HANDLER.getStateSnapshot(consensusContext);
+////		}
+//		return messageHandle.getStateSnapshot(consensusContext);
+//	}
+//
+//	@Override
+//	public StateSnapshot getGenesisStateSnapshot(ConsensusContext consensusContext) {
+//		check();
+////		if (messageHandle == null) {
+////			return NULL_HANDLER.getGenesisStateSnapshot(consensusContext);
+////		}
+//		return messageHandle.getGenesisStateSnapshot(consensusContext);
+//	}
 
 }

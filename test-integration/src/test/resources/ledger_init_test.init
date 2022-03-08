@@ -47,6 +47,8 @@ security.role.MANAGER.tx-privileges=DIRECT_OPERATION, CONTRACT_OPERATION
 security.role.GUEST.ledger-privileges=
 security.role.GUEST.tx-privileges=CONTRACT_OPERATION
 
+#账本数据底层结构，分为：MERKLE_TREE, KV两种，默认MERKLE_TREE
+ledger.data.structure=MERKLE_TREE
 
 
 #-----------------------------------------------
