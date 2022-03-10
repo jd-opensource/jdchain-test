@@ -136,7 +136,7 @@ public class IntegrationBase {
 
 		TransactionTemplate txTpl = blockchainService.newTransaction(ledgerHash);
 
-		txTpl.settings().update(propertiesArray);
+		txTpl.consensus().update(propertiesArray);
 
 		// TX 准备就绪；
 		PreparedTransaction prepTx = txTpl.prepare();
