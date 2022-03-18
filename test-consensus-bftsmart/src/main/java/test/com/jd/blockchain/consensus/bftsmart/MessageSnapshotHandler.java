@@ -233,6 +233,11 @@ public class MessageSnapshotHandler implements MessageHandle {
 			return hashSnapshot;
 		}
 
+		@Override
+		public long getTimestamp() {
+			return 0;
+		}
+
 	}
 
 	private static class GenesisMessageSnapshot implements StateSnapshot {
@@ -254,6 +259,11 @@ public class MessageSnapshotHandler implements MessageHandle {
 		@Override
 		public byte[] getSnapshot() {
 			return hashSnapshot;
+		}
+
+		@Override
+		public long getTimestamp() {
+			return 0;
 		}
 
 	}
