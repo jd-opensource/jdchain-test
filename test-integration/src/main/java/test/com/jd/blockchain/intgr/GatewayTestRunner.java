@@ -32,11 +32,11 @@ public class GatewayTestRunner {
 		config.http().setHost(host);
 		config.http().setPort(port);
 
-		if (providers != null) {
-			for (String provider : providers) {
-				config.providerConfig().add(provider);
-			}
-		}
+//		if (providers != null) {
+//			for (String provider : providers) {
+//				config.providerConfig().add(provider);
+//			}
+//		}
 
 		for (NetworkAddress address : masterPeerAddresses) {
 			config.setMasterPeerAddress(address);
