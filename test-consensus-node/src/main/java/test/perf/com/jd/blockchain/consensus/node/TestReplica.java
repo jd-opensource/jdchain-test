@@ -46,7 +46,7 @@ public class TestReplica extends BftsmartNodeServer {
 	}
 
 	@Override
-	public byte[] getCheckPointSnapshot(int cid) {
+	public byte[] getBlockHashByCid(int cid) {
 		// TODO Auto-generated method stub
 		return null;
 	}

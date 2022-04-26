@@ -114,7 +114,7 @@ public class MessageHandlerDelegater implements MessageHandle {
 	}
 
 	@Override
-	public byte[] getSnapshotByHeight(String realName, int cid) {
+	public byte[] getBlockHashByCid(String realName, int cid) {
 		return new byte[0];
 	}
 
