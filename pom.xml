@@ -73,11 +73,6 @@
 
 			<dependency>
 				<groupId>com.jd.blockchain</groupId>
-				<artifactId>crypto-adv</artifactId>
-				<version>${core.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.jd.blockchain</groupId>
 				<artifactId>crypto-pki</artifactId>
 				<version>${core.version}</version>
 			</dependency>
