@@ -269,7 +269,7 @@ public class LedgerInitializeWeb5Nodes {
 
         public LedgerQuery registLedger(HashDigest ledgerHash, LedgerDataStructure ledgerDataStructure) {
             DbConnection conn = db.connect(dbConnConfig.getUri());
-            LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService(), ledgerDataStructure);
+            LedgerQuery ledgerRepo = ledgerManager.register(ledgerHash, conn.getStorageService(), null, ledgerDataStructure);
             return ledgerRepo;
         }
 

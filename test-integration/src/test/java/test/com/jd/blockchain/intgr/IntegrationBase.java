@@ -474,7 +474,7 @@ public class IntegrationBase {
 			HashDigest ledgerHash = bindingConfigs[0].getLedgerHashs()[0];
 			DbConnection conn = dbConnectionFactories[i]
 					.connect(bindingConfigs[i].getLedger(ledgerHash).getDbConnection().getUri());
-			ledgers[i] = ledgerManagers[i].register(ledgerHash, conn.getStorageService(), bindingConfigs[i].getLedger(ledgerHash).getDataStructure());
+			ledgers[i] = ledgerManagers[i].register(ledgerHash, conn.getStorageService(), null, bindingConfigs[i].getLedger(ledgerHash).getDataStructure());
 		}
 		return ledgers;
 	}
@@ -562,7 +562,12 @@ public class IntegrationBase {
 						for (String readLine : readLines) {
 							String newLine = readLine.replace(oldLedger, newLedger);
 							if (dbType.equalsIgnoreCase("rocksdb")) {
-								if (newLine.contains("db.uri")) {
+								if (newLine.contains("archivedb.uri")) {
+									String[] propArray = newLine.split("=");
+									String dbKey = propArray[0];
+									String dbValue = LedgerInitConsensusConfig.rocksdbConnectionStrings[id+4];
+									newLine = dbKey + "=" + dbValue;
+								} else if (newLine.contains("db.uri")) {
 									String[] propArray = newLine.split("=");
 									String dbKey = propArray[0];
 									String dbValue = LedgerInitConsensusConfig.rocksdbConnectionStrings[id];
@@ -574,10 +579,15 @@ public class IntegrationBase {
 					} else if (dbType.equalsIgnoreCase("rocksdb")) {
 						for (String readLine : readLines) {
 							String newLine = readLine;
-							if (readLine.contains("db.uri")) {
+							if (readLine.contains("archivedb.uri")) {
 								String[] propArray = readLine.split("=");
 								String dbKey = propArray[0];
-								String dbValue = LedgerInitConsensusConfig.rocksdbConnectionStrings[id];
+								String dbValue = LedgerInitConsensusConfig.rocksdbConnectionStrings[id+4];
+								newLine = dbKey + "=" + dbValue;
+							} else if (newLine.contains("db.uri")) {
+								String[] propArray = newLine.split("=");
+								String dbKey = propArray[0];
+								String dbValue = LedgerInitConsensusConfig.rocksdbConnectionStrings[id + 4];
 								newLine = dbKey + "=" + dbValue;
 							}
 							writeLines.add(newLine);

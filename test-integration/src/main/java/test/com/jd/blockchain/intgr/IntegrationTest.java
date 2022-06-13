@@ -519,7 +519,7 @@ public class IntegrationTest {
 
 		KVStorageService storageService = node0.getStorageDB().connect(memDbConnString).getStorageService();
 
-		LedgerQuery ledgerOfNode0 = ledgerManager.register(ledgerHashs[0], storageService, node0.getBindingConfig().getLedger(ledgerHashs[0]).getDataStructure());
+		LedgerQuery ledgerOfNode0 = ledgerManager.register(ledgerHashs[0], storageService, null, node0.getBindingConfig().getLedger(ledgerHashs[0]).getDataStructure());
 
 	}
 
@@ -559,7 +559,7 @@ public class IntegrationTest {
 
 		KVStorageService storageService = node0.getStorageDB().connect(memDbConnString).getStorageService();
 
-		LedgerQuery ledgerOfNode0 = ledgerManager.register(ledgerHashs[0], storageService, node0.getBindingConfig().getLedger(ledgerHashs[0]).getDataStructure());
+		LedgerQuery ledgerOfNode0 = ledgerManager.register(ledgerHashs[0], storageService, null, node0.getBindingConfig().getLedger(ledgerHashs[0]).getDataStructure());
 
 	}
 
@@ -649,7 +649,7 @@ public class IntegrationTest {
 
 		KVStorageService storageService = node0.getStorageDB().connect(memDbConnString).getStorageService();
 
-		LedgerQuery ledgerOfNode0 = ledgerManager.register(ledgerHash, storageService, node0.getBindingConfig().getLedger(ledgerHash).getDataStructure());
+		LedgerQuery ledgerOfNode0 = ledgerManager.register(ledgerHash, storageService, null, node0.getBindingConfig().getLedger(ledgerHash).getDataStructure());
 
 		return user;
 	}
@@ -681,7 +681,7 @@ public class IntegrationTest {
 
 		KVStorageService storageService = node0.getStorageDB().connect(memDbConnString).getStorageService();
 
-		LedgerQuery ledgerOfNode0 = ledgerManager.register(ledgerHash, storageService, node0.getBindingConfig().getLedger(ledgerHash).getDataStructure());
+		LedgerQuery ledgerOfNode0 = ledgerManager.register(ledgerHash, storageService, null, node0.getBindingConfig().getLedger(ledgerHash).getDataStructure());
 		long latestBlockHeight = ledgerOfNode0.retrieveLatestBlockHeight();
 
 		return dataAccount;
@@ -700,7 +700,7 @@ public class IntegrationTest {
 
 		KVStorageService storageService = node0.getStorageDB().connect(memDbConnString).getStorageService();
 
-		LedgerQuery ledgerOfNode0 = ledgerManager.register(ledgerHash, storageService, node0.getBindingConfig().getLedger(ledgerHash).getDataStructure());
+		LedgerQuery ledgerOfNode0 = ledgerManager.register(ledgerHash, storageService, null, node0.getBindingConfig().getLedger(ledgerHash).getDataStructure());
 
 		// getLedgerHashs
 		HashDigest[] ledgerHashs = blockchainService.getLedgerHashs();

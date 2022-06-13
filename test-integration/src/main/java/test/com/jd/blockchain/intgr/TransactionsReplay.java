@@ -113,9 +113,9 @@ public class TransactionsReplay {
 		HashDigest ledgerHash = ledgerManage3.getLedgerHashs()[0];
 
 		LedgerRepository ledgerRepository0 = (LedgerRepository) ledgerManage0.register(ledgerHash,
-				node0.getStorageDB().connect("memory://local/0").getStorageService(), node0.getBindingConfig().getLedger(ledgerHash).getDataStructure());
+				node0.getStorageDB().connect("memory://local/0").getStorageService(), null, node0.getBindingConfig().getLedger(ledgerHash).getDataStructure());
 		LedgerRepository ledgerRepository3 = (LedgerRepository) ledgerManage3.register(ledgerHash,
-				node0.getStorageDB().connect("memory://local/3").getStorageService(), node0.getBindingConfig().getLedger(ledgerHash).getDataStructure());
+				node0.getStorageDB().connect("memory://local/3").getStorageService(), null, node0.getBindingConfig().getLedger(ledgerHash).getDataStructure());
 
 		addNewBlocksForNode0(node0, pubKey, privKey);
 
@@ -137,7 +137,7 @@ public class TransactionsReplay {
 		HashDigest ledgerHash0 = ledgerManage0.getLedgerHashs()[0];
 		long startTs = System.currentTimeMillis();
 		LedgerRepository ledgerRepository0 = (LedgerRepository) ledgerManage0.register(ledgerHash0,
-				node0.getStorageDB().connect("memory://local/0").getStorageService(), node0.getBindingConfig().getLedger(ledgerHash0).getDataStructure());
+				node0.getStorageDB().connect("memory://local/0").getStorageService(), null, node0.getBindingConfig().getLedger(ledgerHash0).getDataStructure());
 
 		for (int height = 1; height < 20; height++) {
 			TransactionBatchProcessor txbatchProcessor = new TransactionBatchProcessor(ledgerRepository0, opReg);

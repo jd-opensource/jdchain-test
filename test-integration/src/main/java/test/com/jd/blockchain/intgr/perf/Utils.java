@@ -201,7 +201,7 @@ public class Utils {
 		}
 
 		public LedgerQuery registerLedger(HashDigest ledgerHash, DBConnectionConfig dbConnConf, LedgerDataStructure ledgerDataStructure) {
-			return ledgerManager.register(ledgerHash, dbConnFactory.connect(dbConnConf.getUri()).getStorageService(), ledgerDataStructure);
+			return ledgerManager.register(ledgerHash, dbConnFactory.connect(dbConnConf.getUri()).getStorageService(), null, ledgerDataStructure);
 		}
 	}
 

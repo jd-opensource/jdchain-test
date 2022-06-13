@@ -221,7 +221,7 @@ public class LedgerInitializeTest {
 		}
 
 		public LedgerQuery registerLedger(HashDigest ledgerHash, String connString, LedgerDataStructure ledgerDataStructure) {
-			return ledgerManager.register(ledgerHash, memoryDBConnFactory.connect(connString).getStorageService(), ledgerDataStructure);
+			return ledgerManager.register(ledgerHash, memoryDBConnFactory.connect(connString).getStorageService(), null, ledgerDataStructure);
 		}
 	}
 

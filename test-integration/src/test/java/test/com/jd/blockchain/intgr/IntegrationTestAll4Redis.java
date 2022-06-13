@@ -178,7 +178,7 @@ public class IntegrationTestAll4Redis {
 			DbConnection conn = dbConnectionFactories[i].connect(
 					bindingConfigs[i].getLedger(ledgerHash).getDbConnection().getUri(),
 					bindingConfigs[i].getLedger(ledgerHash).getDbConnection().getPassword());
-			ledgers[i] = ledgerManagers[i].register(ledgerHash, conn.getStorageService(), bindingConfigs[i].getLedger(ledgerHash).getDataStructure());
+			ledgers[i] = ledgerManagers[i].register(ledgerHash, conn.getStorageService(), null, bindingConfigs[i].getLedger(ledgerHash).getDataStructure());
 		}
 		return ledgers;
 	}
