@@ -181,7 +181,9 @@ public class IntegrationTest4Archive {
 			kvDataArchive(ledgerHash.toBase58(), "127.0.0.1", 12000, 3, 10);
 			kvDataArchive(ledgerHash.toBase58(), "127.0.0.1", 12000, 12, 13);
 			kvDataRecovery(ledgerHash.toBase58(), "127.0.0.1", 12000, 3, 10);
+			kvDataIterate(ledgerHash.toBase58(), "127.0.0.1", 12000);
 			kvDataRecovery(ledgerHash.toBase58(), "127.0.0.1", 12000, 12, 13);
+			kvDataIterate(ledgerHash.toBase58(), "127.0.0.1", 12000);
 
 			Thread.sleep(Integer.MAX_VALUE);
 		} catch (Exception e) {
@@ -245,6 +247,31 @@ public class IntegrationTest4Archive {
 				System.out.println("kvDataRecovery succ!");
 			} else {
 				System.out.println("kvDataRecovery fail! " + webResponse.getError().getErrorMessage());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new IllegalStateException(e.getMessage());
+		}
+	}
+
+	private void kvDataIterate(String ledgerHash, String ip, int port) {
+		try {
+			String url = "http://" + ip + ":" + String.valueOf(port) + "/management/delegate/kvdataiterate";
+			HttpPost httpPost = new HttpPost(url);
+			List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+			params.add(new BasicNameValuePair("ledgerHash", ledgerHash));
+			httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+			ServiceEndpoint endpoint = new ServiceEndpoint(ip, port, false);
+
+			endpoint.setSslSecurity(new SSLSecurity());
+
+			HttpResponse response = ServiceConnectionManager.buildHttpClient(endpoint).execute(httpPost);
+			WebResponse webResponse = (WebResponse) new JsonResponseConverter(WebResponse.class).getResponse(null, response.getEntity().getContent(), null);
+
+			if (webResponse.isSuccess()) {
+				System.out.println("kvDataIterate succ!");
+			} else {
+				System.out.println("kvDataIterate fail! " + webResponse.getError().getErrorMessage());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
