@@ -169,6 +169,10 @@ public class IntegrationTest4Tamper {
 
 			txTamper(ledgerHash.toBase58(), "127.0.0.1", 12000, 3);
 
+			antiTamperCheck(ledgerHash.toBase58(), "127.0.0.1", 12000, 3);
+
+			antiTamperCheck(ledgerHash.toBase58(), "127.0.0.1", 12010, 3);
+
 			Thread.sleep(Integer.MAX_VALUE);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -203,6 +207,32 @@ public class IntegrationTest4Tamper {
 				System.out.println("tx tamper succ!");
 			} else {
 				System.out.println("tx tamper fail! " + webResponse.getError().getErrorMessage());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new IllegalStateException(e.getMessage());
+		}
+	}
+
+	private void antiTamperCheck(String ledgerHash, String ip, int port, long blockHeight) {
+		try {
+			String url = "http://" + ip + ":" + String.valueOf(port) + "/management/monitor/ledger/tamper";
+			HttpPost httpPost = new HttpPost(url);
+			List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+			params.add(new BasicNameValuePair("ledgerHash", ledgerHash));
+			params.add(new BasicNameValuePair("blockHeight", blockHeight + ""));
+			httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+			ServiceEndpoint endpoint = new ServiceEndpoint(ip, port, false);
+
+			endpoint.setSslSecurity(new SSLSecurity());
+
+			HttpResponse response = ServiceConnectionManager.buildHttpClient(endpoint).execute(httpPost);
+			WebResponse webResponse = (WebResponse) new JsonResponseConverter(WebResponse.class).getResponse(null, response.getEntity().getContent(), null);
+
+			if (webResponse.isSuccess()) {
+				System.out.println("No tamper happened!");
+			} else {
+				System.out.println(webResponse.getError().getErrorMessage());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

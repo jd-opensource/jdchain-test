@@ -587,7 +587,7 @@ public class IntegrationBase {
 							} else if (newLine.contains("db.uri")) {
 								String[] propArray = newLine.split("=");
 								String dbKey = propArray[0];
-								String dbValue = LedgerInitConsensusConfig.rocksdbConnectionStrings[id + 4];
+								String dbValue = LedgerInitConsensusConfig.rocksdbConnectionStrings[id];
 								newLine = dbKey + "=" + dbValue;
 							}
 							writeLines.add(newLine);
