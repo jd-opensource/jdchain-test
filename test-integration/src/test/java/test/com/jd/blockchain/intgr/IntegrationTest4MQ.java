@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import com.jd.blockchain.consensus.ConsensusProviders;
 import com.jd.blockchain.consensus.bftsmart.BftsmartConsensusViewSettings;
-import com.jd.blockchain.consensus.mq.settings.MsgQueueConsensusSettings;
+import com.jd.blockchain.consensus.mq.settings.MQConsensusSettings;
 import com.jd.blockchain.crypto.AsymmetricKeypair;
 import com.jd.blockchain.crypto.HashDigest;
 import com.jd.blockchain.crypto.KeyGenUtils;
@@ -169,7 +169,7 @@ public class IntegrationTest4MQ {
 
 		System.out.printf("after add participant: participantCount = %d, userCount = %d\r\n", (int)participantCount, (int)userCount);
 
-		MsgQueueConsensusSettings consensusSettings = (MsgQueueConsensusSettings) ConsensusProviders.getProvider(MQ_PROVIDER).getSettingsFactory().getConsensusSettingsEncoder().decode(ledgerRepository.getAdminInfo().getSettings().getConsensusSetting().toBytes());
+		MQConsensusSettings consensusSettings = (MQConsensusSettings) ConsensusProviders.getProvider(MQ_PROVIDER).getSettingsFactory().getConsensusSettingsEncoder().decode(ledgerRepository.getAdminInfo().getSettings().getConsensusSetting().toBytes());
 
 		System.out.printf("update participant state before ,old consensus env node num = %d\r\n", consensusSettings.getNodes().length);
 
