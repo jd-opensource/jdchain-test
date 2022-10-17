@@ -89,16 +89,35 @@ public class NullMessageHandler implements MessageHandle{
 	}
 
 	@Override
-	public StateSnapshot getStateSnapshot(ConsensusContext consensusContext) {
-		return lastSnapshot == null ? genesitSnapshot : lastSnapshot;
+	public StateSnapshot getLatestStateSnapshot(String realName) {
+		return lastSnapshot;
 	}
 
 	@Override
-	public StateSnapshot getGenesisStateSnapshot(ConsensusContext consensusContext) {
+	public StateSnapshot getGenesisStateSnapshot(String realName) {
 		return genesitSnapshot;
 	}
 
-	
+	@Override
+	public int getCommandsNumByCid(String realName, int cid) {
+		return 0;
+	}
+
+	@Override
+	public byte[][] getCommandsByCid(String realName, int cid, int currCidCommandsSize) {
+		return new byte[0][];
+	}
+
+	@Override
+	public byte[] getBlockHashByCid(String realName, int cid) {
+		return new byte[0];
+	}
+
+	@Override
+	public long getTimestampByCid(String realName, int cid) {
+		return 0;
+	}
+
 	private static class EmptyStateSnapshot implements StateSnapshot{
 		
 		private long id;
@@ -118,6 +137,11 @@ public class NullMessageHandler implements MessageHandle{
 		public byte[] getSnapshot() {
 			return BytesUtils.EMPTY_BYTES;
 		}
-		
+
+		@Override
+		public long getTimestamp() {
+			return 0;
+		}
+
 	}
 }

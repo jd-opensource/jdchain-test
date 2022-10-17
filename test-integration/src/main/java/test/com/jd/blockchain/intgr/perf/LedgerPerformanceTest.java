@@ -653,11 +653,6 @@ public class LedgerPerformanceTest {
 		}
 
 		@Override
-		public SecurityPolicy getSecurityPolicy(Set<Bytes> endpoints, Set<Bytes> nodes, X509Certificate[] ledgerCAs) {
-			return new FreedomSecurityPolicy(endpoints, nodes, ledgerCAs);
-		}
-
-		@Override
 		public UserRolesPrivileges getUserRolesPrivilegs(Bytes userAddress) {
 			return null;
 		}
