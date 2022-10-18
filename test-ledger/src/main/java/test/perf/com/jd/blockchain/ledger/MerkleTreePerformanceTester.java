@@ -17,7 +17,7 @@ import utils.Bytes;
 
 public class MerkleTreePerformanceTester {
 
-	public static final String LEDGER_KEY_PREFIX = "LDG://";
+	public static final String LEDGER_KEY_PREFIX = "L:/";
 
 	private static final String[] SUPPORTED_PROVIDERS = { ClassicCryptoService.class.getName(),
 			SMCryptoService.class.getName() };
